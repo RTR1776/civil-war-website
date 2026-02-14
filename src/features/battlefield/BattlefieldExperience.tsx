@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import NarrativeMode from "@/features/battlefield/NarrativeMode";
+import PresentDayMapbox from "@/features/battlefield/PresentDayMapbox";
 import Scene from "@/features/battlefield/Scene";
 import TimelineControls from "@/features/battlefield/TimelineControls";
+import { getConfidenceStyle, interpolateUnitPositions } from "@/lib/battle/interpolation";
 import {
   resolveActiveTimelineEvent,
   useBattleStore,
@@ -21,7 +23,6 @@ import type {
   TimeSlice,
   TimelineEvent,
 } from "@/lib/battle/types";
-import { getConfidenceStyle } from "@/lib/battle/interpolation";
 import { validateBattleData } from "@/lib/battle/validation";
 
 interface DivisionsPayload {
@@ -34,6 +35,8 @@ interface EventsPayload {
   mapLabels: MapLabel[];
   timelineEvents: TimelineEvent[];
 }
+
+type MapMode = "battle" | "present-day";
 
 async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url);
@@ -51,10 +54,20 @@ function formatClock(timestamp: number): string {
   }).format(new Date(timestamp));
 }
 
+function formatNumber(value: number | undefined): string {
+  if (typeof value !== "number") {
+    return "N/A";
+  }
+
+  return value.toLocaleString();
+}
+
 export default function BattlefieldExperience() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [mapMode, setMapMode] = useState<MapMode>("battle");
+  const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
 
   const {
     data,
@@ -115,6 +128,7 @@ export default function BattlefieldExperience() {
 
         if (!cancelled) {
           setData(bundle);
+          setSelectedUnitId(divisions.units[0]?.id ?? null);
         }
       } catch (loadError) {
         if (!cancelled) {
@@ -157,6 +171,21 @@ export default function BattlefieldExperience() {
     };
   }, [advanceTimeline]);
 
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+
+    if (!selectedUnitId && data.units.length > 0) {
+      setSelectedUnitId(data.units[0].id);
+      return;
+    }
+
+    if (selectedUnitId && !data.units.some((unit) => unit.id === selectedUnitId)) {
+      setSelectedUnitId(data.units[0]?.id ?? null);
+    }
+  }, [data, selectedUnitId]);
+
   const activeEvent = useMemo(() => {
     if (!data) {
       return null;
@@ -168,6 +197,27 @@ export default function BattlefieldExperience() {
 
     return resolveActiveTimelineEvent(selectedTime, data.timelineEvents);
   }, [data, hoveredEventId, selectedTime]);
+
+  const currentUnitStateById = useMemo(() => {
+    if (!data) {
+      return new Map<string, ReturnType<typeof interpolateUnitPositions>[number]>();
+    }
+
+    const positions = interpolateUnitPositions(selectedTime, data.timeSlices);
+    return new Map(positions.map((position) => [position.unitId, position]));
+  }, [data, selectedTime]);
+
+  const selectedUnit = useMemo(() => {
+    if (!data || !selectedUnitId) {
+      return null;
+    }
+
+    return data.units.find((unit) => unit.id === selectedUnitId) ?? null;
+  }, [data, selectedUnitId]);
+
+  const selectedUnitState = selectedUnit
+    ? currentUnitStateById.get(selectedUnit.id) ?? null
+    : null;
 
   if (loading) {
     return <p className="status-card">Loading the Franklin battlefield simulation...</p>;
@@ -195,10 +245,30 @@ export default function BattlefieldExperience() {
             November 30, 1864, Franklin, Tennessee. Division-level playback with documented vs inferred
             provenance visibility.
           </p>
+          <div className="view-toggle" role="tablist" aria-label="Battlefield view mode">
+            <button
+              type="button"
+              className={mapMode === "battle" ? "active" : ""}
+              onClick={() => setMapMode("battle")}
+              data-testid="view-battle-button"
+            >
+              Battlefield 3D
+            </button>
+            <button
+              type="button"
+              className={mapMode === "present-day" ? "active" : ""}
+              onClick={() => setMapMode("present-day")}
+              data-testid="view-present-button"
+            >
+              Present-Day Mapbox
+            </button>
+          </div>
         </div>
         <div className="status-block">
-          <span className="status-label">Mode</span>
+          <span className="status-label">Playback</span>
           <strong>{guidedMode ? "Guided Narrative" : "Free Exploration"}</strong>
+          <span className="status-label">View</span>
+          <strong>{mapMode === "battle" ? "Historical 3D" : "Present-Day"}</strong>
           <span className="status-label">Time</span>
           <strong>{formatClock(selectedTime)}</strong>
         </div>
@@ -206,20 +276,35 @@ export default function BattlefieldExperience() {
 
       <div className="battlefield-grid">
         <div className="scene-wrap">
-          <Scene
-            manifest={data.manifest}
-            units={data.units}
-            timeSlices={data.timeSlices}
-            mapLabels={data.mapLabels}
-            terrainDem={data.terrainDem}
-            selectedTime={selectedTime}
-            activeBeatId={activeBeatId}
-            cameraPoseOverride={cameraPoseOverride}
-            focusUnitIds={
-              data.narrativeBeats.find((beat) => beat.id === activeBeatId)?.focusUnitIds ?? []
-            }
-            onCameraOverrideConsumed={clearCameraOverride}
-          />
+          {mapMode === "battle" ? (
+            <Scene
+              manifest={data.manifest}
+              units={data.units}
+              timeSlices={data.timeSlices}
+              mapLabels={data.mapLabels}
+              terrainDem={data.terrainDem}
+              selectedTime={selectedTime}
+              activeBeatId={activeBeatId}
+              selectedUnitId={selectedUnitId}
+              cameraPoseOverride={cameraPoseOverride}
+              focusUnitIds={
+                data.narrativeBeats.find((beat) => beat.id === activeBeatId)?.focusUnitIds ?? []
+              }
+              onCameraOverrideConsumed={clearCameraOverride}
+              onSelectUnit={setSelectedUnitId}
+            />
+          ) : (
+            <PresentDayMapbox
+              manifest={data.manifest}
+              units={data.units}
+              mapLabels={data.mapLabels}
+              timeSlices={data.timeSlices}
+              selectedTime={selectedTime}
+              selectedUnitId={selectedUnitId}
+              onSelectUnit={setSelectedUnitId}
+            />
+          )}
+
           {activeEvent ? (
             <aside
               className={`event-callout ${activeEvent.confidence === "inferred" ? "inferred" : "documented"}`}
@@ -253,6 +338,65 @@ export default function BattlefieldExperience() {
             onToggleGuidedMode={setGuidedMode}
             onSelectBeat={selectBeat}
           />
+
+          <section className="unit-card" aria-label="Selected unit details">
+            <h2>Division Intel</h2>
+            {selectedUnit ? (
+              <div className="unit-card-grid">
+                <div className="unit-card-title-row">
+                  <span className={`side-pill ${selectedUnit.side.toLowerCase()}`}>
+                    {selectedUnit.side}
+                  </span>
+                  <strong>{selectedUnit.name}</strong>
+                </div>
+                <div className="unit-stat-row">
+                  <span>Commander</span>
+                  <strong>{selectedUnit.commander}</strong>
+                </div>
+                <div className="unit-stat-row">
+                  <span>Corps / Army</span>
+                  <strong>
+                    {selectedUnit.corps ?? "Unknown corps"} / {selectedUnit.army ?? "Unknown army"}
+                  </strong>
+                </div>
+                <div className="unit-stat-row">
+                  <span>Estimated Strength</span>
+                  <strong>{formatNumber(selectedUnit.strengthEstimate)} personnel</strong>
+                </div>
+                <div className="unit-stat-row">
+                  <span>Estimated Casualties</span>
+                  <strong>{formatNumber(selectedUnit.casualtyEstimate)}</strong>
+                </div>
+                <div className="unit-stat-row">
+                  <span>Current Formation</span>
+                  <strong>{selectedUnitState?.formation ?? "Unknown"}</strong>
+                </div>
+                <div className="unit-stat-row">
+                  <span>Engagement Status</span>
+                  <strong>{selectedUnitState?.engaged ? "Engaged" : "Not engaged"}</strong>
+                </div>
+                <div className="unit-stat-row">
+                  <span>Current Position</span>
+                  <strong>
+                    {selectedUnitState
+                      ? `${selectedUnitState.lat.toFixed(4)}, ${selectedUnitState.lng.toFixed(4)}`
+                      : "No position"}
+                  </strong>
+                </div>
+                <div className="unit-stat-row">
+                  <span>Confidence</span>
+                  <strong>
+                    {selectedUnitState?.confidence === "inferred"
+                      ? "Inferred movement segment"
+                      : "Documented movement segment"}
+                  </strong>
+                </div>
+                {selectedUnit.notes ? <p className="unit-notes">{selectedUnit.notes}</p> : null}
+              </div>
+            ) : (
+              <p className="unit-empty">Select a division marker in 3D or Mapbox mode.</p>
+            )}
+          </section>
 
           <section className="legend-card" aria-label="Legend and data confidence">
             <h2>Legend</h2>

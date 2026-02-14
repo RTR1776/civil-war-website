@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Line, OrbitControls, Sky, Text } from "@react-three/drei";
+import { Html, Line, OrbitControls, Sky } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
 
@@ -25,9 +25,11 @@ interface SceneProps {
   terrainDem: TerrainDem | null;
   selectedTime: number;
   activeBeatId: string | null;
+  selectedUnitId: string | null;
   cameraPoseOverride: CameraPose | null;
   focusUnitIds: string[];
   onCameraOverrideConsumed: () => void;
+  onSelectUnit: (unitId: string | null) => void;
 }
 
 const SIDE_COLORS = {
@@ -36,7 +38,11 @@ const SIDE_COLORS = {
 } as const;
 
 function getShortName(value: string): string {
-  return value.replace("'s Division", "").replace(" Division", "");
+  return value
+    .replace("'s Division", "")
+    .replace(" Division", "")
+    .replace(" (XXIII Corps)", "")
+    .replace(" (IV Corps)", "");
 }
 
 function makeCircle(radius: number, y = 0, points = 32): [number, number, number][] {
@@ -75,10 +81,10 @@ function Terrain({
     <group>
       <mesh geometry={terrainGeometry} rotation-x={-Math.PI / 2} receiveShadow>
         <meshStandardMaterial
-          color="#6a7e5f"
-          roughness={0.95}
+          color="#5f7859"
+          roughness={0.94}
           metalness={0.05}
-          emissive="#1c2417"
+          emissive="#182013"
           emissiveIntensity={0.1}
         />
       </mesh>
@@ -206,11 +212,20 @@ export default function Scene({
   terrainDem,
   selectedTime,
   activeBeatId,
+  selectedUnitId,
   cameraPoseOverride,
   focusUnitIds,
   onCameraOverrideConsumed,
+  onSelectUnit,
 }: SceneProps) {
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
+
+  useEffect(
+    () => () => {
+      document.body.style.cursor = "default";
+    },
+    [],
+  );
 
   const orderedSlices = useMemo(
     () => [...timeSlices].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp)),
@@ -268,6 +283,7 @@ export default function Scene({
           far: 600,
         }}
         shadows
+        onPointerMissed={() => onSelectUnit(null)}
       >
         <color attach="background" args={["#9eb7cc"]} />
         <fog attach="fog" args={["#c7b59d", 85, 360]} />
@@ -292,35 +308,52 @@ export default function Scene({
           const battlefield = latLngToBattlefield(position.lat, position.lng, manifest.bounds);
           const y = terrainHeight(battlefield.x, battlefield.z, manifest.terrain, terrainDem) + 1.4;
           const style = getConfidenceStyle(position.confidence);
-          const focused = focusUnitIds.includes(unit.id) || activeBeatId === null;
-          const circle = makeCircle(focused ? 2.6 : 2.1, 0.18, 40);
+          const selected = selectedUnitId === unit.id;
+          const focused = selected || focusUnitIds.includes(unit.id) || activeBeatId === null;
+          const circle = makeCircle(selected ? 3.1 : focused ? 2.6 : 2.1, 0.18, 40);
 
           return (
-            <group key={unit.id} position={[battlefield.x, y, battlefield.z]}>
-              <mesh castShadow>
-                <cylinderGeometry args={[focused ? 1.4 : 1.2, focused ? 1.6 : 1.4, focused ? 2.6 : 2.1, 20]} />
+            <group
+              key={unit.id}
+              position={[battlefield.x, y, battlefield.z]}
+              scale={selected ? 1.16 : 1}
+            >
+              <mesh
+                castShadow
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onSelectUnit(unit.id);
+                }}
+                onPointerOver={(event) => {
+                  event.stopPropagation();
+                  document.body.style.cursor = "pointer";
+                }}
+                onPointerOut={() => {
+                  document.body.style.cursor = "default";
+                }}
+              >
+                <cylinderGeometry
+                  args={[focused ? 1.4 : 1.2, focused ? 1.6 : 1.4, focused ? 2.6 : 2.1, 20]}
+                />
                 <meshStandardMaterial
                   color={SIDE_COLORS[unit.side]}
                   transparent
                   opacity={style.opacity}
-                  emissive={focused ? SIDE_COLORS[unit.side] : "#000000"}
-                  emissiveIntensity={focused ? 0.26 : 0.04}
+                  emissive={selected ? "#f5e2b8" : focused ? SIDE_COLORS[unit.side] : "#000000"}
+                  emissiveIntensity={selected ? 0.38 : focused ? 0.26 : 0.04}
+                  polygonOffset
+                  polygonOffsetFactor={selected ? -2 : -1}
+                  polygonOffsetUnits={selected ? -3 : -1}
                 />
               </mesh>
               {style.dashed ? (
                 <Line points={circle} color="#f4ece2" dashed dashSize={0.4} gapSize={0.25} lineWidth={1.2} />
               ) : null}
-              <Text
-                position={[0, 3.6, 0]}
-                fontSize={1.8}
-                color="#f8f3ea"
-                outlineColor="#1c1c1c"
-                outlineWidth={0.07}
-                anchorX="center"
-                anchorY="middle"
-              >
-                {getShortName(unit.name)}
-              </Text>
+              <Html center position={[0, 3.5, 0]} distanceFactor={14} style={{ pointerEvents: "none" }}>
+                <div className={`scene-unit-label ${unit.side.toLowerCase()} ${selected ? "selected" : ""}`}>
+                  {getShortName(unit.name)}
+                </div>
+              </Html>
             </group>
           );
         })}
@@ -361,17 +394,11 @@ export default function Scene({
                 <sphereGeometry args={[0.45, 12, 12]} />
                 <meshStandardMaterial color="#f2d39e" emissive="#4f2d0d" emissiveIntensity={0.22} />
               </mesh>
-              <Text
-                position={[0, 1.9, 0]}
-                fontSize={1.2 + label.importance * 0.14}
-                color="#f7ead6"
-                outlineColor="#20130a"
-                outlineWidth={0.05}
-                anchorX="center"
-                anchorY="middle"
-              >
-                {label.name}
-              </Text>
+              <Html center position={[0, 1.9, 0]} distanceFactor={26} style={{ pointerEvents: "none" }}>
+                <div className={`scene-landmark-label importance-${Math.min(5, Math.max(1, label.importance))}`}>
+                  {label.name}
+                </div>
+              </Html>
             </group>
           );
         })}

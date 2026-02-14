@@ -41,4 +41,18 @@ test.describe("Franklin immersive battlefield", () => {
     await page.mouse.wheel(0, 350);
     await expect(scene).toBeVisible();
   });
+
+  test("switches to present-day map mode", async ({ page }) => {
+    await page.goto("/");
+
+    await page.getByTestId("view-present-button").click();
+
+    const map = page.getByTestId("present-day-map");
+    const noToken = page.getByTestId("present-day-map-empty");
+
+    const visibleMap = await map.isVisible().catch(() => false);
+    const visibleFallback = await noToken.isVisible().catch(() => false);
+
+    expect(visibleMap || visibleFallback).toBeTruthy();
+  });
 });

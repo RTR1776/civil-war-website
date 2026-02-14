@@ -5,56 +5,88 @@
       "name": "Cox's Division (XXIII Corps)",
       "side": "Union",
       "commander": "Brig. Gen. Jacob D. Cox",
-      "strengthEstimate": 4200
+      "strengthEstimate": 4200,
+      "corps": "XXIII Corps",
+      "army": "Army of the Ohio",
+      "casualtyEstimate": 540,
+      "notes": "Anchored the Federal center around Carter House and Columbia Pike."
     },
     {
       "id": "union-wagner-division",
       "name": "Wagner's Division",
       "side": "Union",
       "commander": "Brig. Gen. George D. Wagner",
-      "strengthEstimate": 3100
+      "strengthEstimate": 3100,
+      "corps": "IV Corps",
+      "army": "Army of the Cumberland",
+      "casualtyEstimate": 780,
+      "notes": "Forward brigades were overextended and driven back into the main line."
     },
     {
       "id": "union-kimball-division",
       "name": "Kimball's Division (IV Corps)",
       "side": "Union",
       "commander": "Brig. Gen. Nathan Kimball",
-      "strengthEstimate": 3700
+      "strengthEstimate": 3700,
+      "corps": "IV Corps",
+      "army": "Army of the Cumberland",
+      "casualtyEstimate": 460,
+      "notes": "Held western sectors and helped stabilize breaches."
     },
     {
       "id": "union-wood-division",
       "name": "Wood's Division (IV Corps)",
       "side": "Union",
       "commander": "Brig. Gen. Thomas J. Wood",
-      "strengthEstimate": 4600
+      "strengthEstimate": 4600,
+      "corps": "IV Corps",
+      "army": "Army of the Cumberland",
+      "casualtyEstimate": 620,
+      "notes": "Committed reserves and countercharges in the center."
     },
     {
       "id": "conf-cleburne-division",
       "name": "Cleburne's Division",
       "side": "Confederate",
       "commander": "Maj. Gen. Patrick R. Cleburne",
-      "strengthEstimate": 2800
+      "strengthEstimate": 2800,
+      "corps": "Cheatham's Corps",
+      "army": "Army of Tennessee",
+      "casualtyEstimate": 1400,
+      "notes": "Led the most intense assaults near the central breach and suffered catastrophic losses."
     },
     {
       "id": "conf-brown-division",
       "name": "Brown's Division",
       "side": "Confederate",
       "commander": "Maj. Gen. John C. Brown",
-      "strengthEstimate": 3300
+      "strengthEstimate": 3300,
+      "corps": "Cheatham's Corps",
+      "army": "Army of Tennessee",
+      "casualtyEstimate": 1250,
+      "notes": "Attacked adjacent to Cleburne and participated in repeated assaults into the works."
     },
     {
       "id": "conf-french-division",
       "name": "French's Division",
       "side": "Confederate",
       "commander": "Maj. Gen. Samuel G. French",
-      "strengthEstimate": 2500
+      "strengthEstimate": 2500,
+      "corps": "Stewart's Corps",
+      "army": "Army of Tennessee",
+      "casualtyEstimate": 720,
+      "notes": "Supported right-center attacks and endured prolonged close-range fighting."
     },
     {
       "id": "conf-bate-division",
       "name": "Bate's Division",
       "side": "Confederate",
       "commander": "Maj. Gen. William B. Bate",
-      "strengthEstimate": 2200
+      "strengthEstimate": 2200,
+      "corps": "Cheatham's Corps",
+      "army": "Army of Tennessee",
+      "casualtyEstimate": 680,
+      "notes": "Committed on the Confederate right, later involved in night attritional combat."
     }
   ],
   "timeSlices": [

@@ -33,6 +33,10 @@ export interface DivisionUnit {
   side: Side;
   commander: string;
   strengthEstimate: number;
+  corps?: string;
+  army?: string;
+  casualtyEstimate?: number;
+  notes?: string;
 }
 
 export interface UnitPosition {

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "mapbox-gl/dist/mapbox-gl.css";
 
 :root {
   --bg-ink: #111419;
@@ -81,6 +82,33 @@ body {
   max-width: 70ch;
 }
 
+.view-toggle {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.view-toggle button {
+  border: 1px solid rgba(245, 214, 167, 0.35);
+  background: rgba(20, 18, 16, 0.7);
+  color: var(--text-main);
+  border-radius: 0.55rem;
+  cursor: pointer;
+  padding: 0.42rem 0.72rem;
+  transition: transform 160ms ease, border-color 160ms ease, background-color 160ms ease;
+}
+
+.view-toggle button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(247, 216, 170, 0.75);
+}
+
+.view-toggle button.active {
+  background: rgba(194, 122, 53, 0.32);
+  border-color: rgba(234, 175, 110, 0.85);
+}
+
 .status-block {
   border: 1px solid var(--stroke);
   border-radius: 0.8rem;
@@ -119,6 +147,131 @@ body {
   inset: 0;
 }
 
+.present-map {
+  position: absolute;
+  inset: 0;
+}
+
+.present-map .mapboxgl-popup-content {
+  border-radius: 0.55rem;
+  border: 1px solid rgba(245, 214, 167, 0.4);
+  background: rgba(14, 17, 22, 0.92);
+  color: #f8f2e8;
+}
+
+.mapbox-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: 0.6rem;
+  padding: 1.5rem;
+  background: linear-gradient(160deg, rgba(18, 29, 48, 0.86), rgba(28, 20, 15, 0.86));
+}
+
+.mapbox-empty h3,
+.mapbox-empty p {
+  margin: 0;
+}
+
+.mapbox-empty p {
+  color: var(--text-muted);
+  max-width: 44ch;
+}
+
+.present-unit-marker {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  background: rgba(10, 12, 15, 0.85);
+  color: #f8f2e8;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.18rem 0.45rem 0.18rem 0.2rem;
+  cursor: pointer;
+  backdrop-filter: blur(3px);
+}
+
+.present-unit-marker .dot {
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 999px;
+}
+
+.present-unit-marker .tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.present-unit-marker.union .dot {
+  background: var(--union);
+}
+
+.present-unit-marker.confederate .dot {
+  background: var(--confed);
+}
+
+.present-unit-marker.selected {
+  border-color: #ffe3ac;
+  box-shadow: 0 0 0 1px rgba(255, 227, 172, 0.4);
+}
+
+.present-landmark-marker {
+  color: #f7ead6;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-shadow:
+    0 0 4px rgba(0, 0, 0, 0.8),
+    0 1px 0 rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.present-landmark-marker.importance-5 {
+  font-size: 0.78rem;
+}
+
+.scene-unit-label {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  background: rgba(10, 12, 15, 0.86);
+  color: #f8f2e8;
+}
+
+.scene-unit-label.union {
+  box-shadow: inset 0 0 0 1px rgba(47, 117, 201, 0.45);
+}
+
+.scene-unit-label.confederate {
+  box-shadow: inset 0 0 0 1px rgba(176, 64, 47, 0.45);
+}
+
+.scene-unit-label.selected {
+  border-color: #ffe3ac;
+}
+
+.scene-landmark-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #ffe8bd;
+  text-shadow:
+    0 0 4px rgba(0, 0, 0, 0.85),
+    0 1px 0 rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+}
+
+.scene-landmark-label.importance-5 {
+  font-size: 0.75rem;
+}
+
 .event-callout {
   position: absolute;
   left: 1rem;
@@ -155,6 +308,7 @@ body {
 
 .timeline-card,
 .narrative-card,
+.unit-card,
 .legend-card,
 .sources-card,
 .validation-card,
@@ -186,6 +340,7 @@ body {
 
 .timeline-header h2,
 .narrative-header h2,
+.unit-card h2,
 .legend-card h2,
 .sources-card h2,
 .validation-card h2 {
@@ -319,6 +474,62 @@ body {
 .narrative-item.active {
   border-color: rgba(240, 198, 131, 0.85);
   background: rgba(162, 99, 47, 0.26);
+}
+
+.unit-card-grid {
+  display: grid;
+  gap: 0.34rem;
+}
+
+.unit-card-title-row {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 0.2rem;
+}
+
+.unit-stat-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.06rem;
+}
+
+.unit-stat-row span {
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.unit-stat-row strong {
+  font-size: 0.9rem;
+}
+
+.unit-notes {
+  margin: 0.35rem 0 0;
+  color: var(--text-muted);
+}
+
+.unit-empty {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.side-pill {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.12rem 0.48rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.side-pill.union {
+  background: rgba(47, 117, 201, 0.22);
+}
+
+.side-pill.confederate {
+  background: rgba(176, 64, 47, 0.22);
 }
 
 .legend-row {
