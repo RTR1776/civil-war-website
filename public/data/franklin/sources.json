@@ -1,0 +1,41 @@
+[
+  {
+    "id": "source-or-vol45",
+    "title": "The War of the Rebellion: Official Records, Series I, Volume XLV",
+    "author": "U.S. War Department",
+    "year": 1893,
+    "url": "https://ehistory.osu.edu/books/official-records",
+    "note": "Primary after-action reports and command correspondence for the Tennessee campaign."
+  },
+  {
+    "id": "source-cozzens-franklin",
+    "title": "No Better Place to Die: The Battle of Franklin",
+    "author": "Peter Cozzens",
+    "year": 1990,
+    "note": "Secondary synthesis used to align sequence and timing of critical assaults."
+  },
+  {
+    "id": "source-jacobs-map",
+    "title": "Map of the Battle of Franklin",
+    "author": "Tennessee State Library and Archives",
+    "year": 1883,
+    "url": "https://tsla.tnsosfiles.com/digital/teva/Maps/",
+    "note": "Historic map references used for defensive line and roadway orientation."
+  },
+  {
+    "id": "source-loc-civil-war-maps",
+    "title": "Civil War Maps Collection",
+    "author": "Library of Congress",
+    "year": 1864,
+    "url": "https://www.loc.gov/collections/civil-war-maps/",
+    "note": "Cartographic context for sector labels and terrain framing."
+  },
+  {
+    "id": "source-usgs-elevation",
+    "title": "USGS 3D Elevation Program",
+    "author": "United States Geological Survey",
+    "year": 2024,
+    "url": "https://www.usgs.gov/3d-elevation-program",
+    "note": "General elevation guidance for stylized terrain contours in the vertical slice."
+  }
+]

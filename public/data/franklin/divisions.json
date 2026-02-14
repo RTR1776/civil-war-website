@@ -1,0 +1,202 @@
+{
+  "units": [
+    {
+      "id": "union-cox-division",
+      "name": "Cox's Division (XXIII Corps)",
+      "side": "Union",
+      "commander": "Brig. Gen. Jacob D. Cox",
+      "strengthEstimate": 4200
+    },
+    {
+      "id": "union-wagner-division",
+      "name": "Wagner's Division",
+      "side": "Union",
+      "commander": "Brig. Gen. George D. Wagner",
+      "strengthEstimate": 3100
+    },
+    {
+      "id": "union-kimball-division",
+      "name": "Kimball's Division (IV Corps)",
+      "side": "Union",
+      "commander": "Brig. Gen. Nathan Kimball",
+      "strengthEstimate": 3700
+    },
+    {
+      "id": "union-wood-division",
+      "name": "Wood's Division (IV Corps)",
+      "side": "Union",
+      "commander": "Brig. Gen. Thomas J. Wood",
+      "strengthEstimate": 4600
+    },
+    {
+      "id": "conf-cleburne-division",
+      "name": "Cleburne's Division",
+      "side": "Confederate",
+      "commander": "Maj. Gen. Patrick R. Cleburne",
+      "strengthEstimate": 2800
+    },
+    {
+      "id": "conf-brown-division",
+      "name": "Brown's Division",
+      "side": "Confederate",
+      "commander": "Maj. Gen. John C. Brown",
+      "strengthEstimate": 3300
+    },
+    {
+      "id": "conf-french-division",
+      "name": "French's Division",
+      "side": "Confederate",
+      "commander": "Maj. Gen. Samuel G. French",
+      "strengthEstimate": 2500
+    },
+    {
+      "id": "conf-bate-division",
+      "name": "Bate's Division",
+      "side": "Confederate",
+      "commander": "Maj. Gen. William B. Bate",
+      "strengthEstimate": 2200
+    }
+  ],
+  "timeSlices": [
+    {
+      "timestamp": "1864-11-30T12:00:00-06:00",
+      "confidence": "documented",
+      "unitPositions": [
+        { "unitId": "union-cox-division", "lat": 35.922, "lng": -86.867, "formation": "defensive-line", "engaged": false },
+        { "unitId": "union-wagner-division", "lat": 35.915, "lng": -86.862, "formation": "forward-screen", "engaged": false },
+        { "unitId": "union-kimball-division", "lat": 35.923, "lng": -86.873, "formation": "defensive-line", "engaged": false },
+        { "unitId": "union-wood-division", "lat": 35.9232, "lng": -86.853, "formation": "reserve", "engaged": false },
+        { "unitId": "conf-cleburne-division", "lat": 35.907, "lng": -86.858, "formation": "march-column", "engaged": false },
+        { "unitId": "conf-brown-division", "lat": 35.908, "lng": -86.868, "formation": "march-column", "engaged": false },
+        { "unitId": "conf-french-division", "lat": 35.909, "lng": -86.849, "formation": "march-column", "engaged": false },
+        { "unitId": "conf-bate-division", "lat": 35.91, "lng": -86.841, "formation": "march-column", "engaged": false }
+      ]
+    },
+    {
+      "timestamp": "1864-11-30T13:00:00-06:00",
+      "confidence": "inferred",
+      "unitPositions": [
+        { "unitId": "union-cox-division", "lat": 35.922, "lng": -86.8664, "formation": "defensive-line", "engaged": false },
+        { "unitId": "union-wagner-division", "lat": 35.916, "lng": -86.861, "formation": "forward-screen", "engaged": false },
+        { "unitId": "union-kimball-division", "lat": 35.923, "lng": -86.8725, "formation": "defensive-line", "engaged": false },
+        { "unitId": "union-wood-division", "lat": 35.923, "lng": -86.8525, "formation": "reserve", "engaged": false },
+        { "unitId": "conf-cleburne-division", "lat": 35.909, "lng": -86.858, "formation": "deployment", "engaged": false },
+        { "unitId": "conf-brown-division", "lat": 35.91, "lng": -86.867, "formation": "deployment", "engaged": false },
+        { "unitId": "conf-french-division", "lat": 35.911, "lng": -86.848, "formation": "deployment", "engaged": false },
+        { "unitId": "conf-bate-division", "lat": 35.912, "lng": -86.8405, "formation": "deployment", "engaged": false }
+      ]
+    },
+    {
+      "timestamp": "1864-11-30T14:00:00-06:00",
+      "confidence": "inferred",
+      "unitPositions": [
+        { "unitId": "union-cox-division", "lat": 35.922, "lng": -86.866, "formation": "defensive-line", "engaged": false },
+        { "unitId": "union-wagner-division", "lat": 35.918, "lng": -86.86, "formation": "forward-screen", "engaged": false },
+        { "unitId": "union-kimball-division", "lat": 35.923, "lng": -86.872, "formation": "defensive-line", "engaged": false },
+        { "unitId": "union-wood-division", "lat": 35.9228, "lng": -86.852, "formation": "reserve", "engaged": false },
+        { "unitId": "conf-cleburne-division", "lat": 35.912, "lng": -86.858, "formation": "line-of-battle", "engaged": false },
+        { "unitId": "conf-brown-division", "lat": 35.913, "lng": -86.866, "formation": "line-of-battle", "engaged": false },
+        { "unitId": "conf-french-division", "lat": 35.914, "lng": -86.847, "formation": "line-of-battle", "engaged": false },
+        { "unitId": "conf-bate-division", "lat": 35.915, "lng": -86.84, "formation": "line-of-battle", "engaged": false }
+      ]
+    },
+    {
+      "timestamp": "1864-11-30T15:00:00-06:00",
+      "confidence": "documented",
+      "unitPositions": [
+        { "unitId": "union-cox-division", "lat": 35.922, "lng": -86.8655, "formation": "defensive-line", "engaged": false },
+        { "unitId": "union-wagner-division", "lat": 35.92, "lng": -86.859, "formation": "fallback", "engaged": true },
+        { "unitId": "union-kimball-division", "lat": 35.923, "lng": -86.8715, "formation": "defensive-line", "engaged": false },
+        { "unitId": "union-wood-division", "lat": 35.9228, "lng": -86.8518, "formation": "reserve", "engaged": false },
+        { "unitId": "conf-cleburne-division", "lat": 35.916, "lng": -86.858, "formation": "assault-line", "engaged": false },
+        { "unitId": "conf-brown-division", "lat": 35.916, "lng": -86.865, "formation": "assault-line", "engaged": false },
+        { "unitId": "conf-french-division", "lat": 35.917, "lng": -86.846, "formation": "assault-line", "engaged": false },
+        { "unitId": "conf-bate-division", "lat": 35.918, "lng": -86.8395, "formation": "assault-line", "engaged": false }
+      ]
+    },
+    {
+      "timestamp": "1864-11-30T16:00:00-06:00",
+      "confidence": "inferred",
+      "unitPositions": [
+        { "unitId": "union-cox-division", "lat": 35.922, "lng": -86.8652, "formation": "defensive-line", "engaged": true },
+        { "unitId": "union-wagner-division", "lat": 35.921, "lng": -86.859, "formation": "collapsed-screen", "engaged": true },
+        { "unitId": "union-kimball-division", "lat": 35.9229, "lng": -86.8713, "formation": "defensive-line", "engaged": true },
+        { "unitId": "union-wood-division", "lat": 35.9228, "lng": -86.8516, "formation": "counter-support", "engaged": true },
+        { "unitId": "conf-cleburne-division", "lat": 35.919, "lng": -86.858, "formation": "assault-line", "engaged": true },
+        { "unitId": "conf-brown-division", "lat": 35.919, "lng": -86.864, "formation": "assault-line", "engaged": true },
+        { "unitId": "conf-french-division", "lat": 35.919, "lng": -86.845, "formation": "assault-line", "engaged": true },
+        { "unitId": "conf-bate-division", "lat": 35.92, "lng": -86.839, "formation": "assault-line", "engaged": true }
+      ]
+    },
+    {
+      "timestamp": "1864-11-30T17:00:00-06:00",
+      "confidence": "documented",
+      "unitPositions": [
+        { "unitId": "union-cox-division", "lat": 35.922, "lng": -86.865, "formation": "defensive-line", "engaged": true },
+        { "unitId": "union-wagner-division", "lat": 35.9215, "lng": -86.859, "formation": "reformed-line", "engaged": true },
+        { "unitId": "union-kimball-division", "lat": 35.9228, "lng": -86.871, "formation": "defensive-line", "engaged": true },
+        { "unitId": "union-wood-division", "lat": 35.9226, "lng": -86.8514, "formation": "counter-support", "engaged": true },
+        { "unitId": "conf-cleburne-division", "lat": 35.921, "lng": -86.858, "formation": "breach-assault", "engaged": true },
+        { "unitId": "conf-brown-division", "lat": 35.921, "lng": -86.863, "formation": "breach-assault", "engaged": true },
+        { "unitId": "conf-french-division", "lat": 35.921, "lng": -86.8445, "formation": "support-assault", "engaged": true },
+        { "unitId": "conf-bate-division", "lat": 35.9214, "lng": -86.8388, "formation": "support-assault", "engaged": true }
+      ]
+    },
+    {
+      "timestamp": "1864-11-30T18:00:00-06:00",
+      "confidence": "inferred",
+      "unitPositions": [
+        { "unitId": "union-cox-division", "lat": 35.9221, "lng": -86.865, "formation": "counterattack", "engaged": true },
+        { "unitId": "union-wagner-division", "lat": 35.9218, "lng": -86.8592, "formation": "counterattack", "engaged": true },
+        { "unitId": "union-kimball-division", "lat": 35.9228, "lng": -86.871, "formation": "defensive-line", "engaged": true },
+        { "unitId": "union-wood-division", "lat": 35.9226, "lng": -86.8514, "formation": "counter-support", "engaged": true },
+        { "unitId": "conf-cleburne-division", "lat": 35.922, "lng": -86.858, "formation": "inside-works", "engaged": true },
+        { "unitId": "conf-brown-division", "lat": 35.9218, "lng": -86.862, "formation": "inside-works", "engaged": true },
+        { "unitId": "conf-french-division", "lat": 35.922, "lng": -86.844, "formation": "close-support", "engaged": true },
+        { "unitId": "conf-bate-division", "lat": 35.9221, "lng": -86.8386, "formation": "close-support", "engaged": true }
+      ]
+    },
+    {
+      "timestamp": "1864-11-30T19:00:00-06:00",
+      "confidence": "documented",
+      "unitPositions": [
+        { "unitId": "union-cox-division", "lat": 35.9221, "lng": -86.8652, "formation": "restored-line", "engaged": true },
+        { "unitId": "union-wagner-division", "lat": 35.922, "lng": -86.8592, "formation": "restored-line", "engaged": true },
+        { "unitId": "union-kimball-division", "lat": 35.9229, "lng": -86.8712, "formation": "restored-line", "engaged": true },
+        { "unitId": "union-wood-division", "lat": 35.9228, "lng": -86.8516, "formation": "restored-line", "engaged": true },
+        { "unitId": "conf-cleburne-division", "lat": 35.9222, "lng": -86.858, "formation": "attritional-fighting", "engaged": true },
+        { "unitId": "conf-brown-division", "lat": 35.922, "lng": -86.8615, "formation": "attritional-fighting", "engaged": true },
+        { "unitId": "conf-french-division", "lat": 35.9224, "lng": -86.8438, "formation": "attritional-fighting", "engaged": true },
+        { "unitId": "conf-bate-division", "lat": 35.9223, "lng": -86.8385, "formation": "attritional-fighting", "engaged": true }
+      ]
+    },
+    {
+      "timestamp": "1864-11-30T20:00:00-06:00",
+      "confidence": "inferred",
+      "unitPositions": [
+        { "unitId": "union-cox-division", "lat": 35.922, "lng": -86.8653, "formation": "defensive-line", "engaged": true },
+        { "unitId": "union-wagner-division", "lat": 35.922, "lng": -86.8593, "formation": "defensive-line", "engaged": true },
+        { "unitId": "union-kimball-division", "lat": 35.9229, "lng": -86.8713, "formation": "defensive-line", "engaged": true },
+        { "unitId": "union-wood-division", "lat": 35.9228, "lng": -86.8518, "formation": "defensive-line", "engaged": true },
+        { "unitId": "conf-cleburne-division", "lat": 35.9218, "lng": -86.8582, "formation": "recoil", "engaged": true },
+        { "unitId": "conf-brown-division", "lat": 35.9217, "lng": -86.8617, "formation": "recoil", "engaged": true },
+        { "unitId": "conf-french-division", "lat": 35.922, "lng": -86.8442, "formation": "recoil", "engaged": true },
+        { "unitId": "conf-bate-division", "lat": 35.922, "lng": -86.8387, "formation": "recoil", "engaged": true }
+      ]
+    },
+    {
+      "timestamp": "1864-11-30T21:00:00-06:00",
+      "confidence": "documented",
+      "unitPositions": [
+        { "unitId": "union-cox-division", "lat": 35.922, "lng": -86.8654, "formation": "defensive-line", "engaged": true },
+        { "unitId": "union-wagner-division", "lat": 35.922, "lng": -86.8593, "formation": "defensive-line", "engaged": true },
+        { "unitId": "union-kimball-division", "lat": 35.9229, "lng": -86.8714, "formation": "defensive-line", "engaged": true },
+        { "unitId": "union-wood-division", "lat": 35.9228, "lng": -86.8518, "formation": "defensive-line", "engaged": true },
+        { "unitId": "conf-cleburne-division", "lat": 35.9215, "lng": -86.8583, "formation": "spent-assault", "engaged": true },
+        { "unitId": "conf-brown-division", "lat": 35.9214, "lng": -86.862, "formation": "spent-assault", "engaged": true },
+        { "unitId": "conf-french-division", "lat": 35.9217, "lng": -86.8445, "formation": "spent-assault", "engaged": true },
+        { "unitId": "conf-bate-division", "lat": 35.9217, "lng": -86.839, "formation": "spent-assault", "engaged": true }
+      ]
+    }
+  ]
+}

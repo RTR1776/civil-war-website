@@ -1,0 +1,20 @@
+{
+  "id": "franklin-1864",
+  "name": "Battle of Franklin",
+  "date": "1864-11-30",
+  "timeStart": "1864-11-30T12:00:00-06:00",
+  "timeEnd": "1864-11-30T21:00:00-06:00",
+  "timezone": "America/Chicago",
+  "bounds": {
+    "north": 35.9368,
+    "south": 35.903,
+    "east": -86.805,
+    "west": -86.892
+  },
+  "terrain": {
+    "verticalScale": 22,
+    "roughness": 0.66,
+    "demGridPath": "/data/franklin/terrain-dem.json",
+    "demVerticalExaggeration": 1.15
+  }
+}
