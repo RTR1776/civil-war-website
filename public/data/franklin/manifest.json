@@ -13,8 +13,6 @@
   },
   "terrain": {
     "verticalScale": 22,
-    "roughness": 0.66,
-    "demGridPath": "/data/franklin/terrain-dem.json",
-    "demVerticalExaggeration": 1.15
+    "roughness": 0.66
   }
 }

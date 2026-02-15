@@ -12,8 +12,6 @@ export interface BattlefieldBounds {
 export interface TerrainConfig {
   verticalScale: number;
   roughness: number;
-  demGridPath?: string;
-  demVerticalExaggeration?: number;
 }
 
 export interface BattleManifest {
@@ -97,6 +95,13 @@ export interface TimelineEvent {
   confidence: ConfidenceLevel;
 }
 
+export interface CasualtyTick {
+  time: string;
+  cumulativeCasualties: number;
+  confidence: ConfidenceLevel;
+  note?: string;
+}
+
 export interface BattleDataBundle {
   manifest: BattleManifest;
   units: DivisionUnit[];
@@ -104,8 +109,8 @@ export interface BattleDataBundle {
   narrativeBeats: NarrativeBeat[];
   mapLabels: MapLabel[];
   timelineEvents: TimelineEvent[];
+  casualtyTimeline: CasualtyTick[];
   sources: SourceCitation[];
-  terrainDem: TerrainDem | null;
 }
 
 export interface InterpolatedUnitPosition {
@@ -115,17 +120,4 @@ export interface InterpolatedUnitPosition {
   engaged: boolean;
   formation?: string;
   confidence: ConfidenceLevel;
-}
-
-export interface TerrainDem {
-  source: string;
-  generatedAt: string;
-  query: string;
-  width: number;
-  height: number;
-  minElevation: number;
-  maxElevation: number;
-  noDataValue: number | null;
-  bbox: BattlefieldBounds;
-  heights: Array<number | null>;
 }

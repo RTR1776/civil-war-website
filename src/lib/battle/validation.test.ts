@@ -14,8 +14,8 @@ describe("validateBattleData", () => {
       narrativeBeats: events.narrativeBeats,
       mapLabels: events.mapLabels,
       timelineEvents: events.timelineEvents,
+      casualtyTimeline: events.casualtyTimeline,
       sources,
-      terrainDem: null,
     });
 
     expect(result.valid).toBe(true);
@@ -43,8 +43,8 @@ describe("validateBattleData", () => {
       narrativeBeats: events.narrativeBeats,
       mapLabels: events.mapLabels,
       timelineEvents: events.timelineEvents,
+      casualtyTimeline: events.casualtyTimeline,
       sources,
-      terrainDem: null,
     });
 
     expect(result.valid).toBe(false);

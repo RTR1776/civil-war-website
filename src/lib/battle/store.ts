@@ -1,11 +1,6 @@
 import { create } from "zustand";
 
-import type {
-  BattleDataBundle,
-  CameraPose,
-  NarrativeBeat,
-  TimelineEvent,
-} from "@/lib/battle/types";
+import type { BattleDataBundle, NarrativeBeat, TimelineEvent } from "@/lib/battle/types";
 import { clampTime } from "@/lib/battle/interpolation";
 
 const PLAYBACK_SCALE = 360;
@@ -19,7 +14,6 @@ interface BattlefieldState {
   speed: PlaybackSpeed;
   guidedMode: boolean;
   activeBeatId: string | null;
-  cameraPoseOverride: CameraPose | null;
   hoveredEventId: string | null;
   setData: (nextData: BattleDataBundle) => void;
   setTime: (nextTime: number) => void;
@@ -29,7 +23,6 @@ interface BattlefieldState {
   advanceTimeline: (realElapsedMs: number) => void;
   setGuidedMode: (value: boolean) => void;
   selectBeat: (beat: NarrativeBeat) => void;
-  clearCameraOverride: () => void;
   setHoveredEventId: (eventId: string | null) => void;
 }
 
@@ -76,7 +69,6 @@ export const useBattleStore = create<BattlefieldState>((set, get) => ({
   speed: 1,
   guidedMode: false,
   activeBeatId: null,
-  cameraPoseOverride: null,
   hoveredEventId: null,
   setData: (nextData) => {
     const start = Date.parse(nextData.manifest.timeStart);
@@ -85,7 +77,6 @@ export const useBattleStore = create<BattlefieldState>((set, get) => ({
       selectedTime: start,
       isPlaying: false,
       activeBeatId: null,
-      cameraPoseOverride: null,
       hoveredEventId: null,
     });
   },
@@ -133,13 +124,9 @@ export const useBattleStore = create<BattlefieldState>((set, get) => ({
     set({
       guidedMode: true,
       activeBeatId: beat.id,
-      cameraPoseOverride: beat.cameraPose,
       selectedTime: Date.parse(beat.time),
       isPlaying: false,
     });
-  },
-  clearCameraOverride: () => {
-    set({ cameraPoseOverride: null });
   },
   setHoveredEventId: (eventId) => {
     set({ hoveredEventId: eventId });

@@ -229,5 +229,49 @@
       "detail": "Major offensive momentum ceases by late evening.",
       "confidence": "documented"
     }
+  ],
+  "casualtyTimeline": [
+    {
+      "time": "1864-11-30T12:00:00-06:00",
+      "cumulativeCasualties": 0,
+      "confidence": "documented",
+      "note": "Major engagement not yet underway."
+    },
+    {
+      "time": "1864-11-30T15:00:00-06:00",
+      "cumulativeCasualties": 420,
+      "confidence": "inferred",
+      "note": "Skirmish and advance-line losses rise as contact intensifies."
+    },
+    {
+      "time": "1864-11-30T16:00:00-06:00",
+      "cumulativeCasualties": 1750,
+      "confidence": "documented",
+      "note": "Main assault opens with heavy casualties."
+    },
+    {
+      "time": "1864-11-30T17:00:00-06:00",
+      "cumulativeCasualties": 4550,
+      "confidence": "documented",
+      "note": "Breach fighting around the Carter House drives major losses."
+    },
+    {
+      "time": "1864-11-30T18:00:00-06:00",
+      "cumulativeCasualties": 6820,
+      "confidence": "inferred",
+      "note": "Countercharges and close combat sustain severe attrition."
+    },
+    {
+      "time": "1864-11-30T19:00:00-06:00",
+      "cumulativeCasualties": 8150,
+      "confidence": "documented",
+      "note": "Night fighting continues with diminishing offensive cohesion."
+    },
+    {
+      "time": "1864-11-30T21:00:00-06:00",
+      "cumulativeCasualties": 9300,
+      "confidence": "documented",
+      "note": "Approximate end-of-battle cumulative casualties (both sides)."
+    }
   ]
 }

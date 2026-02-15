@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import NarrativeMode from "@/features/battlefield/NarrativeMode";
 import PresentDayMapbox from "@/features/battlefield/PresentDayMapbox";
-import Scene from "@/features/battlefield/Scene";
 import TimelineControls from "@/features/battlefield/TimelineControls";
 import { getConfidenceStyle, interpolateUnitPositions } from "@/lib/battle/interpolation";
 import {
@@ -15,11 +14,11 @@ import {
 import type {
   BattleDataBundle,
   BattleManifest,
+  CasualtyTick,
   DivisionUnit,
   MapLabel,
   NarrativeBeat,
   SourceCitation,
-  TerrainDem,
   TimeSlice,
   TimelineEvent,
 } from "@/lib/battle/types";
@@ -34,17 +33,7 @@ interface EventsPayload {
   narrativeBeats: NarrativeBeat[];
   mapLabels: MapLabel[];
   timelineEvents: TimelineEvent[];
-}
-
-type MapMode = "battle" | "present-day";
-
-async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to load ${url}: ${response.status}`);
-  }
-
-  return response.json() as Promise<T>;
+  casualtyTimeline: CasualtyTick[];
 }
 
 function formatClock(timestamp: number): string {
@@ -62,11 +51,66 @@ function formatNumber(value: number | undefined): string {
   return value.toLocaleString();
 }
 
+function interpolateCasualtyState(
+  selectedTime: number,
+  timeline: CasualtyTick[],
+): { value: number; confidence: "documented" | "inferred"; note?: string } {
+  if (timeline.length === 0) {
+    return { value: 0, confidence: "inferred" };
+  }
+
+  const ordered = [...timeline].sort((a, b) => Date.parse(a.time) - Date.parse(b.time));
+  const start = ordered[0];
+  const end = ordered[ordered.length - 1];
+
+  const selected = Math.min(
+    Date.parse(end.time),
+    Math.max(Date.parse(start.time), selectedTime),
+  );
+
+  for (let index = 0; index < ordered.length - 1; index += 1) {
+    const left = ordered[index];
+    const right = ordered[index + 1];
+    const leftTime = Date.parse(left.time);
+    const rightTime = Date.parse(right.time);
+
+    if (selected >= leftTime && selected <= rightTime) {
+      const ratio = (selected - leftTime) / Math.max(1, rightTime - leftTime);
+      const value = Math.round(
+        left.cumulativeCasualties + (right.cumulativeCasualties - left.cumulativeCasualties) * ratio,
+      );
+
+      return {
+        value,
+        confidence:
+          left.confidence === "documented" && right.confidence === "documented"
+            ? "documented"
+            : "inferred",
+        note: right.note ?? left.note,
+      };
+    }
+  }
+
+  return {
+    value: end.cumulativeCasualties,
+    confidence: end.confidence,
+    note: end.note,
+  };
+}
+
+async function fetchJson<T>(url: string): Promise<T> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to load ${url}: ${response.status}`);
+  }
+
+  return response.json() as Promise<T>;
+}
+
 export default function BattlefieldExperience() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [mapMode, setMapMode] = useState<MapMode>("present-day");
   const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
 
   const {
@@ -75,7 +119,6 @@ export default function BattlefieldExperience() {
     isPlaying,
     speed,
     activeBeatId,
-    cameraPoseOverride,
     guidedMode,
     hoveredEventId,
     setData,
@@ -84,7 +127,6 @@ export default function BattlefieldExperience() {
     togglePlayback,
     setGuidedMode,
     selectBeat,
-    clearCameraOverride,
     setHoveredEventId,
     advanceTimeline,
   } = useBattleStore();
@@ -101,13 +143,10 @@ export default function BattlefieldExperience() {
 
         const manifest = await fetchJson<BattleManifest>("/data/franklin/manifest.json");
 
-        const [divisions, events, sources, terrainDem] = await Promise.all([
+        const [divisions, events, sources] = await Promise.all([
           fetchJson<DivisionsPayload>("/data/franklin/divisions.json"),
           fetchJson<EventsPayload>("/data/franklin/events.json"),
           fetchJson<SourceCitation[]>("/data/franklin/sources.json"),
-          manifest.terrain.demGridPath
-            ? fetchJson<TerrainDem>(manifest.terrain.demGridPath)
-            : Promise.resolve(null),
         ]);
 
         const bundle: BattleDataBundle = {
@@ -117,8 +156,8 @@ export default function BattlefieldExperience() {
           narrativeBeats: events.narrativeBeats,
           mapLabels: events.mapLabels,
           timelineEvents: events.timelineEvents,
+          casualtyTimeline: events.casualtyTimeline,
           sources,
-          terrainDem,
         };
 
         const validationResult = validateBattleData(bundle);
@@ -219,8 +258,44 @@ export default function BattlefieldExperience() {
     ? currentUnitStateById.get(selectedUnit.id) ?? null
     : null;
 
+  const casualtyState = useMemo(
+    () => (data ? interpolateCasualtyState(selectedTime, data.casualtyTimeline) : null),
+    [data, selectedTime],
+  );
+
+  const totalCasualtyEstimate = useMemo(() => {
+    if (!data) {
+      return 0;
+    }
+
+    const fromTimeline = data.casualtyTimeline[data.casualtyTimeline.length - 1]?.cumulativeCasualties ?? 0;
+    const fromUnits = data.units.reduce((sum, unit) => sum + (unit.casualtyEstimate ?? 0), 0);
+    return Math.max(fromTimeline, fromUnits);
+  }, [data]);
+
+  const sideCasualtyEstimates = useMemo(() => {
+    if (!data || !casualtyState) {
+      return { union: 0, confederate: 0 };
+    }
+
+    const unionTotal = data.units
+      .filter((unit) => unit.side === "Union")
+      .reduce((sum, unit) => sum + (unit.casualtyEstimate ?? 0), 0);
+
+    const confederateTotal = data.units
+      .filter((unit) => unit.side === "Confederate")
+      .reduce((sum, unit) => sum + (unit.casualtyEstimate ?? 0), 0);
+
+    const ratio = totalCasualtyEstimate > 0 ? casualtyState.value / totalCasualtyEstimate : 0;
+
+    return {
+      union: Math.round(unionTotal * ratio),
+      confederate: Math.round(confederateTotal * ratio),
+    };
+  }, [casualtyState, data, totalCasualtyEstimate]);
+
   if (loading) {
-    return <p className="status-card">Loading the Franklin battlefield simulation...</p>;
+    return <p className="status-card">Loading the Franklin battle timelapse...</p>;
   }
 
   if (error || !data) {
@@ -239,36 +314,18 @@ export default function BattlefieldExperience() {
     <div className="battlefield-layout" data-testid="battlefield-app">
       <header className="battle-header">
         <div>
-          <p className="eyebrow">Civil War Immersive Vertical Slice</p>
+          <p className="eyebrow">Civil War Timelapse Map Experience</p>
           <h1>{data.manifest.name}</h1>
           <p className="subtitle">
-            November 30, 1864, Franklin, Tennessee. Division-level playback with documented vs inferred
-            provenance visibility.
+            Historic-styled Mapbox playback of troop movement, key battlefield landmarks, and casualty
+            progression across November 30, 1864.
           </p>
-          <div className="view-toggle" role="tablist" aria-label="Battlefield view mode">
-            <button
-              type="button"
-              className={mapMode === "battle" ? "active" : ""}
-              onClick={() => setMapMode("battle")}
-              data-testid="view-battle-button"
-            >
-              Battlefield 3D
-            </button>
-            <button
-              type="button"
-              className={mapMode === "present-day" ? "active" : ""}
-              onClick={() => setMapMode("present-day")}
-              data-testid="view-present-button"
-            >
-              Present-Day Mapbox
-            </button>
-          </div>
         </div>
         <div className="status-block">
+          <span className="status-label">Mode</span>
+          <strong>Mapbox Historical Timelapse</strong>
           <span className="status-label">Playback</span>
           <strong>{guidedMode ? "Guided Narrative" : "Free Exploration"}</strong>
-          <span className="status-label">View</span>
-          <strong>{mapMode === "battle" ? "Historical 3D" : "Present-Day"}</strong>
           <span className="status-label">Time</span>
           <strong>{formatClock(selectedTime)}</strong>
         </div>
@@ -276,34 +333,18 @@ export default function BattlefieldExperience() {
 
       <div className="battlefield-grid">
         <div className="scene-wrap">
-          {mapMode === "battle" ? (
-            <Scene
-              manifest={data.manifest}
-              units={data.units}
-              timeSlices={data.timeSlices}
-              mapLabels={data.mapLabels}
-              terrainDem={data.terrainDem}
-              selectedTime={selectedTime}
-              activeBeatId={activeBeatId}
-              selectedUnitId={selectedUnitId}
-              cameraPoseOverride={cameraPoseOverride}
-              focusUnitIds={
-                data.narrativeBeats.find((beat) => beat.id === activeBeatId)?.focusUnitIds ?? []
-              }
-              onCameraOverrideConsumed={clearCameraOverride}
-              onSelectUnit={setSelectedUnitId}
-            />
-          ) : (
-            <PresentDayMapbox
-              manifest={data.manifest}
-              units={data.units}
-              mapLabels={data.mapLabels}
-              timeSlices={data.timeSlices}
-              selectedTime={selectedTime}
-              selectedUnitId={selectedUnitId}
-              onSelectUnit={setSelectedUnitId}
-            />
-          )}
+          <PresentDayMapbox
+            manifest={data.manifest}
+            units={data.units}
+            mapLabels={data.mapLabels}
+            narrativeBeats={data.narrativeBeats}
+            timeSlices={data.timeSlices}
+            selectedTime={selectedTime}
+            activeBeatId={activeBeatId}
+            guidedMode={guidedMode}
+            selectedUnitId={selectedUnitId}
+            onSelectUnit={setSelectedUnitId}
+          />
 
           {activeEvent ? (
             <aside
@@ -338,6 +379,27 @@ export default function BattlefieldExperience() {
             onToggleGuidedMode={setGuidedMode}
             onSelectBeat={selectBeat}
           />
+
+          <section className="casualty-card" aria-label="Estimated casualties">
+            <h2>Casualty Counter</h2>
+            <p className="casualty-total">{formatNumber(casualtyState?.value)} estimated casualties</p>
+            <div className="casualty-sides">
+              <div>
+                <span>Union (est.)</span>
+                <strong>{formatNumber(sideCasualtyEstimates.union)}</strong>
+              </div>
+              <div>
+                <span>Confederate (est.)</span>
+                <strong>{formatNumber(sideCasualtyEstimates.confederate)}</strong>
+              </div>
+            </div>
+            <p className="casualty-note">
+              {casualtyState?.confidence === "inferred"
+                ? "Includes inferred interval interpolation between documented casualty checkpoints."
+                : "Derived from documented checkpoint totals."}
+            </p>
+            {casualtyState?.note ? <small>{casualtyState.note}</small> : null}
+          </section>
 
           <section className="unit-card" aria-label="Selected unit details">
             <h2>Division Intel</h2>
@@ -394,7 +456,7 @@ export default function BattlefieldExperience() {
                 {selectedUnit.notes ? <p className="unit-notes">{selectedUnit.notes}</p> : null}
               </div>
             ) : (
-              <p className="unit-empty">Select a division marker in 3D or Mapbox mode.</p>
+              <p className="unit-empty">Select a division marker on the map to inspect details.</p>
             )}
           </section>
 
@@ -402,11 +464,11 @@ export default function BattlefieldExperience() {
             <h2>Legend</h2>
             <div className="legend-row">
               <span className="swatch union" />
-              <span>Union divisions</span>
+              <span>Union formations</span>
             </div>
             <div className="legend-row">
               <span className="swatch confederate" />
-              <span>Confederate divisions</span>
+              <span>Confederate formations</span>
             </div>
             <div className="legend-row">
               <span className="swatch documented" />
@@ -414,7 +476,7 @@ export default function BattlefieldExperience() {
             </div>
             <div className="legend-row">
               <span className="swatch inferred" />
-              <span>Inferred segment (ghosted + dashed)</span>
+              <span>Inferred segment (ghosted)</span>
             </div>
           </section>
 

@@ -53,8 +53,19 @@ const SAMPLE_BUNDLE: BattleDataBundle = {
       confidence: "documented",
     },
   ],
+  casualtyTimeline: [
+    {
+      time: "1864-11-30T12:00:00-06:00",
+      cumulativeCasualties: 0,
+      confidence: "documented",
+    },
+    {
+      time: "1864-11-30T13:00:00-06:00",
+      cumulativeCasualties: 120,
+      confidence: "documented",
+    },
+  ],
   sources: [],
-  terrainDem: null,
 };
 
 describe("battle store", () => {
@@ -66,22 +77,19 @@ describe("battle store", () => {
       speed: 1,
       guidedMode: false,
       activeBeatId: null,
-      cameraPoseOverride: null,
       hoveredEventId: null,
     });
   });
 
-  it("sets camera pose when selecting a narrative beat", () => {
+  it("sets guided mode and active beat when selecting a narrative beat", () => {
     const state = useBattleStore.getState();
     state.setData(SAMPLE_BUNDLE);
     state.selectBeat(SAMPLE_BUNDLE.narrativeBeats[0]);
 
     const next = useBattleStore.getState();
     expect(next.activeBeatId).toBe("beat-1");
-    expect(next.cameraPoseOverride).toEqual(
-      expect.objectContaining({ lat: 35.92, lng: -86.86, distance: 40, pitch: 32, yaw: 18 }),
-    );
     expect(next.guidedMode).toBe(true);
+    expect(next.selectedTime).toBe(Date.parse("1864-11-30T13:00:00-06:00"));
   });
 });
 
