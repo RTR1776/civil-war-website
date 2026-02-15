@@ -33,6 +33,19 @@ export function validateBattleData(bundle: BattleDataBundle): ValidationResult {
     }
   }
 
+  for (const casualtyTick of bundle.casualtyTimeline) {
+    const current = Date.parse(casualtyTick.time);
+
+    if (Number.isNaN(current)) {
+      errors.push(`Invalid casualty timestamp format: ${casualtyTick.time}`);
+      continue;
+    }
+
+    if (current < start || current > end) {
+      errors.push(`Casualty timestamp outside battle window: ${casualtyTick.time}`);
+    }
+  }
+
   return {
     valid: errors.length === 0,
     errors,

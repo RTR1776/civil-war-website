@@ -18,6 +18,8 @@ import type {
   TimeSlice,
 } from "@/lib/battle/types";
 
+export type MapTheme = "historical" | "modern";
+
 interface PresentDayMapboxProps {
   manifest: BattleManifest;
   units: DivisionUnit[];
@@ -28,7 +30,60 @@ interface PresentDayMapboxProps {
   activeBeatId: string | null;
   guidedMode: boolean;
   selectedUnitId: string | null;
+  mapTheme: MapTheme;
   onSelectUnit: (unitId: string | null) => void;
+}
+
+const HISTORICAL_BASEMAP_CONFIG = {
+  theme: "faded",
+  lightPreset: "dusk",
+  showRoadsAndTransit: false,
+  showPlaceLabels: false,
+  showPointOfInterestLabels: false,
+  show3dObjects: false,
+};
+
+const MODERN_BASEMAP_CONFIG = {
+  theme: "default",
+  lightPreset: "day",
+  showRoadsAndTransit: true,
+  showPlaceLabels: true,
+  showPointOfInterestLabels: true,
+  show3dObjects: true,
+};
+
+function getBasemapConfig(mapTheme: MapTheme) {
+  return mapTheme === "historical" ? HISTORICAL_BASEMAP_CONFIG : MODERN_BASEMAP_CONFIG;
+}
+
+function applyMapTheme(map: MapboxMap, mapTheme: MapTheme) {
+  map.setConfig("basemap", getBasemapConfig(mapTheme));
+
+  map.setTerrain({
+    source: "battlefield-dem",
+    exaggeration: mapTheme === "historical" ? 1.03 : 1.07,
+  });
+
+  map.setFog({
+    color: mapTheme === "historical" ? "#cab08a" : "#cad5df",
+    "high-color": mapTheme === "historical" ? "#e6d0aa" : "#dde7ef",
+    "horizon-blend": mapTheme === "historical" ? 0.28 : 0.2,
+    "space-color": mapTheme === "historical" ? "#d8c4a5" : "#dfe8f0",
+  });
+
+  if (map.getLayer("historic-lines")) {
+    map.setPaintProperty("historic-lines", "line-opacity", mapTheme === "historical" ? 0.88 : 0.56);
+  }
+
+  if (map.getLayer("battle-labels")) {
+    map.setPaintProperty("battle-labels", "text-opacity", mapTheme === "historical" ? 0.98 : 0.86);
+  }
+
+  map.easeTo({
+    pitch: mapTheme === "historical" ? 38 : 45,
+    duration: 420,
+    essential: true,
+  });
 }
 
 function getShortName(value: string): string {
@@ -80,6 +135,20 @@ function setSourceData<T extends Point | LineString>(
   if (source) {
     source.setData(data);
   }
+}
+
+function emptyPointCollection(): FeatureCollection<Point> {
+  return {
+    type: "FeatureCollection",
+    features: [],
+  };
+}
+
+function emptyLineCollection(): FeatureCollection<LineString> {
+  return {
+    type: "FeatureCollection",
+    features: [],
+  };
 }
 
 function buildTroopFeatures(
@@ -251,6 +320,80 @@ function buildFocusFeature(
   };
 }
 
+function buildHistoricLineFeatures(): FeatureCollection<LineString> {
+  return {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [-86.8598, 35.9093],
+            [-86.8596, 35.9152],
+            [-86.8593, 35.9208],
+            [-86.8596, 35.925],
+          ],
+        },
+        properties: {
+          type: "road-1864",
+          name: "Columbia Pike (1864 axis)",
+        },
+      },
+      {
+        type: "Feature",
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [-86.874, 35.9222],
+            [-86.8696, 35.9225],
+            [-86.8654, 35.9226],
+            [-86.8614, 35.9224],
+            [-86.8572, 35.9222],
+            [-86.8528, 35.9231],
+          ],
+        },
+        properties: {
+          type: "union-works",
+          name: "Federal Main Works",
+        },
+      },
+      {
+        type: "Feature",
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [-86.8622, 35.9097],
+            [-86.8611, 35.9148],
+            [-86.8601, 35.9184],
+            [-86.8596, 35.9219],
+          ],
+        },
+        properties: {
+          type: "assault-axis",
+          name: "Cheatham Assault Axis",
+        },
+      },
+      {
+        type: "Feature",
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [-86.8684, 35.9082],
+            [-86.8661, 35.9138],
+            [-86.8639, 35.919],
+            [-86.8621, 35.9221],
+          ],
+        },
+        properties: {
+          type: "assault-axis",
+          name: "Brown-Cleburne Axis",
+        },
+      },
+    ],
+  };
+}
+
 export default function PresentDayMapbox({
   manifest,
   units,
@@ -261,14 +404,25 @@ export default function PresentDayMapbox({
   activeBeatId,
   guidedMode,
   selectedUnitId,
+  mapTheme,
   onSelectUnit,
 }: PresentDayMapboxProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapboxMap | null>(null);
   const mapReadyRef = useRef(false);
   const previousBeatRef = useRef<string | null>(null);
+  const onSelectUnitRef = useRef(onSelectUnit);
+  const mapThemeRef = useRef(mapTheme);
 
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN?.trim();
+
+  useEffect(() => {
+    onSelectUnitRef.current = onSelectUnit;
+  }, [onSelectUnit]);
+
+  useEffect(() => {
+    mapThemeRef.current = mapTheme;
+  }, [mapTheme]);
 
   const positionsByUnit = useMemo(() => {
     const interpolated = interpolateUnitPositions(selectedTime, timeSlices);
@@ -291,6 +445,7 @@ export default function PresentDayMapbox({
   );
 
   const labels = useMemo(() => buildLabelFeatures(mapLabels), [mapLabels]);
+  const historicLines = useMemo(() => buildHistoricLineFeatures(), []);
 
   const activeBeat = useMemo(
     () => narrativeBeats.find((beat) => beat.id === activeBeatId) ?? null,
@@ -319,12 +474,14 @@ export default function PresentDayMapbox({
 
       const map = new mapbox.Map({
         container: containerRef.current,
-        style: "mapbox://styles/mapbox/standard",
+        style: "mapbox://styles/mapbox/standard-satellite",
+        config: { basemap: getBasemapConfig(mapThemeRef.current) },
         center: [centerLng, centerLat],
         zoom: 13.6,
-        pitch: 52,
+        pitch: 40,
         bearing: -18,
         antialias: true,
+        cooperativeGestures: true,
       });
 
       map.addControl(new mapbox.NavigationControl({ visualizePitch: true }), "top-right");
@@ -333,44 +490,81 @@ export default function PresentDayMapbox({
       map.on("load", () => {
         mapReadyRef.current = true;
 
-        map.addSource("battlefield-dem", {
-          type: "raster-dem",
-          url: "mapbox://mapbox.mapbox-terrain-dem-v1",
-          tileSize: 512,
-          maxzoom: 14,
-        });
+        if (!map.getSource("battlefield-dem")) {
+          map.addSource("battlefield-dem", {
+            type: "raster-dem",
+            url: "mapbox://mapbox.mapbox-terrain-dem-v1",
+            tileSize: 512,
+            maxzoom: 14,
+          });
+        }
 
-        map.setTerrain({ source: "battlefield-dem", exaggeration: 1.18 });
-        map.setFog({
-          color: "#d2c0a3",
-          "high-color": "#f0dcc0",
-          "horizon-blend": 0.24,
-          "space-color": "#d7ceb8",
-        });
+        applyMapTheme(map, mapThemeRef.current);
 
         map.addSource("battle-trails", {
           type: "geojson",
-          data: trails,
+          data: emptyLineCollection(),
         });
 
         map.addSource("troop-dots", {
           type: "geojson",
-          data: troopDots,
+          data: emptyPointCollection(),
         });
 
         map.addSource("unit-anchors", {
           type: "geojson",
-          data: unitAnchors,
+          data: emptyPointCollection(),
         });
 
         map.addSource("battle-labels", {
           type: "geojson",
-          data: labels,
+          data: emptyPointCollection(),
         });
 
         map.addSource("focus-beat", {
           type: "geojson",
-          data: focus,
+          data: emptyPointCollection(),
+        });
+
+        map.addSource("historic-lines", {
+          type: "geojson",
+          data: emptyLineCollection(),
+        });
+
+        map.addLayer({
+          id: "historic-lines",
+          type: "line",
+          source: "historic-lines",
+          paint: {
+            "line-color": [
+              "match",
+              ["get", "type"],
+              "union-works",
+              "#7a9bc1",
+              "assault-axis",
+              "#b14e3e",
+              "#cfb079",
+            ],
+            "line-width": [
+              "match",
+              ["get", "type"],
+              "union-works",
+              3,
+              "assault-axis",
+              2.7,
+              2,
+            ],
+            "line-dasharray": [
+              "match",
+              ["get", "type"],
+              "assault-axis",
+              [1.3, 1],
+              "road-1864",
+              [0.6, 1.2],
+              [1, 0],
+            ],
+            "line-opacity": 0.84,
+          },
         });
 
         map.addLayer({
@@ -418,6 +612,8 @@ export default function PresentDayMapbox({
             "circle-opacity": ["case", ["==", ["get", "confidence"], "inferred"], 0.56, 0.9],
             "circle-stroke-width": ["case", ["==", ["get", "selected"], 1], 1.6, 0],
             "circle-stroke-color": "#fbe8b6",
+            "circle-pitch-alignment": "viewport",
+            "circle-pitch-scale": "viewport",
           },
         });
 
@@ -446,11 +642,14 @@ export default function PresentDayMapbox({
             "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
             "text-offset": [0, 1.25],
             "text-allow-overlap": true,
+            "text-ignore-placement": true,
+            "text-pitch-alignment": "viewport",
+            "text-rotation-alignment": "viewport",
           },
           paint: {
             "text-color": "#f5ead5",
             "text-halo-color": "#17120e",
-            "text-halo-width": 1.2,
+            "text-halo-width": 1.35,
           },
         });
 
@@ -463,12 +662,16 @@ export default function PresentDayMapbox({
             "text-size": ["interpolate", ["linear"], ["get", "importance"], 1, 10, 5, 14],
             "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
             "text-offset": [0, 0.95],
-            "text-allow-overlap": false,
+            "symbol-sort-key": ["get", "importance"],
+            "text-allow-overlap": true,
+            "text-ignore-placement": true,
+            "text-pitch-alignment": "viewport",
+            "text-rotation-alignment": "viewport",
           },
           paint: {
             "text-color": "#f9ecd1",
             "text-halo-color": "#2f261d",
-            "text-halo-width": 1.2,
+            "text-halo-width": 1.5,
             "text-opacity": 0.95,
           },
         });
@@ -489,7 +692,7 @@ export default function PresentDayMapbox({
 
         map.on("click", "unit-anchors-hit", (event) => {
           const unitId = event.features?.[0]?.properties?.unitId;
-          onSelectUnit(typeof unitId === "string" ? unitId : null);
+          onSelectUnitRef.current(typeof unitId === "string" ? unitId : null);
         });
 
         map.on("mouseenter", "unit-anchors-hit", () => {
@@ -506,7 +709,7 @@ export default function PresentDayMapbox({
           }).length;
 
           if (!isUnitClick) {
-            onSelectUnit(null);
+            onSelectUnitRef.current(null);
           }
         });
 
@@ -532,6 +735,7 @@ export default function PresentDayMapbox({
       mapReadyRef.current = false;
       mapRef.current?.remove();
       mapRef.current = null;
+      previousBeatRef.current = null;
     };
   }, [
     manifest.bounds.east,
@@ -539,13 +743,15 @@ export default function PresentDayMapbox({
     manifest.bounds.south,
     manifest.bounds.west,
     mapboxToken,
-    onSelectUnit,
-    focus,
-    labels,
-    trails,
-    troopDots,
-    unitAnchors,
   ]);
+
+  useEffect(() => {
+    if (!mapRef.current || !mapReadyRef.current) {
+      return;
+    }
+
+    applyMapTheme(mapRef.current, mapTheme);
+  }, [mapTheme]);
 
   useEffect(() => {
     if (!mapRef.current || !mapReadyRef.current) {
@@ -557,7 +763,8 @@ export default function PresentDayMapbox({
     setSourceData(mapRef.current, "unit-anchors", unitAnchors);
     setSourceData(mapRef.current, "battle-labels", labels);
     setSourceData(mapRef.current, "focus-beat", focus);
-  }, [focus, labels, trails, troopDots, unitAnchors]);
+    setSourceData(mapRef.current, "historic-lines", historicLines);
+  }, [focus, historicLines, labels, trails, troopDots, unitAnchors]);
 
   useEffect(() => {
     if (!mapRef.current || !guidedMode || !activeBeat || previousBeatRef.current === activeBeat.id) {
@@ -591,7 +798,7 @@ export default function PresentDayMapbox({
   return (
     <div className="present-map-wrap">
       <div ref={containerRef} className="present-map" data-testid="present-day-map" />
-      <div className="historic-map-overlay" aria-hidden="true" />
+      <div className={`historic-map-overlay ${mapTheme}`} aria-hidden="true" />
     </div>
   );
 }

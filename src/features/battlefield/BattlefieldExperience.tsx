@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import NarrativeMode from "@/features/battlefield/NarrativeMode";
-import PresentDayMapbox from "@/features/battlefield/PresentDayMapbox";
+import PresentDayMapbox, { type MapTheme } from "@/features/battlefield/PresentDayMapbox";
 import TimelineControls from "@/features/battlefield/TimelineControls";
 import { getConfidenceStyle, interpolateUnitPositions } from "@/lib/battle/interpolation";
 import {
@@ -35,6 +35,8 @@ interface EventsPayload {
   timelineEvents: TimelineEvent[];
   casualtyTimeline: CasualtyTick[];
 }
+
+type PanelTab = "intel" | "sources";
 
 function formatClock(timestamp: number): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -112,6 +114,8 @@ export default function BattlefieldExperience() {
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
+  const [mapTheme, setMapTheme] = useState<MapTheme>("historical");
+  const [panelTab, setPanelTab] = useState<PanelTab>("intel");
 
   const {
     data,
@@ -294,6 +298,18 @@ export default function BattlefieldExperience() {
     };
   }, [casualtyState, data, totalCasualtyEstimate]);
 
+  const casualtyBreakdown = useMemo(() => {
+    if (!casualtyState) {
+      return { killed: 0, wounded: 0, missing: 0 };
+    }
+
+    const killed = Math.round(casualtyState.value * 0.2);
+    const wounded = Math.round(casualtyState.value * 0.7);
+    const missing = Math.max(0, casualtyState.value - killed - wounded);
+
+    return { killed, wounded, missing };
+  }, [casualtyState]);
+
   if (loading) {
     return <p className="status-card">Loading the Franklin battle timelapse...</p>;
   }
@@ -320,10 +336,32 @@ export default function BattlefieldExperience() {
             Historic-styled Mapbox playback of troop movement, key battlefield landmarks, and casualty
             progression across November 30, 1864.
           </p>
+          <div className="theme-toggle" role="tablist" aria-label="Map theme">
+            <button
+              type="button"
+              className={mapTheme === "historical" ? "active" : ""}
+              onClick={() => setMapTheme("historical")}
+            >
+              1864 Field Style
+            </button>
+            <button
+              type="button"
+              className={mapTheme === "modern" ? "active" : ""}
+              onClick={() => setMapTheme("modern")}
+            >
+              Modern Context
+            </button>
+          </div>
+          <p className="subtitle">
+            Historical mode suppresses modern roads, POIs, and place labels to keep focus on 1864
+            battle geometry. Use <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + scroll to zoom.
+          </p>
         </div>
         <div className="status-block">
           <span className="status-label">Mode</span>
           <strong>Mapbox Historical Timelapse</strong>
+          <span className="status-label">Basemap</span>
+          <strong>{mapTheme === "historical" ? "1864 Field Style" : "Modern Context"}</strong>
           <span className="status-label">Playback</span>
           <strong>{guidedMode ? "Guided Narrative" : "Free Exploration"}</strong>
           <span className="status-label">Time</span>
@@ -343,6 +381,7 @@ export default function BattlefieldExperience() {
             activeBeatId={activeBeatId}
             guidedMode={guidedMode}
             selectedUnitId={selectedUnitId}
+            mapTheme={mapTheme}
             onSelectUnit={setSelectedUnitId}
           />
 
@@ -380,125 +419,160 @@ export default function BattlefieldExperience() {
             onSelectBeat={selectBeat}
           />
 
-          <section className="casualty-card" aria-label="Estimated casualties">
-            <h2>Casualty Counter</h2>
-            <p className="casualty-total">{formatNumber(casualtyState?.value)} estimated casualties</p>
-            <div className="casualty-sides">
-              <div>
-                <span>Union (est.)</span>
-                <strong>{formatNumber(sideCasualtyEstimates.union)}</strong>
-              </div>
-              <div>
-                <span>Confederate (est.)</span>
-                <strong>{formatNumber(sideCasualtyEstimates.confederate)}</strong>
-              </div>
-            </div>
-            <p className="casualty-note">
-              {casualtyState?.confidence === "inferred"
-                ? "Includes inferred interval interpolation between documented casualty checkpoints."
-                : "Derived from documented checkpoint totals."}
-            </p>
-            {casualtyState?.note ? <small>{casualtyState.note}</small> : null}
-          </section>
+          <div className="panel-tabs" role="tablist" aria-label="Sidebar sections">
+            <button
+              type="button"
+              className={panelTab === "intel" ? "active" : ""}
+              onClick={() => setPanelTab("intel")}
+            >
+              Battle Intel
+            </button>
+            <button
+              type="button"
+              className={panelTab === "sources" ? "active" : ""}
+              onClick={() => setPanelTab("sources")}
+            >
+              Sources
+            </button>
+          </div>
 
-          <section className="unit-card" aria-label="Selected unit details">
-            <h2>Division Intel</h2>
-            {selectedUnit ? (
-              <div className="unit-card-grid">
-                <div className="unit-card-title-row">
-                  <span className={`side-pill ${selectedUnit.side.toLowerCase()}`}>
-                    {selectedUnit.side}
-                  </span>
-                  <strong>{selectedUnit.name}</strong>
+          {panelTab === "intel" ? (
+            <>
+              <section className="casualty-card" aria-label="Estimated casualties">
+                <h2>Casualty Counter</h2>
+                <p className="casualty-total">{formatNumber(casualtyState?.value)} total casualties</p>
+                <div className="casualty-sides">
+                  <div>
+                    <span>Union (est.)</span>
+                    <strong>{formatNumber(sideCasualtyEstimates.union)}</strong>
+                  </div>
+                  <div>
+                    <span>Confederate (est.)</span>
+                    <strong>{formatNumber(sideCasualtyEstimates.confederate)}</strong>
+                  </div>
                 </div>
-                <div className="unit-stat-row">
-                  <span>Commander</span>
-                  <strong>{selectedUnit.commander}</strong>
+                <div className="casualty-breakdown">
+                  <div>
+                    <span>Killed (est.)</span>
+                    <strong>{formatNumber(casualtyBreakdown.killed)}</strong>
+                  </div>
+                  <div>
+                    <span>Wounded (est.)</span>
+                    <strong>{formatNumber(casualtyBreakdown.wounded)}</strong>
+                  </div>
+                  <div>
+                    <span>Missing/Captured (est.)</span>
+                    <strong>{formatNumber(casualtyBreakdown.missing)}</strong>
+                  </div>
                 </div>
-                <div className="unit-stat-row">
-                  <span>Corps / Army</span>
-                  <strong>
-                    {selectedUnit.corps ?? "Unknown corps"} / {selectedUnit.army ?? "Unknown army"}
-                  </strong>
-                </div>
-                <div className="unit-stat-row">
-                  <span>Estimated Strength</span>
-                  <strong>{formatNumber(selectedUnit.strengthEstimate)} personnel</strong>
-                </div>
-                <div className="unit-stat-row">
-                  <span>Estimated Casualties</span>
-                  <strong>{formatNumber(selectedUnit.casualtyEstimate)}</strong>
-                </div>
-                <div className="unit-stat-row">
-                  <span>Current Formation</span>
-                  <strong>{selectedUnitState?.formation ?? "Unknown"}</strong>
-                </div>
-                <div className="unit-stat-row">
-                  <span>Engagement Status</span>
-                  <strong>{selectedUnitState?.engaged ? "Engaged" : "Not engaged"}</strong>
-                </div>
-                <div className="unit-stat-row">
-                  <span>Current Position</span>
-                  <strong>
-                    {selectedUnitState
-                      ? `${selectedUnitState.lat.toFixed(4)}, ${selectedUnitState.lng.toFixed(4)}`
-                      : "No position"}
-                  </strong>
-                </div>
-                <div className="unit-stat-row">
-                  <span>Confidence</span>
-                  <strong>
-                    {selectedUnitState?.confidence === "inferred"
-                      ? "Inferred movement segment"
-                      : "Documented movement segment"}
-                  </strong>
-                </div>
-                {selectedUnit.notes ? <p className="unit-notes">{selectedUnit.notes}</p> : null}
-              </div>
-            ) : (
-              <p className="unit-empty">Select a division marker on the map to inspect details.</p>
-            )}
-          </section>
+                <p className="casualty-note">
+                  {casualtyState?.confidence === "inferred"
+                    ? "Includes inferred interval interpolation between documented casualty checkpoints."
+                    : "Derived from documented checkpoint totals."}
+                </p>
+                {casualtyState?.note ? <small>{casualtyState.note}</small> : null}
+              </section>
 
-          <section className="legend-card" aria-label="Legend and data confidence">
-            <h2>Legend</h2>
-            <div className="legend-row">
-              <span className="swatch union" />
-              <span>Union formations</span>
-            </div>
-            <div className="legend-row">
-              <span className="swatch confederate" />
-              <span>Confederate formations</span>
-            </div>
-            <div className="legend-row">
-              <span className="swatch documented" />
-              <span>Documented movement segment</span>
-            </div>
-            <div className="legend-row">
-              <span className="swatch inferred" />
-              <span>Inferred segment (ghosted)</span>
-            </div>
-          </section>
+              <section className="unit-card" aria-label="Selected unit details">
+                <h2>Division Intel</h2>
+                {selectedUnit ? (
+                  <div className="unit-card-grid">
+                    <div className="unit-card-title-row">
+                      <span className={`side-pill ${selectedUnit.side.toLowerCase()}`}>
+                        {selectedUnit.side}
+                      </span>
+                      <strong>{selectedUnit.name}</strong>
+                    </div>
+                    <div className="unit-stat-row">
+                      <span>Commander</span>
+                      <strong>{selectedUnit.commander}</strong>
+                    </div>
+                    <div className="unit-stat-row">
+                      <span>Corps / Army</span>
+                      <strong>
+                        {selectedUnit.corps ?? "Unknown corps"} / {selectedUnit.army ?? "Unknown army"}
+                      </strong>
+                    </div>
+                    <div className="unit-stat-row">
+                      <span>Estimated Strength</span>
+                      <strong>{formatNumber(selectedUnit.strengthEstimate)} personnel</strong>
+                    </div>
+                    <div className="unit-stat-row">
+                      <span>Estimated Casualties</span>
+                      <strong>{formatNumber(selectedUnit.casualtyEstimate)}</strong>
+                    </div>
+                    <div className="unit-stat-row">
+                      <span>Current Formation</span>
+                      <strong>{selectedUnitState?.formation ?? "Unknown"}</strong>
+                    </div>
+                    <div className="unit-stat-row">
+                      <span>Engagement Status</span>
+                      <strong>{selectedUnitState?.engaged ? "Engaged" : "Not engaged"}</strong>
+                    </div>
+                    <div className="unit-stat-row">
+                      <span>Current Position</span>
+                      <strong>
+                        {selectedUnitState
+                          ? `${selectedUnitState.lat.toFixed(4)}, ${selectedUnitState.lng.toFixed(4)}`
+                          : "No position"}
+                      </strong>
+                    </div>
+                    <div className="unit-stat-row">
+                      <span>Confidence</span>
+                      <strong>
+                        {selectedUnitState?.confidence === "inferred"
+                          ? "Inferred movement segment"
+                          : "Documented movement segment"}
+                      </strong>
+                    </div>
+                    {selectedUnit.notes ? <p className="unit-notes">{selectedUnit.notes}</p> : null}
+                  </div>
+                ) : (
+                  <p className="unit-empty">Select a formation on the map to inspect details.</p>
+                )}
+              </section>
 
-          <section className="sources-card" aria-label="Sources">
-            <h2>Source citations</h2>
-            <ul>
-              {data.sources.map((source) => (
-                <li key={source.id}>
-                  <strong>{source.title}</strong>
-                  <span>
-                    {source.author} ({source.year})
-                  </span>
-                  <small>{source.note}</small>
-                  {source.url ? (
-                    <a href={source.url} target="_blank" rel="noreferrer">
-                      Open source
-                    </a>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          </section>
+              <section className="legend-card" aria-label="Legend and data confidence">
+                <h2>Legend</h2>
+                <div className="legend-row">
+                  <span className="swatch union" />
+                  <span>Union formations</span>
+                </div>
+                <div className="legend-row">
+                  <span className="swatch confederate" />
+                  <span>Confederate formations</span>
+                </div>
+                <div className="legend-row">
+                  <span className="swatch documented" />
+                  <span>Documented movement segment</span>
+                </div>
+                <div className="legend-row">
+                  <span className="swatch inferred" />
+                  <span>Inferred segment (ghosted)</span>
+                </div>
+              </section>
+            </>
+          ) : (
+            <section className="sources-card" aria-label="Sources">
+              <h2>Source citations</h2>
+              <ul>
+                {data.sources.map((source) => (
+                  <li key={source.id}>
+                    <strong>{source.title}</strong>
+                    <span>
+                      {source.author} ({source.year})
+                    </span>
+                    <small>{source.note}</small>
+                    {source.url ? (
+                      <a href={source.url} target="_blank" rel="noreferrer">
+                        Open source
+                      </a>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {validationErrors.length > 0 ? (
             <section className="validation-card" aria-label="Data validation warnings">

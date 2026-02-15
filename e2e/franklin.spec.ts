@@ -15,6 +15,8 @@ test.describe("Franklin immersive battlefield", () => {
     await expect(page.getByTestId("timeline-slider")).toBeVisible();
     await expect(page.getByTestId("guided-mode-toggle")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Casualty Counter" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Sources" }).click();
     await expect(page.getByRole("heading", { name: "Source citations" })).toBeVisible();
   });
 

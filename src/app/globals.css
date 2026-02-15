@@ -4,7 +4,6 @@
 :root {
   --bg-ink: #111419;
   --bg-earth: #2a2119;
-  --bg-warm: #6b4d32;
   --panel: rgba(18, 20, 24, 0.82);
   --panel-strong: rgba(11, 13, 16, 0.92);
   --stroke: rgba(255, 228, 194, 0.24);
@@ -38,11 +37,11 @@ body {
 
 .app-shell {
   min-height: 100vh;
-  padding: 1.2rem;
+  padding: 1rem;
 }
 
 .battlefield-layout {
-  width: min(100%, 1600px);
+  width: min(100%, 1520px);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -79,14 +78,71 @@ body {
 .subtitle {
   margin: 0.45rem 0 0;
   color: var(--text-muted);
-  max-width: 70ch;
+  max-width: 76ch;
+}
+
+.subtitle kbd {
+  border: 1px solid rgba(255, 230, 189, 0.32);
+  border-bottom-color: rgba(255, 230, 189, 0.52);
+  border-radius: 0.32rem;
+  padding: 0.04rem 0.35rem;
+  margin: 0 0.1rem;
+  font-size: 0.78em;
+  color: var(--text-main);
+  background: rgba(19, 17, 13, 0.86);
+}
+
+.theme-toggle {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.theme-toggle button,
+.panel-tabs button,
+.timeline-actions button,
+.narrative-header button,
+.speed-cluster button,
+.narrative-item {
+  border: 1px solid rgba(245, 214, 167, 0.35);
+  background: rgba(20, 18, 16, 0.8);
+  color: var(--text-main);
+  border-radius: 0.55rem;
+  cursor: pointer;
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+.theme-toggle button,
+.panel-tabs button,
+.timeline-actions button,
+.narrative-header button,
+.speed-cluster button {
+  padding: 0.42rem 0.72rem;
+}
+
+.theme-toggle button:hover,
+.panel-tabs button:hover,
+.timeline-actions button:hover,
+.narrative-header button:hover,
+.speed-cluster button:hover,
+.narrative-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(247, 216, 170, 0.75);
+}
+
+.theme-toggle .active,
+.panel-tabs .active,
+.speed-cluster .active {
+  background: rgba(194, 122, 53, 0.3);
+  border-color: rgba(234, 175, 110, 0.86);
 }
 
 .status-block {
   border: 1px solid var(--stroke);
   border-radius: 0.8rem;
   padding: 0.9rem;
-  min-width: 180px;
+  min-width: 215px;
   display: grid;
   gap: 0.15rem;
   align-content: center;
@@ -102,36 +158,29 @@ body {
 
 .battlefield-grid {
   display: grid;
-  grid-template-columns: 2.25fr 1fr;
+  grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.95fr);
   gap: 1rem;
+  align-items: start;
 }
 
 .scene-wrap {
-  position: relative;
+  position: sticky;
+  top: 0.8rem;
   border-radius: 1.1rem;
   border: 1px solid var(--stroke);
   overflow: hidden;
-  min-height: 72vh;
+  height: clamp(520px, 72vh, 760px);
   background: linear-gradient(180deg, rgba(29, 41, 57, 0.64), rgba(26, 22, 18, 0.64));
 }
 
-.scene-canvas {
-  position: absolute;
-  inset: 0;
-}
-
-.present-map-wrap {
-  position: absolute;
-  inset: 0;
-}
-
+.present-map-wrap,
 .present-map {
   position: absolute;
   inset: 0;
 }
 
 .present-map .mapboxgl-canvas {
-  filter: sepia(0.3) saturate(0.86) contrast(0.93);
+  filter: sepia(0.28) saturate(0.88) contrast(0.92);
 }
 
 .present-map .mapboxgl-popup-content {
@@ -155,6 +204,14 @@ body {
       rgba(0, 0, 0, 0) 7px
     );
   mix-blend-mode: multiply;
+}
+
+.historic-map-overlay.modern {
+  opacity: 0.2;
+}
+
+.historic-map-overlay.historical {
+  opacity: 0.62;
 }
 
 .mapbox-empty {
@@ -184,8 +241,8 @@ body {
   left: 1rem;
   bottom: 1rem;
   width: min(470px, calc(100% - 2rem));
-  background: rgba(11, 12, 15, 0.82);
-  border: 1px solid rgba(231, 212, 172, 0.4);
+  background: rgba(11, 12, 15, 0.84);
+  border: 1px solid rgba(231, 212, 172, 0.42);
   border-radius: 0.8rem;
   padding: 0.8rem 0.95rem;
   backdrop-filter: blur(8px);
@@ -211,6 +268,11 @@ body {
   display: grid;
   gap: 0.9rem;
   align-content: start;
+}
+
+.panel-tabs {
+  display: flex;
+  gap: 0.45rem;
 }
 
 .timeline-card,
@@ -298,40 +360,9 @@ body {
   gap: 0.7rem;
 }
 
-.timeline-actions button,
-.narrative-header button,
-.speed-cluster button,
-.narrative-item {
-  border: 1px solid rgba(245, 214, 167, 0.35);
-  background: rgba(20, 18, 16, 0.8);
-  color: var(--text-main);
-  border-radius: 0.55rem;
-  cursor: pointer;
-  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
-}
-
-.timeline-actions button,
-.narrative-header button,
-.speed-cluster button {
-  padding: 0.45rem 0.7rem;
-}
-
-.timeline-actions button:hover,
-.narrative-header button:hover,
-.speed-cluster button:hover,
-.narrative-item:hover {
-  transform: translateY(-1px);
-  border-color: rgba(247, 216, 170, 0.75);
-}
-
 .speed-cluster {
   display: flex;
   gap: 0.38rem;
-}
-
-.speed-cluster .active {
-  background: rgba(194, 122, 53, 0.3);
-  border-color: rgba(234, 175, 110, 0.86);
 }
 
 .event-preview {
@@ -391,25 +422,29 @@ body {
   font-weight: 700;
 }
 
-.casualty-sides {
+.casualty-sides,
+.casualty-breakdown {
   display: grid;
   gap: 0.45rem;
 }
 
-.casualty-sides div {
+.casualty-sides div,
+.casualty-breakdown div {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
 }
 
-.casualty-sides span {
+.casualty-sides span,
+.casualty-breakdown span {
   color: var(--text-muted);
   font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
-.casualty-sides strong {
+.casualty-sides strong,
+.casualty-breakdown strong {
   font-size: 1rem;
 }
 
@@ -543,13 +578,20 @@ body {
   width: fit-content;
 }
 
-@media (max-width: 1150px) {
+@media (max-width: 1260px) {
   .battlefield-grid {
     grid-template-columns: 1fr;
   }
 
   .scene-wrap {
-    min-height: 64vh;
+    position: relative;
+    top: 0;
+    height: 64vh;
+    min-height: 520px;
+  }
+
+  .panel-stack {
+    overflow: visible;
   }
 
   .battle-header {
@@ -566,10 +608,21 @@ body {
 
 @media (max-width: 760px) {
   .app-shell {
-    padding: 0.6rem;
+    padding: 0.55rem;
   }
 
   .scene-wrap {
-    min-height: 58vh;
+    min-height: 56vh;
+  }
+
+  .event-callout {
+    width: calc(100% - 1.2rem);
+    left: 0.6rem;
+    bottom: 0.6rem;
+  }
+
+  .panel-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 }
