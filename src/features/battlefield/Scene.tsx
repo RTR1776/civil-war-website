@@ -45,13 +45,30 @@ function getShortName(value: string): string {
     .replace(" (IV Corps)", "");
 }
 
-function makeCircle(radius: number, y = 0, points = 32): [number, number, number][] {
+function makeCircle(radius: number, y = 0, points = 48): [number, number, number][] {
   const result: [number, number, number][] = [];
   for (let index = 0; index <= points; index += 1) {
     const theta = (index / points) * Math.PI * 2;
     result.push([Math.cos(theta) * radius, y, Math.sin(theta) * radius]);
   }
   return result;
+}
+
+function buildTroopOffsets(strengthEstimate: number): [number, number][] {
+  const count = Math.max(10, Math.min(42, Math.round(strengthEstimate / 165)));
+  const offsets: [number, number][] = [];
+
+  for (let index = 0; index < count; index += 1) {
+    const row = Math.floor(index / 6);
+    const col = index % 6;
+    const jitterX = ((index * 7) % 5) * 0.05;
+    const jitterZ = ((index * 11) % 7) * 0.05;
+    const x = (col - 2.5) * 0.5 + jitterX;
+    const z = (row - Math.floor(count / 12)) * 0.5 + jitterZ;
+    offsets.push([x, z]);
+  }
+
+  return offsets;
 }
 
 function Terrain({
@@ -62,7 +79,7 @@ function Terrain({
   terrainDem: TerrainDem | null;
 }) {
   const terrainGeometry = useMemo(() => {
-    const geometry = new THREE.PlaneGeometry(220, 220, 120, 120);
+    const geometry = new THREE.PlaneGeometry(220, 220, 140, 140);
     const positions = geometry.attributes.position;
 
     for (let index = 0; index < positions.count; index += 1) {
@@ -81,15 +98,12 @@ function Terrain({
     <group>
       <mesh geometry={terrainGeometry} rotation-x={-Math.PI / 2} receiveShadow>
         <meshStandardMaterial
-          color="#5f7859"
-          roughness={0.94}
-          metalness={0.05}
-          emissive="#182013"
-          emissiveIntensity={0.1}
+          color="#5f7d58"
+          roughness={0.98}
+          metalness={0.02}
+          emissive="#141a13"
+          emissiveIntensity={0.08}
         />
-      </mesh>
-      <mesh geometry={terrainGeometry} rotation-x={-Math.PI / 2} position-y={0.08}>
-        <meshBasicMaterial color="#12210f" wireframe opacity={0.12} transparent />
       </mesh>
     </group>
   );
@@ -260,7 +274,7 @@ export default function Scene({
         }
 
         const point = latLngToBattlefield(unitPosition.lat, unitPosition.lng, manifest.bounds);
-        const y = terrainHeight(point.x, point.z, manifest.terrain, terrainDem) + 0.4;
+        const y = terrainHeight(point.x, point.z, manifest.terrain, terrainDem) + 0.9;
         const asTuple: [number, number, number] = [point.x, y, point.z];
         group.points.push(asTuple);
 
@@ -286,77 +300,18 @@ export default function Scene({
         onPointerMissed={() => onSelectUnit(null)}
       >
         <color attach="background" args={["#9eb7cc"]} />
-        <fog attach="fog" args={["#c7b59d", 85, 360]} />
+        <fog attach="fog" args={["#c9bcaa", 95, 390]} />
         <Sky distance={450000} sunPosition={[120, 45, 18]} turbidity={8} rayleigh={2} />
-        <ambientLight intensity={0.46} />
+        <ambientLight intensity={0.52} />
         <directionalLight
           position={[80, 140, 60]}
-          intensity={1.35}
+          intensity={1.25}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
         />
 
         <Terrain manifest={manifest} terrainDem={terrainDem} />
-
-        {units.map((unit) => {
-          const position = positionsByUnit.get(unit.id);
-          if (!position) {
-            return null;
-          }
-
-          const battlefield = latLngToBattlefield(position.lat, position.lng, manifest.bounds);
-          const y = terrainHeight(battlefield.x, battlefield.z, manifest.terrain, terrainDem) + 1.4;
-          const style = getConfidenceStyle(position.confidence);
-          const selected = selectedUnitId === unit.id;
-          const focused = selected || focusUnitIds.includes(unit.id) || activeBeatId === null;
-          const circle = makeCircle(selected ? 3.1 : focused ? 2.6 : 2.1, 0.18, 40);
-
-          return (
-            <group
-              key={unit.id}
-              position={[battlefield.x, y, battlefield.z]}
-              scale={selected ? 1.16 : 1}
-            >
-              <mesh
-                castShadow
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onSelectUnit(unit.id);
-                }}
-                onPointerOver={(event) => {
-                  event.stopPropagation();
-                  document.body.style.cursor = "pointer";
-                }}
-                onPointerOut={() => {
-                  document.body.style.cursor = "default";
-                }}
-              >
-                <cylinderGeometry
-                  args={[focused ? 1.4 : 1.2, focused ? 1.6 : 1.4, focused ? 2.6 : 2.1, 20]}
-                />
-                <meshStandardMaterial
-                  color={SIDE_COLORS[unit.side]}
-                  transparent
-                  opacity={style.opacity}
-                  emissive={selected ? "#f5e2b8" : focused ? SIDE_COLORS[unit.side] : "#000000"}
-                  emissiveIntensity={selected ? 0.38 : focused ? 0.26 : 0.04}
-                  polygonOffset
-                  polygonOffsetFactor={selected ? -2 : -1}
-                  polygonOffsetUnits={selected ? -3 : -1}
-                />
-              </mesh>
-              {style.dashed ? (
-                <Line points={circle} color="#f4ece2" dashed dashSize={0.4} gapSize={0.25} lineWidth={1.2} />
-              ) : null}
-              <Html center position={[0, 3.5, 0]} distanceFactor={14} style={{ pointerEvents: "none" }}>
-                <div className={`scene-unit-label ${unit.side.toLowerCase()} ${selected ? "selected" : ""}`}>
-                  {getShortName(unit.name)}
-                </div>
-              </Html>
-            </group>
-          );
-        })}
 
         {[...trails.entries()].map(([unitId, trail]) => {
           if (trail.points.length < 2) {
@@ -369,32 +324,109 @@ export default function Scene({
                 points={trail.points}
                 color={SIDE_COLORS[trail.side]}
                 transparent
-                opacity={0.16}
-                lineWidth={0.8}
+                opacity={0.1}
+                lineWidth={0.65}
+                depthWrite={false}
+                depthTest={false}
               />
               {trail.progressive.length >= 2 ? (
                 <Line
                   points={trail.progressive}
                   color={SIDE_COLORS[trail.side]}
                   transparent
-                  opacity={0.88}
-                  lineWidth={1.4}
+                  opacity={0.74}
+                  lineWidth={1.35}
+                  depthWrite={false}
+                  depthTest={false}
                 />
               ) : null}
             </group>
           );
         })}
 
+        {units.map((unit) => {
+          const position = positionsByUnit.get(unit.id);
+          if (!position) {
+            return null;
+          }
+
+          const battlefield = latLngToBattlefield(position.lat, position.lng, manifest.bounds);
+          const y = terrainHeight(battlefield.x, battlefield.z, manifest.terrain, terrainDem) + 0.85;
+          const style = getConfidenceStyle(position.confidence);
+          const selected = selectedUnitId === unit.id;
+          const focused = selected || focusUnitIds.includes(unit.id) || activeBeatId === null;
+          const offsets = buildTroopOffsets(unit.strengthEstimate);
+
+          return (
+            <group key={unit.id} position={[battlefield.x, y, battlefield.z]}>
+              <mesh
+                rotation-x={-Math.PI / 2}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onSelectUnit(unit.id);
+                }}
+                onPointerOver={(event) => {
+                  event.stopPropagation();
+                  document.body.style.cursor = "pointer";
+                }}
+                onPointerOut={() => {
+                  document.body.style.cursor = "default";
+                }}
+              >
+                <circleGeometry args={[selected ? 5.4 : 4.6, 44]} />
+                <meshBasicMaterial color="#0d0f12" transparent opacity={selected ? 0.32 : 0.2} depthWrite={false} />
+              </mesh>
+
+              {offsets.map(([offsetX, offsetZ], index) => (
+                <mesh
+                  key={`${unit.id}-troop-${index}`}
+                  position={[offsetX, 0.2, offsetZ]}
+                  castShadow={selected}
+                  renderOrder={selected ? 3 : 2}
+                >
+                  <sphereGeometry args={[selected ? 0.26 : focused ? 0.23 : 0.2, 10, 10]} />
+                  <meshStandardMaterial
+                    color={SIDE_COLORS[unit.side]}
+                    transparent
+                    opacity={style.opacity * (focused ? 0.98 : 0.78)}
+                    emissive={selected ? "#ffe3ac" : "#000000"}
+                    emissiveIntensity={selected ? 0.22 : 0}
+                  />
+                </mesh>
+              ))}
+
+              <Line
+                points={makeCircle(selected ? 5.2 : 4.4, 0.12)}
+                color={selected ? "#ffe3ac" : SIDE_COLORS[unit.side]}
+                dashed={style.dashed}
+                dashSize={0.38}
+                gapSize={0.28}
+                lineWidth={selected ? 1.8 : 1.2}
+                transparent
+                opacity={selected ? 0.95 : 0.55}
+                depthWrite={false}
+                depthTest={false}
+              />
+
+              <Html center position={[0, selected ? 3.8 : 3.4, 0]} distanceFactor={15} style={{ pointerEvents: "none" }}>
+                <div className={`scene-unit-label ${unit.side.toLowerCase()} ${selected ? "selected" : ""}`}>
+                  {getShortName(unit.name)}
+                </div>
+              </Html>
+            </group>
+          );
+        })}
+
         {mapLabels.map((label) => {
           const point = latLngToBattlefield(label.lat, label.lng, manifest.bounds);
-          const y = terrainHeight(point.x, point.z, manifest.terrain, terrainDem) + 0.9;
+          const y = terrainHeight(point.x, point.z, manifest.terrain, terrainDem) + 0.95;
           return (
             <group key={label.id} position={[point.x, y, point.z]}>
               <mesh>
-                <sphereGeometry args={[0.45, 12, 12]} />
-                <meshStandardMaterial color="#f2d39e" emissive="#4f2d0d" emissiveIntensity={0.22} />
+                <sphereGeometry args={[0.24, 10, 10]} />
+                <meshBasicMaterial color="#f3d7a4" />
               </mesh>
-              <Html center position={[0, 1.9, 0]} distanceFactor={26} style={{ pointerEvents: "none" }}>
+              <Html center position={[0, 1.55, 0]} distanceFactor={26} style={{ pointerEvents: "none" }}>
                 <div className={`scene-landmark-label importance-${Math.min(5, Math.max(1, label.importance))}`}>
                   {label.name}
                 </div>

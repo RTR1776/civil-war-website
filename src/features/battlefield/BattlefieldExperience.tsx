@@ -66,7 +66,7 @@ export default function BattlefieldExperience() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [mapMode, setMapMode] = useState<MapMode>("battle");
+  const [mapMode, setMapMode] = useState<MapMode>("present-day");
   const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
 
   const {

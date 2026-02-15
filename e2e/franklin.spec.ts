@@ -5,7 +5,11 @@ test.describe("Franklin immersive battlefield", () => {
     await page.goto("/");
 
     await expect(page.getByRole("heading", { name: "Battle of Franklin" })).toBeVisible();
-    await expect(page.getByTestId("battlefield-scene")).toBeVisible();
+    const map = page.getByTestId("present-day-map");
+    const noToken = page.getByTestId("present-day-map-empty");
+    const visibleMap = await map.isVisible().catch(() => false);
+    const visibleFallback = await noToken.isVisible().catch(() => false);
+    expect(visibleMap || visibleFallback).toBeTruthy();
     await expect(page.getByTestId("timeline-slider")).toBeVisible();
     await expect(page.getByTestId("guided-mode-toggle")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Source citations" })).toBeVisible();
@@ -31,6 +35,7 @@ test.describe("Franklin immersive battlefield", () => {
 
   test("handles battlefield camera interactions", async ({ page }) => {
     await page.goto("/");
+    await page.getByTestId("view-battle-button").click();
 
     const scene = page.getByTestId("battlefield-scene");
     await scene.hover();

@@ -189,7 +189,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.18rem 0.45rem 0.18rem 0.2rem;
+  padding: 0.16rem 0.32rem 0.16rem 0.2rem;
   cursor: pointer;
   backdrop-filter: blur(3px);
 }
@@ -201,7 +201,8 @@ body {
 }
 
 .present-unit-marker .tag {
-  font-size: 0.7rem;
+  display: none;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
@@ -217,6 +218,12 @@ body {
 .present-unit-marker.selected {
   border-color: #ffe3ac;
   box-shadow: 0 0 0 1px rgba(255, 227, 172, 0.4);
+  padding-right: 0.45rem;
+}
+
+.present-unit-marker:hover .tag,
+.present-unit-marker.selected .tag {
+  display: inline;
 }
 
 .present-landmark-marker {
