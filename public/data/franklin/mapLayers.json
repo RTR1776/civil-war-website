@@ -1,0 +1,106 @@
+{
+  "id": "franklin-map-layers-v1",
+  "name": "Franklin 1864 Reconstructed Layer Pack",
+  "description": "Reconstructed roads, works, river line, and terrain sectors for cinematic playback.",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-86.8598, 35.9093],
+          [-86.8596, 35.9152],
+          [-86.8593, 35.9208],
+          [-86.8596, 35.925]
+        ]
+      },
+      "properties": {
+        "id": "layer-columbia-pike",
+        "name": "Columbia Pike (1864 axis)",
+        "category": "road",
+        "styleKey": "road-primary",
+        "confidence": "documented",
+        "evidenceRefs": [{ "sourceId": "source-opdycke-1880" }]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-86.874, 35.9222],
+          [-86.8696, 35.9225],
+          [-86.8654, 35.9226],
+          [-86.8614, 35.9224],
+          [-86.8572, 35.9222],
+          [-86.8528, 35.9231]
+        ]
+      },
+      "properties": {
+        "id": "layer-federal-works",
+        "name": "Federal Main Works",
+        "category": "works",
+        "styleKey": "works-main",
+        "confidence": "documented",
+        "evidenceRefs": [{ "sourceId": "source-jacobs-2006" }]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-86.8716, 35.9264],
+          [-86.8685, 35.9276],
+          [-86.8649, 35.928],
+          [-86.8602, 35.9275],
+          [-86.8558, 35.9268]
+        ]
+      },
+      "properties": {
+        "id": "layer-harpeth",
+        "name": "Harpeth River",
+        "category": "river",
+        "styleKey": "river-main",
+        "confidence": "documented",
+        "evidenceRefs": [{ "sourceId": "source-atlas-1864" }]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-86.8612, 35.9232],
+          [-86.8582, 35.9232],
+          [-86.8582, 35.9217],
+          [-86.8612, 35.9217],
+          [-86.8612, 35.9232]
+        ]]
+      },
+      "properties": {
+        "id": "layer-carter-sector",
+        "name": "Carter House Sector",
+        "category": "sector",
+        "styleKey": "sector-contested",
+        "confidence": "inferred",
+        "evidenceRefs": [{ "sourceId": "source-jacobs-2006" }]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-86.8597, 35.9224]
+      },
+      "properties": {
+        "id": "layer-carter-house",
+        "name": "Carter House",
+        "category": "landmark",
+        "styleKey": "landmark-primary",
+        "confidence": "documented",
+        "evidenceRefs": [{ "sourceId": "source-jacobs-2006" }]
+      }
+    }
+  ]
+}

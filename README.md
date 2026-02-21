@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Franklin Immersive Story Engine
 
-## Getting Started
+Interactive Civil War battlefield experience for the Battle of Franklin, focused on cinematic story playback, analyst tools, and evidence traceability.
 
-First, run the development server:
+## Run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+NEXT_PUBLIC_EXPERIENCE_V2=1 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Set `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` to enable full map rendering.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Feature Flag
 
-## Learn More
+- `NEXT_PUBLIC_EXPERIENCE_V2=1`: enables the rebuilt immersive experience.
+- If unset, the app currently falls back to the same V2 implementation path while rollout controls are retained.
 
-To learn more about Next.js, take a look at the following resources:
+## Data Model
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Franklin content lives in `public/data/franklin`:
+- `manifest.json`
+- `divisions.json`
+- `events.json`
+- `chapters.json`
+- `mapLayers.json`
+- `evidence.json`
+- `sources.json`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Schema docs:
+- `docs/schemas/chapters.md`
+- `docs/schemas/mapLayers.md`
+- `docs/schemas/evidence.md`
 
-## Deploy on Vercel
+## Validation and Build Pack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run scenario:validate
+npm run scenario:pack
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`scenario:pack` generates `public/data/franklin/render-pack.json` for render-optimized consumption.
+
+## Testing
+
+```bash
+npm test
+npm run test:e2e
+```

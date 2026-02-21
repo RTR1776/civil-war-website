@@ -1,0 +1,216 @@
+[
+  {
+    "id": "chapter-observation",
+    "title": "Approach and Observation",
+    "summary": "Hood's commanders stage at Winstead Hill while Union engineers tighten the Franklin line.",
+    "startTime": "1864-11-30T12:00:00-06:00",
+    "endTime": "1864-11-30T15:00:00-06:00",
+    "beatIds": [
+      "beat-winstead-overlook",
+      "beat-wagner-screen"
+    ],
+    "pivotalEventId": "event-forward-screen-pressure",
+    "cameraRail": [
+      {
+        "timeOffsetMs": 0,
+        "lat": 35.9105,
+        "lng": -86.862,
+        "zoom": 13.9,
+        "pitch": 38,
+        "bearing": 24,
+        "overlayText": "Commanders read the ground from Winstead Hill.",
+        "focusFormationIds": [
+          "conf-cleburne-division",
+          "conf-brown-division"
+        ]
+      },
+      {
+        "timeOffsetMs": 9000,
+        "lat": 35.9189,
+        "lng": -86.8602,
+        "zoom": 14.25,
+        "pitch": 42,
+        "bearing": 54,
+        "overlayText": "Wagner's exposed brigades begin falling back.",
+        "focusFormationIds": [
+          "union-wagner-division"
+        ]
+      }
+    ],
+    "evidenceRefs": [
+      {
+        "sourceId": "source-jacobs-2006",
+        "claimId": "claim-forward-screen"
+      }
+    ]
+  },
+  {
+    "id": "chapter-assault",
+    "title": "Grand Assault",
+    "summary": "Cheatham's corps advances over open fields toward the Federal works.",
+    "startTime": "1864-11-30T15:00:00-06:00",
+    "endTime": "1864-11-30T17:00:00-06:00",
+    "beatIds": [
+      "beat-grand-assault"
+    ],
+    "pivotalEventId": "event-grand-assault-start",
+    "cameraRail": [
+      {
+        "timeOffsetMs": 0,
+        "lat": 35.9167,
+        "lng": -86.8601,
+        "zoom": 14.1,
+        "pitch": 44,
+        "bearing": 14,
+        "overlayText": "The main Confederate wave forms and surges.",
+        "focusFormationIds": [
+          "conf-cleburne-division",
+          "conf-brown-division",
+          "conf-french-division"
+        ]
+      },
+      {
+        "timeOffsetMs": 11000,
+        "lat": 35.9202,
+        "lng": -86.8594,
+        "zoom": 14.45,
+        "pitch": 50,
+        "bearing": 19,
+        "overlayText": "Federal artillery and musketry intensify near the line.",
+        "focusFormationIds": [
+          "union-cox-division"
+        ]
+      }
+    ],
+    "evidenceRefs": [
+      {
+        "sourceId": "source-opdycke-1880",
+        "claimId": "claim-mass-assault"
+      }
+    ]
+  },
+  {
+    "id": "chapter-breach",
+    "title": "Columbia Pike Breach",
+    "summary": "Close-quarters combat erupts around Carter House and the pike crossing.",
+    "startTime": "1864-11-30T17:00:00-06:00",
+    "endTime": "1864-11-30T18:00:00-06:00",
+    "beatIds": [
+      "beat-columbia-pike-breach"
+    ],
+    "pivotalEventId": "event-breach-fight",
+    "cameraRail": [
+      {
+        "timeOffsetMs": 0,
+        "lat": 35.9212,
+        "lng": -86.859,
+        "zoom": 14.7,
+        "pitch": 52,
+        "bearing": 78,
+        "overlayText": "The center buckles near Carter House.",
+        "focusFormationIds": [
+          "conf-cleburne-division",
+          "union-cox-division"
+        ]
+      },
+      {
+        "timeOffsetMs": 10000,
+        "lat": 35.9221,
+        "lng": -86.8604,
+        "zoom": 14.85,
+        "pitch": 55,
+        "bearing": 95,
+        "overlayText": "Counterfire and reserves prevent a full collapse.",
+        "focusFormationIds": [
+          "union-wood-division",
+          "union-kimball-division"
+        ]
+      }
+    ],
+    "evidenceRefs": [
+      {
+        "sourceId": "source-jacobs-2006",
+        "claimId": "claim-breach-fight"
+      }
+    ]
+  },
+  {
+    "id": "chapter-countercharge",
+    "title": "Countercharge and Stabilization",
+    "summary": "Union reserves hit back and re-knit the battered line.",
+    "startTime": "1864-11-30T18:00:00-06:00",
+    "endTime": "1864-11-30T19:00:00-06:00",
+    "beatIds": [
+      "beat-countercharge"
+    ],
+    "pivotalEventId": "event-countercharge",
+    "cameraRail": [
+      {
+        "timeOffsetMs": 0,
+        "lat": 35.922,
+        "lng": -86.8616,
+        "zoom": 14.55,
+        "pitch": 47,
+        "bearing": -20,
+        "overlayText": "Union reserves launch local counterattacks.",
+        "focusFormationIds": [
+          "union-wood-division",
+          "union-kimball-division"
+        ]
+      }
+    ],
+    "evidenceRefs": [
+      {
+        "sourceId": "source-horn-1941",
+        "claimId": "claim-countercharge"
+      }
+    ]
+  },
+  {
+    "id": "chapter-nightfall",
+    "title": "Nightfall Attrition and Aftermath",
+    "summary": "The fight grinds on in darkness before Confederate momentum finally ebbs.",
+    "startTime": "1864-11-30T19:00:00-06:00",
+    "endTime": "1864-11-30T21:00:00-06:00",
+    "beatIds": [
+      "beat-night-grind",
+      "beat-assault-ebbs",
+      "beat-aftermath"
+    ],
+    "pivotalEventId": "event-assault-ends",
+    "cameraRail": [
+      {
+        "timeOffsetMs": 0,
+        "lat": 35.9222,
+        "lng": -86.8579,
+        "zoom": 14.5,
+        "pitch": 57,
+        "bearing": 112,
+        "overlayText": "Combat continues in darkness at near point-blank range.",
+        "focusFormationIds": [
+          "conf-cleburne-division",
+          "union-cox-division"
+        ]
+      },
+      {
+        "timeOffsetMs": 9000,
+        "lat": 35.9227,
+        "lng": -86.8637,
+        "zoom": 14.1,
+        "pitch": 38,
+        "bearing": 178,
+        "overlayText": "By late evening, Confederate assaults lose cohesion.",
+        "focusFormationIds": [
+          "conf-bate-division",
+          "conf-french-division"
+        ]
+      }
+    ],
+    "evidenceRefs": [
+      {
+        "sourceId": "source-cunningham-2012",
+        "claimId": "claim-nightfall"
+      }
+    ]
+  }
+]

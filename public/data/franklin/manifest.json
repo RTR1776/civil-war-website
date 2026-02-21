@@ -1,5 +1,6 @@
 {
   "id": "franklin-1864",
+  "schemaVersion": 2,
   "name": "Battle of Franklin",
   "date": "1864-11-30",
   "timeStart": "1864-11-30T12:00:00-06:00",
@@ -14,5 +15,14 @@
   "terrain": {
     "verticalScale": 22,
     "roughness": 0.66
-  }
+  },
+  "defaultMode": "story",
+  "mapModes": ["reconstructed", "modern"],
+  "chapterOrder": [
+    "chapter-observation",
+    "chapter-assault",
+    "chapter-breach",
+    "chapter-countercharge",
+    "chapter-nightfall"
+  ]
 }

@@ -1,9 +1,10 @@
 import { resolveActiveTimelineEvent, useBattleStore } from "@/lib/battle/store";
-import type { BattleDataBundle } from "@/lib/battle/types";
+import type { ScenarioDataBundle } from "@/lib/battle/types";
 
-const SAMPLE_BUNDLE: BattleDataBundle = {
+const SAMPLE_BUNDLE: ScenarioDataBundle = {
   manifest: {
     id: "test",
+    schemaVersion: 2,
     name: "Test",
     date: "1864-11-30",
     timeStart: "1864-11-30T12:00:00-06:00",
@@ -11,8 +12,11 @@ const SAMPLE_BUNDLE: BattleDataBundle = {
     timezone: "America/Chicago",
     bounds: { north: 35.94, south: 35.9, east: -86.8, west: -86.89 },
     terrain: { verticalScale: 20, roughness: 0.6 },
+    defaultMode: "story",
+    mapModes: ["reconstructed", "modern"],
+    chapterOrder: ["chapter-1"],
   },
-  units: [
+  formations: [
     {
       id: "unit-1",
       name: "Unit 1",
@@ -21,16 +25,18 @@ const SAMPLE_BUNDLE: BattleDataBundle = {
       strengthEstimate: 1000,
     },
   ],
-  timeSlices: [
+  movementKeyframes: [
     {
       timestamp: "1864-11-30T12:00:00-06:00",
       confidence: "documented",
-      unitPositions: [{ unitId: "unit-1", lat: 35.91, lng: -86.87 }],
+      interpolationHint: "linear",
+      positions: [{ formationId: "unit-1", lat: 35.91, lng: -86.87 }],
     },
     {
       timestamp: "1864-11-30T13:00:00-06:00",
       confidence: "documented",
-      unitPositions: [{ unitId: "unit-1", lat: 35.92, lng: -86.86 }],
+      interpolationHint: "linear",
+      positions: [{ formationId: "unit-1", lat: 35.92, lng: -86.86 }],
     },
   ],
   narrativeBeats: [
@@ -40,7 +46,31 @@ const SAMPLE_BUNDLE: BattleDataBundle = {
       title: "Beat",
       description: "Desc",
       cameraPose: { lat: 35.92, lng: -86.86, distance: 40, pitch: 32, yaw: 18 },
-      focusUnitIds: ["unit-1"],
+      focusFormationIds: ["unit-1"],
+      confidence: "documented",
+      evidenceRefs: [{ sourceId: "source-1" }],
+    },
+  ],
+  chapters: [
+    {
+      id: "chapter-1",
+      title: "Chapter",
+      summary: "Summary",
+      startTime: "1864-11-30T12:00:00-06:00",
+      endTime: "1864-11-30T13:00:00-06:00",
+      beatIds: ["beat-1"],
+      pivotalEventId: "event-1",
+      cameraRail: [
+        {
+          timeOffsetMs: 0,
+          lat: 35.92,
+          lng: -86.86,
+          zoom: 14,
+          pitch: 44,
+          bearing: 14,
+        },
+      ],
+      evidenceRefs: [{ sourceId: "source-1" }],
     },
   ],
   mapLabels: [],
@@ -51,6 +81,7 @@ const SAMPLE_BUNDLE: BattleDataBundle = {
       title: "Event",
       detail: "Detail",
       confidence: "documented",
+      evidenceRefs: [{ sourceId: "source-1" }],
     },
   ],
   casualtyTimeline: [
@@ -65,19 +96,66 @@ const SAMPLE_BUNDLE: BattleDataBundle = {
       confidence: "documented",
     },
   ],
-  sources: [],
+  mapLayerPack: {
+    id: "pack",
+    name: "Pack",
+    features: [],
+  },
+  evidenceSources: [
+    {
+      id: "source-1",
+      title: "Source",
+      author: "Author",
+      year: 1864,
+      note: "Note",
+    },
+  ],
+  evidenceClaims: [
+    {
+      id: "claim-1",
+      title: "Claim",
+      detail: "Detail",
+      confidence: "documented",
+      linkedEventIds: ["event-1"],
+      linkedChapterIds: ["chapter-1"],
+      evidenceRefs: [{ sourceId: "source-1" }],
+    },
+  ],
 };
 
 describe("battle store", () => {
   beforeEach(() => {
     useBattleStore.setState({
       data: null,
+      simulationState: {
+        simTimeMs: 0,
+        minTimeMs: 0,
+        maxTimeMs: 0,
+        isPlaying: false,
+        speed: 1,
+        tickAccumulatorMs: 0,
+      },
+      uiState: {
+        sidebarMode: "story",
+        mapMode: "reconstructed",
+        guidedMode: false,
+        hoveredEventId: null,
+        selectedFormationId: null,
+      },
+      storyState: {
+        activeBeatId: null,
+        activeChapterId: null,
+        lockedFormationId: null,
+        overlayText: null,
+      },
       selectedTime: 0,
       isPlaying: false,
       speed: 1,
       guidedMode: false,
       activeBeatId: null,
       hoveredEventId: null,
+      sidebarMode: "story",
+      mapMode: "reconstructed",
     });
   });
 
@@ -87,9 +165,27 @@ describe("battle store", () => {
     state.selectBeat(SAMPLE_BUNDLE.narrativeBeats[0]);
 
     const next = useBattleStore.getState();
-    expect(next.activeBeatId).toBe("beat-1");
-    expect(next.guidedMode).toBe(true);
-    expect(next.selectedTime).toBe(Date.parse("1864-11-30T13:00:00-06:00"));
+    expect(next.storyState.activeBeatId).toBe("beat-1");
+    expect(next.uiState.guidedMode).toBe(true);
+    expect(next.simulationState.simTimeMs).toBe(Date.parse("1864-11-30T13:00:00-06:00"));
+  });
+
+  it("selects chapter and jumps to its start", () => {
+    const state = useBattleStore.getState();
+    state.setData(SAMPLE_BUNDLE);
+    state.selectChapter("chapter-1");
+
+    const next = useBattleStore.getState();
+    expect(next.storyState.activeChapterId).toBe("chapter-1");
+    expect(next.simulationState.simTimeMs).toBe(Date.parse("1864-11-30T12:00:00-06:00"));
+  });
+
+  it("toggles map mode", () => {
+    const state = useBattleStore.getState();
+    state.setData(SAMPLE_BUNDLE);
+    state.toggleMapMode("modern");
+
+    expect(useBattleStore.getState().uiState.mapMode).toBe("modern");
   });
 });
 

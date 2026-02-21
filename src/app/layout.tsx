@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Cinzel, Source_Sans_3 } from "next/font/google";
+import { Cormorant_Garamond, Spectral } from "next/font/google";
 import "./globals.css";
 
-const cinzel = Cinzel({
+const cormorant = Cormorant_Garamond({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["600", "700"],
+  weight: ["500", "600", "700"],
 });
 
-const sourceSans = Source_Sans_3({
+const spectral = Spectral({
   variable: "--font-body",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${cinzel.variable} ${sourceSans.variable}`}>{children}</body>
+      <body className={`${cormorant.variable} ${spectral.variable}`}>{children}</body>
     </html>
   );
 }

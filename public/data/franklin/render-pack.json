@@ -1,0 +1,1318 @@
+{
+  "scenarioId": "franklin-1864",
+  "builtAt": "2026-02-21T00:23:18.528Z",
+  "window": {
+    "start": "1864-11-30T12:00:00-06:00",
+    "end": "1864-11-30T21:00:00-06:00"
+  },
+  "tracks": [
+    {
+      "unitId": "union-cox-division",
+      "points": [
+        {
+          "t": -3316140000000,
+          "lat": 35.922,
+          "lng": -86.867,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316136400000,
+          "lat": 35.922,
+          "lng": -86.8664,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316132800000,
+          "lat": 35.922,
+          "lng": -86.866,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316129200000,
+          "lat": 35.922,
+          "lng": -86.8655,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316125600000,
+          "lat": 35.922,
+          "lng": -86.8652,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316122000000,
+          "lat": 35.922,
+          "lng": -86.865,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316118400000,
+          "lat": 35.9221,
+          "lng": -86.865,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316114800000,
+          "lat": 35.9221,
+          "lng": -86.8652,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316111200000,
+          "lat": 35.922,
+          "lng": -86.8653,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316107600000,
+          "lat": 35.922,
+          "lng": -86.8654,
+          "engaged": true,
+          "confidence": "documented"
+        }
+      ]
+    },
+    {
+      "unitId": "union-wagner-division",
+      "points": [
+        {
+          "t": -3316140000000,
+          "lat": 35.915,
+          "lng": -86.862,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316136400000,
+          "lat": 35.916,
+          "lng": -86.861,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316132800000,
+          "lat": 35.918,
+          "lng": -86.86,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316129200000,
+          "lat": 35.92,
+          "lng": -86.859,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316125600000,
+          "lat": 35.921,
+          "lng": -86.859,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316122000000,
+          "lat": 35.9215,
+          "lng": -86.859,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316118400000,
+          "lat": 35.9218,
+          "lng": -86.8592,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316114800000,
+          "lat": 35.922,
+          "lng": -86.8592,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316111200000,
+          "lat": 35.922,
+          "lng": -86.8593,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316107600000,
+          "lat": 35.922,
+          "lng": -86.8593,
+          "engaged": true,
+          "confidence": "documented"
+        }
+      ]
+    },
+    {
+      "unitId": "union-kimball-division",
+      "points": [
+        {
+          "t": -3316140000000,
+          "lat": 35.923,
+          "lng": -86.873,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316136400000,
+          "lat": 35.923,
+          "lng": -86.8725,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316132800000,
+          "lat": 35.923,
+          "lng": -86.872,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316129200000,
+          "lat": 35.923,
+          "lng": -86.8715,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316125600000,
+          "lat": 35.9229,
+          "lng": -86.8713,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316122000000,
+          "lat": 35.9228,
+          "lng": -86.871,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316118400000,
+          "lat": 35.9228,
+          "lng": -86.871,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316114800000,
+          "lat": 35.9229,
+          "lng": -86.8712,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316111200000,
+          "lat": 35.9229,
+          "lng": -86.8713,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316107600000,
+          "lat": 35.9229,
+          "lng": -86.8714,
+          "engaged": true,
+          "confidence": "documented"
+        }
+      ]
+    },
+    {
+      "unitId": "union-wood-division",
+      "points": [
+        {
+          "t": -3316140000000,
+          "lat": 35.9232,
+          "lng": -86.853,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316136400000,
+          "lat": 35.923,
+          "lng": -86.8525,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316132800000,
+          "lat": 35.9228,
+          "lng": -86.852,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316129200000,
+          "lat": 35.9228,
+          "lng": -86.8518,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316125600000,
+          "lat": 35.9228,
+          "lng": -86.8516,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316122000000,
+          "lat": 35.9226,
+          "lng": -86.8514,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316118400000,
+          "lat": 35.9226,
+          "lng": -86.8514,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316114800000,
+          "lat": 35.9228,
+          "lng": -86.8516,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316111200000,
+          "lat": 35.9228,
+          "lng": -86.8518,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316107600000,
+          "lat": 35.9228,
+          "lng": -86.8518,
+          "engaged": true,
+          "confidence": "documented"
+        }
+      ]
+    },
+    {
+      "unitId": "conf-cleburne-division",
+      "points": [
+        {
+          "t": -3316140000000,
+          "lat": 35.907,
+          "lng": -86.858,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316136400000,
+          "lat": 35.909,
+          "lng": -86.858,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316132800000,
+          "lat": 35.912,
+          "lng": -86.858,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316129200000,
+          "lat": 35.916,
+          "lng": -86.858,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316125600000,
+          "lat": 35.919,
+          "lng": -86.858,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316122000000,
+          "lat": 35.921,
+          "lng": -86.858,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316118400000,
+          "lat": 35.922,
+          "lng": -86.858,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316114800000,
+          "lat": 35.9222,
+          "lng": -86.858,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316111200000,
+          "lat": 35.9218,
+          "lng": -86.8582,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316107600000,
+          "lat": 35.9215,
+          "lng": -86.8583,
+          "engaged": true,
+          "confidence": "documented"
+        }
+      ]
+    },
+    {
+      "unitId": "conf-brown-division",
+      "points": [
+        {
+          "t": -3316140000000,
+          "lat": 35.908,
+          "lng": -86.868,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316136400000,
+          "lat": 35.91,
+          "lng": -86.867,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316132800000,
+          "lat": 35.913,
+          "lng": -86.866,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316129200000,
+          "lat": 35.916,
+          "lng": -86.865,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316125600000,
+          "lat": 35.919,
+          "lng": -86.864,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316122000000,
+          "lat": 35.921,
+          "lng": -86.863,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316118400000,
+          "lat": 35.9218,
+          "lng": -86.862,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316114800000,
+          "lat": 35.922,
+          "lng": -86.8615,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316111200000,
+          "lat": 35.9217,
+          "lng": -86.8617,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316107600000,
+          "lat": 35.9214,
+          "lng": -86.862,
+          "engaged": true,
+          "confidence": "documented"
+        }
+      ]
+    },
+    {
+      "unitId": "conf-french-division",
+      "points": [
+        {
+          "t": -3316140000000,
+          "lat": 35.909,
+          "lng": -86.849,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316136400000,
+          "lat": 35.911,
+          "lng": -86.848,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316132800000,
+          "lat": 35.914,
+          "lng": -86.847,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316129200000,
+          "lat": 35.917,
+          "lng": -86.846,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316125600000,
+          "lat": 35.919,
+          "lng": -86.845,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316122000000,
+          "lat": 35.921,
+          "lng": -86.8445,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316118400000,
+          "lat": 35.922,
+          "lng": -86.844,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316114800000,
+          "lat": 35.9224,
+          "lng": -86.8438,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316111200000,
+          "lat": 35.922,
+          "lng": -86.8442,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316107600000,
+          "lat": 35.9217,
+          "lng": -86.8445,
+          "engaged": true,
+          "confidence": "documented"
+        }
+      ]
+    },
+    {
+      "unitId": "conf-bate-division",
+      "points": [
+        {
+          "t": -3316140000000,
+          "lat": 35.91,
+          "lng": -86.841,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316136400000,
+          "lat": 35.912,
+          "lng": -86.8405,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316132800000,
+          "lat": 35.915,
+          "lng": -86.84,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316129200000,
+          "lat": 35.918,
+          "lng": -86.8395,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316125600000,
+          "lat": 35.92,
+          "lng": -86.839,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316122000000,
+          "lat": 35.9214,
+          "lng": -86.8388,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316118400000,
+          "lat": 35.9221,
+          "lng": -86.8386,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316114800000,
+          "lat": 35.9223,
+          "lng": -86.8385,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316111200000,
+          "lat": 35.922,
+          "lng": -86.8387,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316107600000,
+          "lat": 35.9217,
+          "lng": -86.839,
+          "engaged": true,
+          "confidence": "documented"
+        }
+      ]
+    }
+  ],
+  "narrative": {
+    "chapters": [
+      {
+        "id": "chapter-observation",
+        "title": "Approach and Observation",
+        "summary": "Hood's commanders stage at Winstead Hill while Union engineers tighten the Franklin line.",
+        "startTime": "1864-11-30T12:00:00-06:00",
+        "endTime": "1864-11-30T15:00:00-06:00",
+        "beatIds": [
+          "beat-winstead-overlook",
+          "beat-wagner-screen"
+        ],
+        "pivotalEventId": "event-forward-screen-pressure",
+        "cameraRail": [
+          {
+            "timeOffsetMs": 0,
+            "lat": 35.9105,
+            "lng": -86.862,
+            "zoom": 13.9,
+            "pitch": 38,
+            "bearing": 24,
+            "overlayText": "Commanders read the ground from Winstead Hill.",
+            "focusFormationIds": [
+              "conf-cleburne-division",
+              "conf-brown-division"
+            ]
+          },
+          {
+            "timeOffsetMs": 9000,
+            "lat": 35.9189,
+            "lng": -86.8602,
+            "zoom": 14.25,
+            "pitch": 42,
+            "bearing": 54,
+            "overlayText": "Wagner's exposed brigades begin falling back.",
+            "focusFormationIds": [
+              "union-wagner-division"
+            ]
+          }
+        ],
+        "evidenceRefs": [
+          {
+            "sourceId": "source-jacobs-2006",
+            "claimId": "claim-forward-screen"
+          }
+        ]
+      },
+      {
+        "id": "chapter-assault",
+        "title": "Grand Assault",
+        "summary": "Cheatham's corps advances over open fields toward the Federal works.",
+        "startTime": "1864-11-30T15:00:00-06:00",
+        "endTime": "1864-11-30T17:00:00-06:00",
+        "beatIds": [
+          "beat-grand-assault"
+        ],
+        "pivotalEventId": "event-grand-assault-start",
+        "cameraRail": [
+          {
+            "timeOffsetMs": 0,
+            "lat": 35.9167,
+            "lng": -86.8601,
+            "zoom": 14.1,
+            "pitch": 44,
+            "bearing": 14,
+            "overlayText": "The main Confederate wave forms and surges.",
+            "focusFormationIds": [
+              "conf-cleburne-division",
+              "conf-brown-division",
+              "conf-french-division"
+            ]
+          },
+          {
+            "timeOffsetMs": 11000,
+            "lat": 35.9202,
+            "lng": -86.8594,
+            "zoom": 14.45,
+            "pitch": 50,
+            "bearing": 19,
+            "overlayText": "Federal artillery and musketry intensify near the line.",
+            "focusFormationIds": [
+              "union-cox-division"
+            ]
+          }
+        ],
+        "evidenceRefs": [
+          {
+            "sourceId": "source-opdycke-1880",
+            "claimId": "claim-mass-assault"
+          }
+        ]
+      },
+      {
+        "id": "chapter-breach",
+        "title": "Columbia Pike Breach",
+        "summary": "Close-quarters combat erupts around Carter House and the pike crossing.",
+        "startTime": "1864-11-30T17:00:00-06:00",
+        "endTime": "1864-11-30T18:00:00-06:00",
+        "beatIds": [
+          "beat-columbia-pike-breach"
+        ],
+        "pivotalEventId": "event-breach-fight",
+        "cameraRail": [
+          {
+            "timeOffsetMs": 0,
+            "lat": 35.9212,
+            "lng": -86.859,
+            "zoom": 14.7,
+            "pitch": 52,
+            "bearing": 78,
+            "overlayText": "The center buckles near Carter House.",
+            "focusFormationIds": [
+              "conf-cleburne-division",
+              "union-cox-division"
+            ]
+          },
+          {
+            "timeOffsetMs": 10000,
+            "lat": 35.9221,
+            "lng": -86.8604,
+            "zoom": 14.85,
+            "pitch": 55,
+            "bearing": 95,
+            "overlayText": "Counterfire and reserves prevent a full collapse.",
+            "focusFormationIds": [
+              "union-wood-division",
+              "union-kimball-division"
+            ]
+          }
+        ],
+        "evidenceRefs": [
+          {
+            "sourceId": "source-jacobs-2006",
+            "claimId": "claim-breach-fight"
+          }
+        ]
+      },
+      {
+        "id": "chapter-countercharge",
+        "title": "Countercharge and Stabilization",
+        "summary": "Union reserves hit back and re-knit the battered line.",
+        "startTime": "1864-11-30T18:00:00-06:00",
+        "endTime": "1864-11-30T19:00:00-06:00",
+        "beatIds": [
+          "beat-countercharge"
+        ],
+        "pivotalEventId": "event-countercharge",
+        "cameraRail": [
+          {
+            "timeOffsetMs": 0,
+            "lat": 35.922,
+            "lng": -86.8616,
+            "zoom": 14.55,
+            "pitch": 47,
+            "bearing": -20,
+            "overlayText": "Union reserves launch local counterattacks.",
+            "focusFormationIds": [
+              "union-wood-division",
+              "union-kimball-division"
+            ]
+          }
+        ],
+        "evidenceRefs": [
+          {
+            "sourceId": "source-horn-1941",
+            "claimId": "claim-countercharge"
+          }
+        ]
+      },
+      {
+        "id": "chapter-nightfall",
+        "title": "Nightfall Attrition and Aftermath",
+        "summary": "The fight grinds on in darkness before Confederate momentum finally ebbs.",
+        "startTime": "1864-11-30T19:00:00-06:00",
+        "endTime": "1864-11-30T21:00:00-06:00",
+        "beatIds": [
+          "beat-night-grind",
+          "beat-assault-ebbs",
+          "beat-aftermath"
+        ],
+        "pivotalEventId": "event-assault-ebbs",
+        "cameraRail": [
+          {
+            "timeOffsetMs": 0,
+            "lat": 35.9222,
+            "lng": -86.8579,
+            "zoom": 14.5,
+            "pitch": 57,
+            "bearing": 112,
+            "overlayText": "Combat continues in darkness at near point-blank range.",
+            "focusFormationIds": [
+              "conf-cleburne-division",
+              "union-cox-division"
+            ]
+          },
+          {
+            "timeOffsetMs": 9000,
+            "lat": 35.9227,
+            "lng": -86.8637,
+            "zoom": 14.1,
+            "pitch": 38,
+            "bearing": 178,
+            "overlayText": "By late evening, Confederate assaults lose cohesion.",
+            "focusFormationIds": [
+              "conf-bate-division",
+              "conf-french-division"
+            ]
+          }
+        ],
+        "evidenceRefs": [
+          {
+            "sourceId": "source-cunningham-2012",
+            "claimId": "claim-nightfall"
+          }
+        ]
+      }
+    ],
+    "beats": [
+      {
+        "id": "beat-winstead-overlook",
+        "time": "1864-11-30T12:00:00-06:00",
+        "title": "Winstead Hill Observation",
+        "description": "Hood's command surveys Franklin from Winstead Hill while Union engineers strengthen interior lines.",
+        "cameraPose": {
+          "lat": 35.9105,
+          "lng": -86.862,
+          "distance": 72,
+          "pitch": 24,
+          "yaw": 30
+        },
+        "focusUnitIds": [
+          "conf-cleburne-division",
+          "conf-brown-division"
+        ]
+      },
+      {
+        "id": "beat-wagner-screen",
+        "time": "1864-11-30T15:00:00-06:00",
+        "title": "Wagner's Advanced Line",
+        "description": "Forward Union brigades become exposed and begin a pressured fallback toward the main works.",
+        "cameraPose": {
+          "lat": 35.919,
+          "lng": -86.86,
+          "distance": 58,
+          "pitch": 28,
+          "yaw": 52
+        },
+        "focusUnitIds": [
+          "union-wagner-division",
+          "conf-cleburne-division"
+        ]
+      },
+      {
+        "id": "beat-grand-assault",
+        "time": "1864-11-30T16:00:00-06:00",
+        "title": "Grand Confederate Assault",
+        "description": "Cheatham's corps advances in massed lines across open ground under intensifying Federal fire.",
+        "cameraPose": {
+          "lat": 35.9185,
+          "lng": -86.8585,
+          "distance": 66,
+          "pitch": 30,
+          "yaw": 12
+        },
+        "focusUnitIds": [
+          "conf-cleburne-division",
+          "conf-brown-division",
+          "conf-french-division"
+        ]
+      },
+      {
+        "id": "beat-columbia-pike-breach",
+        "time": "1864-11-30T17:00:00-06:00",
+        "title": "Columbia Pike Breach",
+        "description": "Combat compresses near the Carter House as Confederate formations penetrate portions of the line.",
+        "cameraPose": {
+          "lat": 35.9213,
+          "lng": -86.859,
+          "distance": 44,
+          "pitch": 34,
+          "yaw": 73
+        },
+        "focusUnitIds": [
+          "union-cox-division",
+          "union-wagner-division",
+          "conf-cleburne-division"
+        ]
+      },
+      {
+        "id": "beat-countercharge",
+        "time": "1864-11-30T18:00:00-06:00",
+        "title": "Union Countercharge",
+        "description": "Union reserves counterattack to seal breaks and restore the inner line under close-range fire.",
+        "cameraPose": {
+          "lat": 35.922,
+          "lng": -86.862,
+          "distance": 48,
+          "pitch": 27,
+          "yaw": -22
+        },
+        "focusUnitIds": [
+          "union-wood-division",
+          "union-kimball-division",
+          "conf-brown-division"
+        ]
+      },
+      {
+        "id": "beat-night-grind",
+        "time": "1864-11-30T19:00:00-06:00",
+        "title": "Nightfall Attrition",
+        "description": "Fighting continues in darkness with shattered regiments trading short-range volleys and bayonet thrusts.",
+        "cameraPose": {
+          "lat": 35.9222,
+          "lng": -86.8578,
+          "distance": 42,
+          "pitch": 38,
+          "yaw": 115
+        },
+        "focusUnitIds": [
+          "conf-cleburne-division",
+          "union-cox-division"
+        ]
+      },
+      {
+        "id": "beat-assault-ebbs",
+        "time": "1864-11-30T20:00:00-06:00",
+        "title": "Assault Momentum Erodes",
+        "description": "Confederate attacks lose cohesion; surviving formations recoil from the strongest Federal positions.",
+        "cameraPose": {
+          "lat": 35.9217,
+          "lng": -86.8608,
+          "distance": 54,
+          "pitch": 25,
+          "yaw": -55
+        },
+        "focusUnitIds": [
+          "conf-brown-division",
+          "conf-french-division"
+        ]
+      },
+      {
+        "id": "beat-aftermath",
+        "time": "1864-11-30T21:00:00-06:00",
+        "title": "Aftermath at the Works",
+        "description": "By late evening, the field is littered with casualties and Confederate command structure is devastated.",
+        "cameraPose": {
+          "lat": 35.9226,
+          "lng": -86.864,
+          "distance": 76,
+          "pitch": 20,
+          "yaw": 180
+        },
+        "focusUnitIds": [
+          "union-cox-division",
+          "conf-cleburne-division",
+          "conf-bate-division"
+        ]
+      }
+    ],
+    "timelineEvents": [
+      {
+        "id": "event-noon-setup",
+        "time": "1864-11-30T12:00:00-06:00",
+        "title": "Deployment and Observation",
+        "detail": "Commanders complete reconnaissance and battle lines form.",
+        "confidence": "documented"
+      },
+      {
+        "id": "event-forward-screen-pressure",
+        "time": "1864-11-30T15:00:00-06:00",
+        "title": "Forward Screen Pressured",
+        "detail": "Wagner's advanced brigades become exposed during Confederate approach.",
+        "confidence": "documented"
+      },
+      {
+        "id": "event-grand-assault-start",
+        "time": "1864-11-30T16:00:00-06:00",
+        "title": "Mass Assault Begins",
+        "detail": "Confederate divisions launch the principal assault wave.",
+        "confidence": "documented"
+      },
+      {
+        "id": "event-breach-fight",
+        "time": "1864-11-30T17:00:00-06:00",
+        "title": "Breach Fighting",
+        "detail": "Close-quarters combat erupts around Columbia Pike and Carter House.",
+        "confidence": "documented"
+      },
+      {
+        "id": "event-countercharge",
+        "time": "1864-11-30T18:00:00-06:00",
+        "title": "Countercharge",
+        "detail": "Union reinforcements counterattack to restore line continuity.",
+        "confidence": "inferred"
+      },
+      {
+        "id": "event-nightfall",
+        "time": "1864-11-30T19:00:00-06:00",
+        "title": "Nightfall Attrition",
+        "detail": "Fighting persists into darkness with heavy casualties.",
+        "confidence": "documented"
+      },
+      {
+        "id": "event-assault-ends",
+        "time": "1864-11-30T21:00:00-06:00",
+        "title": "Assault Exhausted",
+        "detail": "Major offensive momentum ceases by late evening.",
+        "confidence": "documented"
+      }
+    ]
+  },
+  "mapLayers": {
+    "id": "franklin-map-layers-v1",
+    "name": "Franklin 1864 Reconstructed Layer Pack",
+    "description": "Reconstructed roads, works, river line, and terrain sectors for cinematic playback.",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -86.8598,
+              35.9093
+            ],
+            [
+              -86.8596,
+              35.9152
+            ],
+            [
+              -86.8593,
+              35.9208
+            ],
+            [
+              -86.8596,
+              35.925
+            ]
+          ]
+        },
+        "properties": {
+          "id": "layer-columbia-pike",
+          "name": "Columbia Pike (1864 axis)",
+          "category": "road",
+          "styleKey": "road-primary",
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-opdycke-1880"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -86.874,
+              35.9222
+            ],
+            [
+              -86.8696,
+              35.9225
+            ],
+            [
+              -86.8654,
+              35.9226
+            ],
+            [
+              -86.8614,
+              35.9224
+            ],
+            [
+              -86.8572,
+              35.9222
+            ],
+            [
+              -86.8528,
+              35.9231
+            ]
+          ]
+        },
+        "properties": {
+          "id": "layer-federal-works",
+          "name": "Federal Main Works",
+          "category": "works",
+          "styleKey": "works-main",
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-jacobs-2006"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -86.8716,
+              35.9264
+            ],
+            [
+              -86.8685,
+              35.9276
+            ],
+            [
+              -86.8649,
+              35.928
+            ],
+            [
+              -86.8602,
+              35.9275
+            ],
+            [
+              -86.8558,
+              35.9268
+            ]
+          ]
+        },
+        "properties": {
+          "id": "layer-harpeth",
+          "name": "Harpeth River",
+          "category": "river",
+          "styleKey": "river-main",
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-atlas-1864"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -86.8612,
+                35.9232
+              ],
+              [
+                -86.8582,
+                35.9232
+              ],
+              [
+                -86.8582,
+                35.9217
+              ],
+              [
+                -86.8612,
+                35.9217
+              ],
+              [
+                -86.8612,
+                35.9232
+              ]
+            ]
+          ]
+        },
+        "properties": {
+          "id": "layer-carter-sector",
+          "name": "Carter House Sector",
+          "category": "sector",
+          "styleKey": "sector-contested",
+          "confidence": "inferred",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-jacobs-2006"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -86.8597,
+            35.9224
+          ]
+        },
+        "properties": {
+          "id": "layer-carter-house",
+          "name": "Carter House",
+          "category": "landmark",
+          "styleKey": "landmark-primary",
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-jacobs-2006"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "evidence": {
+    "claims": [
+      {
+        "id": "claim-forward-screen",
+        "title": "Forward Union line collapse",
+        "detail": "Wagner's exposed brigades were pushed back toward the main works before the principal assault struck.",
+        "confidence": "documented",
+        "linkedEventIds": [
+          "event-forward-screen-pressure"
+        ],
+        "linkedBeatIds": [
+          "beat-wagner-screen"
+        ],
+        "linkedChapterIds": [
+          "chapter-observation"
+        ],
+        "evidenceRefs": [
+          {
+            "sourceId": "source-jacobs-2006"
+          }
+        ]
+      },
+      {
+        "id": "claim-mass-assault",
+        "title": "Massed Confederate advance",
+        "detail": "Cheatham's corps advanced in large assault lines across open ground toward Union earthworks.",
+        "confidence": "documented",
+        "linkedEventIds": [
+          "event-grand-assault-start"
+        ],
+        "linkedBeatIds": [
+          "beat-grand-assault"
+        ],
+        "linkedChapterIds": [
+          "chapter-assault"
+        ],
+        "evidenceRefs": [
+          {
+            "sourceId": "source-opdycke-1880"
+          }
+        ]
+      },
+      {
+        "id": "claim-breach-fight",
+        "title": "Breach fighting near Columbia Pike",
+        "detail": "Confederate units penetrated portions of the center near Carter House, prompting severe close combat.",
+        "confidence": "documented",
+        "linkedEventIds": [
+          "event-breach-fight"
+        ],
+        "linkedBeatIds": [
+          "beat-columbia-pike-breach"
+        ],
+        "linkedChapterIds": [
+          "chapter-breach"
+        ],
+        "evidenceRefs": [
+          {
+            "sourceId": "source-jacobs-2006"
+          }
+        ]
+      },
+      {
+        "id": "claim-countercharge",
+        "title": "Union local countercharge",
+        "detail": "Union reserves and nearby brigades counterattacked to restore continuity in the center.",
+        "confidence": "inferred",
+        "linkedEventIds": [
+          "event-countercharge"
+        ],
+        "linkedBeatIds": [
+          "beat-countercharge"
+        ],
+        "linkedChapterIds": [
+          "chapter-countercharge"
+        ],
+        "evidenceRefs": [
+          {
+            "sourceId": "source-horn-1941"
+          }
+        ]
+      },
+      {
+        "id": "claim-nightfall",
+        "title": "Attrition into darkness",
+        "detail": "Battle intensity remained high into evening before attack momentum eroded.",
+        "confidence": "documented",
+        "linkedEventIds": [
+          "event-nightfall",
+          "event-assault-ebbs"
+        ],
+        "linkedBeatIds": [
+          "beat-night-grind",
+          "beat-assault-ebbs"
+        ],
+        "linkedChapterIds": [
+          "chapter-nightfall"
+        ],
+        "evidenceRefs": [
+          {
+            "sourceId": "source-cunningham-2012"
+          }
+        ]
+      }
+    ]
+  }
+}

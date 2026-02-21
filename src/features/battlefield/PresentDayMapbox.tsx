@@ -4,86 +4,119 @@ import { useEffect, useMemo, useRef } from "react";
 import type {
   Feature,
   FeatureCollection,
+  Geometry,
   LineString,
   Point,
+  Polygon,
 } from "geojson";
 import type { GeoJSONSource, Map as MapboxMap } from "mapbox-gl";
 
-import { interpolateUnitPositions } from "@/lib/battle/interpolation";
+import { interpolateFormationPositions, interpolateUnitPositions } from "@/lib/battle/interpolation";
 import type {
-  BattleManifest,
+  ChapterScene,
   DivisionUnit,
+  Formation,
   MapLabel,
+  MapLayerFeature,
+  MapLayerPack,
+  MapMode,
+  MovementKeyframe,
   NarrativeBeat,
+  ScenarioManifest,
   TimeSlice,
 } from "@/lib/battle/types";
 
 export type MapTheme = "historical" | "modern";
 
 interface PresentDayMapboxProps {
-  manifest: BattleManifest;
-  units: DivisionUnit[];
+  manifest: ScenarioManifest;
+  formations?: Formation[];
+  units?: DivisionUnit[];
+  movementKeyframes?: MovementKeyframe[];
+  timeSlices?: TimeSlice[];
   mapLabels: MapLabel[];
   narrativeBeats: NarrativeBeat[];
-  timeSlices: TimeSlice[];
+  chapters?: ChapterScene[];
+  mapLayerPack?: MapLayerPack;
   selectedTime: number;
   activeBeatId: string | null;
+  activeChapterId?: string | null;
   guidedMode: boolean;
-  selectedUnitId: string | null;
-  mapTheme: MapTheme;
-  onSelectUnit: (unitId: string | null) => void;
+  selectedFormationId?: string | null;
+  selectedUnitId?: string | null;
+  mapMode?: MapMode;
+  mapTheme?: MapTheme;
+  lockedFormationId?: string | null;
+  reducedMotion?: boolean;
+  onSelectFormation?: (formationId: string | null) => void;
+  onSelectUnit?: (unitId: string | null) => void;
 }
 
-const HISTORICAL_BASEMAP_CONFIG = {
-  theme: "faded",
-  lightPreset: "dusk",
-  showRoadsAndTransit: false,
-  showPlaceLabels: false,
-  showPointOfInterestLabels: false,
-  show3dObjects: false,
+const STYLE_BY_MODE: Record<MapMode, string> = {
+  reconstructed: "mapbox://styles/mapbox/navigation-day-v1",
+  modern: "mapbox://styles/mapbox/standard-satellite",
 };
 
-const MODERN_BASEMAP_CONFIG = {
-  theme: "default",
-  lightPreset: "day",
-  showRoadsAndTransit: true,
-  showPlaceLabels: true,
-  showPointOfInterestLabels: true,
-  show3dObjects: true,
+const MAP_MODE_FOG: Record<MapMode, Record<string, number | string>> = {
+  reconstructed: {
+    color: "#c9b08f",
+    "high-color": "#ead2ac",
+    "horizon-blend": 0.34,
+    "space-color": "#d7c3a3",
+  },
+  modern: {
+    color: "#cad5df",
+    "high-color": "#dde7ef",
+    "horizon-blend": 0.2,
+    "space-color": "#dfe8f0",
+  },
 };
 
-function getBasemapConfig(mapTheme: MapTheme) {
-  return mapTheme === "historical" ? HISTORICAL_BASEMAP_CONFIG : MODERN_BASEMAP_CONFIG;
+interface TimedPoint {
+  t: number;
+  lat: number;
+  lng: number;
+  confidence: "documented" | "inferred";
+  engaged: boolean;
 }
 
-function applyMapTheme(map: MapboxMap, mapTheme: MapTheme) {
-  map.setConfig("basemap", getBasemapConfig(mapTheme));
+interface Track {
+  formationId: string;
+  side: Formation["side"];
+  points: TimedPoint[];
+}
 
-  map.setTerrain({
-    source: "battlefield-dem",
-    exaggeration: mapTheme === "historical" ? 1.03 : 1.07,
-  });
-
-  map.setFog({
-    color: mapTheme === "historical" ? "#cab08a" : "#cad5df",
-    "high-color": mapTheme === "historical" ? "#e6d0aa" : "#dde7ef",
-    "horizon-blend": mapTheme === "historical" ? 0.28 : 0.2,
-    "space-color": mapTheme === "historical" ? "#d8c4a5" : "#dfe8f0",
-  });
-
-  if (map.getLayer("historic-lines")) {
-    map.setPaintProperty("historic-lines", "line-opacity", mapTheme === "historical" ? 0.88 : 0.56);
+function normalizeMapMode(mode?: MapMode, theme?: MapTheme): MapMode {
+  if (mode) {
+    return mode;
   }
 
-  if (map.getLayer("battle-labels")) {
-    map.setPaintProperty("battle-labels", "text-opacity", mapTheme === "historical" ? 0.98 : 0.86);
+  return theme === "modern" ? "modern" : "reconstructed";
+}
+
+function normalizeFormations(formations?: Formation[], units?: DivisionUnit[]): Formation[] {
+  return formations ?? units ?? [];
+}
+
+function normalizeKeyframes(movementKeyframes?: MovementKeyframe[], timeSlices?: TimeSlice[]): MovementKeyframe[] {
+  if (movementKeyframes) {
+    return movementKeyframes;
   }
 
-  map.easeTo({
-    pitch: mapTheme === "historical" ? 38 : 45,
-    duration: 420,
-    essential: true,
-  });
+  return (timeSlices ?? []).map((timeSlice) => ({
+    timestamp: timeSlice.timestamp,
+    confidence: timeSlice.confidence,
+    interpolationHint: "linear",
+    positions: timeSlice.unitPositions.map((position) => ({
+      formationId: position.unitId,
+      lat: position.lat,
+      lng: position.lng,
+      engaged: position.engaged,
+      formation: position.formation,
+      elevation: position.elevation,
+      uncertaintyMeters: timeSlice.confidence === "inferred" ? 110 : 45,
+    })),
+  }));
 }
 
 function getShortName(value: string): string {
@@ -126,7 +159,7 @@ function buildFormationOffsets(count: number): Array<{ east: number; north: numb
   return offsets;
 }
 
-function setSourceData<T extends Point | LineString>(
+function setSourceData<T extends Geometry>(
   map: MapboxMap,
   sourceId: string,
   data: FeatureCollection<T>,
@@ -151,21 +184,127 @@ function emptyLineCollection(): FeatureCollection<LineString> {
   };
 }
 
+function emptyPolygonCollection(): FeatureCollection<Polygon> {
+  return {
+    type: "FeatureCollection",
+    features: [],
+  };
+}
+
+function buildTracks(formations: Formation[], keyframes: MovementKeyframe[]): Track[] {
+  const orderedKeyframes = [...keyframes].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp));
+  const byFormation = new Map<string, TimedPoint[]>();
+
+  for (const formation of formations) {
+    byFormation.set(formation.id, []);
+  }
+
+  for (const keyframe of orderedKeyframes) {
+    const t = Date.parse(keyframe.timestamp);
+    for (const position of keyframe.positions) {
+      const points = byFormation.get(position.formationId);
+      if (!points) {
+        continue;
+      }
+
+      points.push({
+        t,
+        lat: position.lat,
+        lng: position.lng,
+        confidence: keyframe.confidence,
+        engaged: Boolean(position.engaged),
+      });
+    }
+  }
+
+  return formations
+    .map((formation) => ({
+      formationId: formation.id,
+      side: formation.side,
+      points: byFormation.get(formation.id) ?? [],
+    }))
+    .filter((track) => track.points.length > 0);
+}
+
+function buildTrailFeatures(
+  tracks: Track[],
+  selectedTime: number,
+): FeatureCollection<LineString> {
+  const features: Array<Feature<LineString>> = [];
+
+  for (const track of tracks) {
+    const points = track.points;
+
+    if (points.length < 2) {
+      continue;
+    }
+
+    const coordinates: Array<[number, number]> = [];
+    let confidence: "documented" | "inferred" = "documented";
+
+    for (let index = 0; index < points.length; index += 1) {
+      const point = points[index];
+      if (point.t > selectedTime) {
+        if (index === 0) {
+          break;
+        }
+
+        const prev = points[index - 1];
+        const span = Math.max(1, point.t - prev.t);
+        const blend = (selectedTime - prev.t) / span;
+        coordinates.push([
+          prev.lng + (point.lng - prev.lng) * blend,
+          prev.lat + (point.lat - prev.lat) * blend,
+        ]);
+        confidence = point.confidence === "documented" && prev.confidence === "documented" ? confidence : "inferred";
+        break;
+      }
+
+      coordinates.push([point.lng, point.lat]);
+      if (point.confidence === "inferred") {
+        confidence = "inferred";
+      }
+    }
+
+    if (coordinates.length < 2) {
+      continue;
+    }
+
+    features.push({
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates,
+      },
+      properties: {
+        formationId: track.formationId,
+        side: track.side,
+        confidence,
+      },
+    });
+  }
+
+  return {
+    type: "FeatureCollection",
+    features,
+  };
+}
+
 function buildTroopFeatures(
-  units: DivisionUnit[],
-  positionsByUnit: Map<string, ReturnType<typeof interpolateUnitPositions>[number]>,
-  selectedUnitId: string | null,
+  formations: Formation[],
+  positionsByFormation: Map<string, ReturnType<typeof interpolateFormationPositions>[number]>,
+  selectedFormationId: string | null,
+  offsetsByFormation: Map<string, Array<{ east: number; north: number }>>,
 ): FeatureCollection<Point> {
   const features: Array<Feature<Point>> = [];
 
-  for (const unit of units) {
-    const position = positionsByUnit.get(unit.id);
+  for (const formation of formations) {
+    const position = positionsByFormation.get(formation.id);
     if (!position) {
       continue;
     }
 
-    const dotCount = troopDotCount(unit.strengthEstimate);
-    const offsets = buildFormationOffsets(dotCount);
+    const offsets = offsetsByFormation.get(formation.id) ?? [];
 
     for (const offset of offsets) {
       features.push({
@@ -178,11 +317,12 @@ function buildTroopFeatures(
           ],
         },
         properties: {
-          unitId: unit.id,
-          unitName: unit.name,
-          side: unit.side,
-          selected: unit.id === selectedUnitId ? 1 : 0,
+          formationId: formation.id,
+          formationName: formation.name,
+          side: formation.side,
+          selected: formation.id === selectedFormationId ? 1 : 0,
           confidence: position.confidence,
+          uncertaintyMeters: position.uncertaintyMeters ?? 0,
         },
       });
     }
@@ -195,14 +335,14 @@ function buildTroopFeatures(
 }
 
 function buildAnchorFeatures(
-  units: DivisionUnit[],
-  positionsByUnit: Map<string, ReturnType<typeof interpolateUnitPositions>[number]>,
-  selectedUnitId: string | null,
+  formations: Formation[],
+  positionsByFormation: Map<string, ReturnType<typeof interpolateFormationPositions>[number]>,
+  selectedFormationId: string | null,
 ): FeatureCollection<Point> {
   const features: Array<Feature<Point>> = [];
 
-  for (const unit of units) {
-    const position = positionsByUnit.get(unit.id);
+  for (const formation of formations) {
+    const position = positionsByFormation.get(formation.id);
     if (!position) {
       continue;
     }
@@ -214,60 +354,11 @@ function buildAnchorFeatures(
         coordinates: [position.lng, position.lat],
       },
       properties: {
-        unitId: unit.id,
-        shortName: getShortName(unit.name),
-        side: unit.side,
-        selected: unit.id === selectedUnitId ? 1 : 0,
-      },
-    });
-  }
-
-  return {
-    type: "FeatureCollection",
-    features,
-  };
-}
-
-function buildTrailFeatures(
-  units: DivisionUnit[],
-  timeSlices: TimeSlice[],
-  selectedTime: number,
-): FeatureCollection<LineString> {
-  const ordered = [...timeSlices].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp));
-  const byUnit = new Map<string, Array<[number, number]>>();
-
-  for (const unit of units) {
-    byUnit.set(unit.id, []);
-  }
-
-  for (const timeSlice of ordered) {
-    const time = Date.parse(timeSlice.timestamp);
-    if (time > selectedTime) {
-      break;
-    }
-
-    for (const position of timeSlice.unitPositions) {
-      byUnit.get(position.unitId)?.push([position.lng, position.lat]);
-    }
-  }
-
-  const features: Array<Feature<LineString>> = [];
-
-  for (const unit of units) {
-    const coordinates = byUnit.get(unit.id) ?? [];
-    if (coordinates.length < 2) {
-      continue;
-    }
-
-    features.push({
-      type: "Feature",
-      geometry: {
-        type: "LineString",
-        coordinates,
-      },
-      properties: {
-        unitId: unit.id,
-        side: unit.side,
+        formationId: formation.id,
+        shortName: getShortName(formation.name),
+        side: formation.side,
+        selected: formation.id === selectedFormationId ? 1 : 0,
+        confidence: position.confidence,
       },
     });
   }
@@ -292,8 +383,58 @@ function buildLabelFeatures(labels: MapLabel[]): FeatureCollection<Point> {
         name: label.name,
         type: label.type,
         importance: label.importance,
+        confidence: label.confidence,
       },
     })),
+  };
+}
+
+function splitLayerPackFeatures(layerPack?: MapLayerPack): {
+  lines: FeatureCollection<LineString>;
+  points: FeatureCollection<Point>;
+  polygons: FeatureCollection<Polygon>;
+} {
+  if (!layerPack) {
+    return {
+      lines: emptyLineCollection(),
+      points: emptyPointCollection(),
+      polygons: emptyPolygonCollection(),
+    };
+  }
+
+  const lineFeatures: Array<MapLayerFeature & { geometry: LineString }> = [];
+  const pointFeatures: Array<MapLayerFeature & { geometry: Point }> = [];
+  const polygonFeatures: Array<MapLayerFeature & { geometry: Polygon }> = [];
+
+  for (const feature of layerPack.features) {
+    if (feature.geometry.type === "LineString") {
+      lineFeatures.push(feature as MapLayerFeature & { geometry: LineString });
+      continue;
+    }
+
+    if (feature.geometry.type === "Point") {
+      pointFeatures.push(feature as MapLayerFeature & { geometry: Point });
+      continue;
+    }
+
+    if (feature.geometry.type === "Polygon") {
+      polygonFeatures.push(feature as MapLayerFeature & { geometry: Polygon });
+    }
+  }
+
+  return {
+    lines: {
+      type: "FeatureCollection",
+      features: lineFeatures,
+    },
+    points: {
+      type: "FeatureCollection",
+      features: pointFeatures,
+    },
+    polygons: {
+      type: "FeatureCollection",
+      features: polygonFeatures,
+    },
   };
 }
 
@@ -320,139 +461,508 @@ function buildFocusFeature(
   };
 }
 
-function buildHistoricLineFeatures(): FeatureCollection<LineString> {
+function addSourceIfMissing(map: MapboxMap, id: string, data: FeatureCollection<Geometry>) {
+  if (!map.getSource(id)) {
+    map.addSource(id, {
+      type: "geojson",
+      data,
+    });
+  }
+}
+
+function addLayersIfMissing(map: MapboxMap) {
+  if (!map.getLayer("historic-polygons")) {
+    map.addLayer({
+      id: "historic-polygons",
+      type: "fill",
+      source: "historic-polygons",
+      paint: {
+        "fill-color": [
+          "match",
+          ["get", "styleKey"],
+          "sector-contested",
+          "#9f5f4a",
+          "landmark-core",
+          "#7d6b50",
+          "#6a5b45",
+        ],
+        "fill-opacity": ["case", ["==", ["get", "confidence"], "inferred"], 0.18, 0.3],
+      },
+    });
+  }
+
+  if (!map.getLayer("historic-lines-casing")) {
+    map.addLayer({
+      id: "historic-lines-casing",
+      type: "line",
+      source: "historic-lines",
+      paint: {
+        "line-color": "#2a2118",
+        "line-width": [
+          "match",
+          ["get", "styleKey"],
+          "works-main",
+          4.8,
+          "river-main",
+          4.1,
+          "road-primary",
+          3.1,
+          2.6,
+        ],
+        "line-opacity": 0.42,
+      },
+    });
+  }
+
+  if (!map.getLayer("historic-lines")) {
+    map.addLayer({
+      id: "historic-lines",
+      type: "line",
+      source: "historic-lines",
+      paint: {
+        "line-color": [
+          "match",
+          ["get", "styleKey"],
+          "works-main",
+          "#6f89ad",
+          "river-main",
+          "#5982aa",
+          "road-primary",
+          "#cfb079",
+          "#c7a472",
+        ],
+        "line-width": [
+          "match",
+          ["get", "styleKey"],
+          "works-main",
+          3.3,
+          "river-main",
+          2.8,
+          "road-primary",
+          2.2,
+          1.8,
+        ],
+        "line-dasharray": ["case", ["==", ["get", "confidence"], "inferred"], [1.1, 1.1], [1, 0]],
+        "line-opacity": 0.82,
+      },
+    });
+  }
+
+  if (!map.getLayer("historic-lines-highlight")) {
+    map.addLayer({
+      id: "historic-lines-highlight",
+      type: "line",
+      source: "historic-lines",
+      paint: {
+        "line-color": [
+          "match",
+          ["get", "styleKey"],
+          "works-main",
+          "#a9bfd8",
+          "river-main",
+          "#7ca5cb",
+          "road-primary",
+          "#f0d7a8",
+          "#e6cb97",
+        ],
+        "line-width": [
+          "match",
+          ["get", "styleKey"],
+          "works-main",
+          1.1,
+          "river-main",
+          1,
+          "road-primary",
+          0.95,
+          0.85,
+        ],
+        "line-opacity": ["case", ["==", ["get", "confidence"], "inferred"], 0.22, 0.5],
+      },
+    });
+  }
+
+  if (!map.getLayer("historic-landmarks")) {
+    map.addLayer({
+      id: "historic-landmarks",
+      type: "circle",
+      source: "historic-points",
+      paint: {
+        "circle-radius": ["match", ["get", "styleKey"], "landmark-primary", 5, 4],
+        "circle-color": "#e5c992",
+        "circle-stroke-width": 1.2,
+        "circle-stroke-color": "#3d2d1e",
+        "circle-opacity": ["case", ["==", ["get", "confidence"], "inferred"], 0.55, 0.9],
+      },
+    });
+  }
+
+  if (!map.getLayer("historic-feature-labels")) {
+    map.addLayer({
+      id: "historic-feature-labels",
+      type: "symbol",
+      source: "historic-points",
+      layout: {
+        "text-field": ["get", "name"],
+        "text-size": ["interpolate", ["linear"], ["zoom"], 12, 10.5, 15, 14],
+        "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+        "text-offset": [0, 0.95],
+        "text-anchor": "top",
+        "symbol-sort-key": [
+          "match",
+          ["get", "styleKey"],
+          "landmark-primary",
+          9,
+          4,
+        ],
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+      },
+      paint: {
+        "text-color": "#f4e5c8",
+        "text-halo-color": "#281f17",
+        "text-halo-width": 1.35,
+        "text-opacity": ["case", ["==", ["get", "confidence"], "inferred"], 0.66, 0.96],
+      },
+    });
+  }
+
+  if (!map.getLayer("battle-trails-shadow")) {
+    map.addLayer({
+      id: "battle-trails-shadow",
+      type: "line",
+      source: "battle-trails",
+      paint: {
+        "line-color": "#1b1712",
+        "line-width": 4,
+        "line-opacity": 0.28,
+        "line-blur": 0.6,
+      },
+    });
+  }
+
+  if (!map.getLayer("battle-trails")) {
+    map.addLayer({
+      id: "battle-trails",
+      type: "line",
+      source: "battle-trails",
+      paint: {
+        "line-color": ["match", ["get", "side"], "Union", "#2f75c9", "#b0402f"],
+        "line-width": 2.2,
+        "line-opacity": 0.84,
+        "line-dasharray": ["case", ["==", ["get", "confidence"], "inferred"], [1.1, 1], [1, 0]],
+      },
+    });
+  }
+
+  if (!map.getLayer("troop-uncertainty")) {
+    map.addLayer({
+      id: "troop-uncertainty",
+      type: "circle",
+      source: "troop-dots",
+      paint: {
+        "circle-radius": ["case", [">", ["get", "uncertaintyMeters"], 70], 6.7, 0],
+        "circle-color": ["match", ["get", "side"], "Union", "#6f9fd7", "#d78a7e"],
+        "circle-opacity": 0.14,
+      },
+    });
+  }
+
+  if (!map.getLayer("troop-dots")) {
+    map.addLayer({
+      id: "troop-dots",
+      type: "circle",
+      source: "troop-dots",
+      paint: {
+        "circle-radius": ["case", ["==", ["get", "selected"], 1], 4.5, 3.2],
+        "circle-color": ["match", ["get", "side"], "Union", "#2f75c9", "#b0402f"],
+        "circle-opacity": ["case", ["==", ["get", "confidence"], "inferred"], 0.56, 0.92],
+        "circle-stroke-width": ["case", ["==", ["get", "selected"], 1], 1.5, 0],
+        "circle-stroke-color": "#fbe8b6",
+        "circle-pitch-alignment": "viewport",
+        "circle-pitch-scale": "viewport",
+      },
+    });
+  }
+
+  if (!map.getLayer("unit-anchors-hit")) {
+    map.addLayer({
+      id: "unit-anchors-hit",
+      type: "circle",
+      source: "unit-anchors",
+      paint: {
+        "circle-radius": 14,
+        "circle-opacity": 0,
+      },
+    });
+  }
+
+  if (!map.getLayer("unit-labels")) {
+    map.addLayer({
+      id: "unit-labels",
+      type: "symbol",
+      source: "unit-anchors",
+      layout: {
+        "text-field": ["case", ["==", ["get", "selected"], 1], ["get", "shortName"], ""],
+        "text-size": 12,
+        "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+        "text-offset": [0, 1.25],
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+        "text-pitch-alignment": "viewport",
+        "text-rotation-alignment": "viewport",
+      },
+      paint: {
+        "text-color": "#f5ead5",
+        "text-halo-color": "#17120e",
+        "text-halo-width": 1.35,
+      },
+    });
+  }
+
+  if (!map.getLayer("battle-labels")) {
+    map.addLayer({
+      id: "battle-labels",
+      type: "symbol",
+      source: "battle-labels",
+      layout: {
+        "text-field": ["get", "name"],
+        "text-size": ["interpolate", ["linear"], ["get", "importance"], 1, 9, 5, 14.8],
+        "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+        "text-offset": [0, 0.95],
+        "symbol-sort-key": ["get", "importance"],
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+        "text-pitch-alignment": "viewport",
+        "text-rotation-alignment": "viewport",
+      },
+      paint: {
+        "text-color": [
+          "interpolate",
+          ["linear"],
+          ["get", "importance"],
+          1,
+          "#d8c2a1",
+          5,
+          "#f9ecd1",
+        ],
+        "text-halo-color": "#2f261d",
+        "text-halo-width": 1.5,
+        "text-opacity": 0.94,
+      },
+    });
+  }
+
+  if (!map.getLayer("focus-ring")) {
+    map.addLayer({
+      id: "focus-ring",
+      type: "circle",
+      source: "focus-beat",
+      paint: {
+        "circle-radius": 24,
+        "circle-color": "#000000",
+        "circle-opacity": 0,
+        "circle-stroke-color": "#f3d79f",
+        "circle-stroke-width": 2,
+        "circle-stroke-opacity": 0.9,
+      },
+    });
+  }
+}
+
+function applyModeStyling(map: MapboxMap, mode: MapMode) {
+  map.setFog(MAP_MODE_FOG[mode]);
+
+  map.setTerrain({
+    source: "battlefield-dem",
+    exaggeration: mode === "reconstructed" ? 1.03 : 1.08,
+  });
+
+  if (map.getLayer("battle-labels")) {
+    map.setPaintProperty("battle-labels", "text-opacity", mode === "reconstructed" ? 0.99 : 0.85);
+  }
+
+  if (map.getLayer("historic-feature-labels")) {
+    map.setPaintProperty(
+      "historic-feature-labels",
+      "text-opacity",
+      mode === "reconstructed" ? 0.95 : 0.45,
+    );
+  }
+
+  if (map.getLayer("historic-polygons")) {
+    map.setPaintProperty("historic-polygons", "fill-opacity", mode === "reconstructed" ? 0.3 : 0.12);
+  }
+
+  if (map.getLayer("historic-lines-casing")) {
+    map.setPaintProperty("historic-lines-casing", "line-opacity", mode === "reconstructed" ? 0.42 : 0.2);
+  }
+
+  if (map.getLayer("historic-lines")) {
+    map.setPaintProperty("historic-lines", "line-opacity", mode === "reconstructed" ? 0.86 : 0.46);
+  }
+
+  if (map.getLayer("historic-lines-highlight")) {
+    map.setPaintProperty("historic-lines-highlight", "line-opacity", mode === "reconstructed" ? 0.46 : 0.18);
+  }
+
+  if (map.getLayer("battle-trails")) {
+    map.setPaintProperty("battle-trails", "line-opacity", mode === "reconstructed" ? 0.84 : 0.72);
+  }
+}
+
+function resolveBeat(
+  activeBeatId: string | null,
+  narrativeBeats: NarrativeBeat[],
+): NarrativeBeat | null {
+  if (!activeBeatId) {
+    return null;
+  }
+
+  return narrativeBeats.find((beat) => beat.id === activeBeatId) ?? null;
+}
+
+function resolveChapter(chapters: ChapterScene[] | undefined, activeChapterId: string | null | undefined): ChapterScene | null {
+  if (!chapters || !activeChapterId) {
+    return null;
+  }
+
+  return chapters.find((chapter) => chapter.id === activeChapterId) ?? null;
+}
+
+function resolveChapterCameraPose(chapter: ChapterScene, selectedTime: number): {
+  lat: number;
+  lng: number;
+  zoom: number;
+  pitch: number;
+  bearing: number;
+} | null {
+  if (chapter.cameraRail.length === 0) {
+    return null;
+  }
+
+  if (chapter.cameraRail.length === 1) {
+    return chapter.cameraRail[0];
+  }
+
+  const chapterStart = Date.parse(chapter.startTime);
+  const targetOffset = Math.max(0, selectedTime - chapterStart);
+
+  let left = chapter.cameraRail[0];
+  let right = chapter.cameraRail[chapter.cameraRail.length - 1];
+
+  for (let index = 0; index < chapter.cameraRail.length - 1; index += 1) {
+    const current = chapter.cameraRail[index];
+    const next = chapter.cameraRail[index + 1];
+
+    if (targetOffset >= current.timeOffsetMs && targetOffset <= next.timeOffsetMs) {
+      left = current;
+      right = next;
+      break;
+    }
+  }
+
+  const span = Math.max(1, right.timeOffsetMs - left.timeOffsetMs);
+  const blend = Math.max(0, Math.min(1, (targetOffset - left.timeOffsetMs) / span));
+
   return {
-    type: "FeatureCollection",
-    features: [
-      {
-        type: "Feature",
-        geometry: {
-          type: "LineString",
-          coordinates: [
-            [-86.8598, 35.9093],
-            [-86.8596, 35.9152],
-            [-86.8593, 35.9208],
-            [-86.8596, 35.925],
-          ],
-        },
-        properties: {
-          type: "road-1864",
-          name: "Columbia Pike (1864 axis)",
-        },
-      },
-      {
-        type: "Feature",
-        geometry: {
-          type: "LineString",
-          coordinates: [
-            [-86.874, 35.9222],
-            [-86.8696, 35.9225],
-            [-86.8654, 35.9226],
-            [-86.8614, 35.9224],
-            [-86.8572, 35.9222],
-            [-86.8528, 35.9231],
-          ],
-        },
-        properties: {
-          type: "union-works",
-          name: "Federal Main Works",
-        },
-      },
-      {
-        type: "Feature",
-        geometry: {
-          type: "LineString",
-          coordinates: [
-            [-86.8622, 35.9097],
-            [-86.8611, 35.9148],
-            [-86.8601, 35.9184],
-            [-86.8596, 35.9219],
-          ],
-        },
-        properties: {
-          type: "assault-axis",
-          name: "Cheatham Assault Axis",
-        },
-      },
-      {
-        type: "Feature",
-        geometry: {
-          type: "LineString",
-          coordinates: [
-            [-86.8684, 35.9082],
-            [-86.8661, 35.9138],
-            [-86.8639, 35.919],
-            [-86.8621, 35.9221],
-          ],
-        },
-        properties: {
-          type: "assault-axis",
-          name: "Brown-Cleburne Axis",
-        },
-      },
-    ],
+    lat: left.lat + (right.lat - left.lat) * blend,
+    lng: left.lng + (right.lng - left.lng) * blend,
+    zoom: left.zoom + (right.zoom - left.zoom) * blend,
+    pitch: left.pitch + (right.pitch - left.pitch) * blend,
+    bearing: left.bearing + (right.bearing - left.bearing) * blend,
   };
 }
 
 export default function PresentDayMapbox({
   manifest,
+  formations,
   units,
+  movementKeyframes,
+  timeSlices,
   mapLabels,
   narrativeBeats,
-  timeSlices,
+  chapters,
+  mapLayerPack,
   selectedTime,
   activeBeatId,
+  activeChapterId,
   guidedMode,
+  selectedFormationId,
   selectedUnitId,
+  mapMode,
   mapTheme,
+  lockedFormationId,
+  reducedMotion = false,
+  onSelectFormation,
   onSelectUnit,
 }: PresentDayMapboxProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapboxMap | null>(null);
   const mapReadyRef = useRef(false);
-  const previousBeatRef = useRef<string | null>(null);
-  const onSelectUnitRef = useRef(onSelectUnit);
-  const mapThemeRef = useRef(mapTheme);
+  const activeMapModeRef = useRef<MapMode>(normalizeMapMode(mapMode, mapTheme));
+  const onSelectRef = useRef<(formationId: string | null) => void>(() => {});
+  const lastGuidedCameraUpdateRef = useRef<number>(0);
+  const focusPulseRafRef = useRef<number | null>(null);
 
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN?.trim();
 
-  useEffect(() => {
-    onSelectUnitRef.current = onSelectUnit;
-  }, [onSelectUnit]);
+  const normalizedMapMode = normalizeMapMode(mapMode, mapTheme);
+  const normalizedFormations = useMemo(() => normalizeFormations(formations, units), [formations, units]);
+  const normalizedKeyframes = useMemo(
+    () => normalizeKeyframes(movementKeyframes, timeSlices),
+    [movementKeyframes, timeSlices],
+  );
+
+  const selectedId = selectedFormationId ?? selectedUnitId ?? null;
 
   useEffect(() => {
-    mapThemeRef.current = mapTheme;
-  }, [mapTheme]);
+    onSelectRef.current = (formationId) => {
+      if (onSelectFormation) {
+        onSelectFormation(formationId);
+      } else {
+        onSelectUnit?.(formationId);
+      }
+    };
+  }, [onSelectFormation, onSelectUnit]);
 
-  const positionsByUnit = useMemo(() => {
-    const interpolated = interpolateUnitPositions(selectedTime, timeSlices);
-    return new Map(interpolated.map((position) => [position.unitId, position]));
-  }, [selectedTime, timeSlices]);
+  const tracks = useMemo(() => buildTracks(normalizedFormations, normalizedKeyframes), [normalizedFormations, normalizedKeyframes]);
+
+  const offsetsByFormation = useMemo(() => {
+    const map = new Map<string, Array<{ east: number; north: number }>>();
+    for (const formation of normalizedFormations) {
+      map.set(formation.id, buildFormationOffsets(troopDotCount(formation.strengthEstimate)));
+    }
+    return map;
+  }, [normalizedFormations]);
+
+  const positionsByFormation = useMemo(() => {
+    const interpolated = movementKeyframes
+      ? interpolateFormationPositions(selectedTime, normalizedKeyframes)
+      : interpolateUnitPositions(selectedTime, normalizedKeyframes);
+
+    return new Map(interpolated.map((position) => [position.formationId, position]));
+  }, [movementKeyframes, normalizedKeyframes, selectedTime]);
+
+  const dynamicTrailFeatures = useMemo(
+    () => buildTrailFeatures(tracks, selectedTime),
+    [selectedTime, tracks],
+  );
 
   const troopDots = useMemo(
-    () => buildTroopFeatures(units, positionsByUnit, selectedUnitId),
-    [positionsByUnit, selectedUnitId, units],
+    () => buildTroopFeatures(normalizedFormations, positionsByFormation, selectedId, offsetsByFormation),
+    [normalizedFormations, offsetsByFormation, positionsByFormation, selectedId],
   );
 
-  const unitAnchors = useMemo(
-    () => buildAnchorFeatures(units, positionsByUnit, selectedUnitId),
-    [positionsByUnit, selectedUnitId, units],
+  const anchors = useMemo(
+    () => buildAnchorFeatures(normalizedFormations, positionsByFormation, selectedId),
+    [normalizedFormations, positionsByFormation, selectedId],
   );
 
-  const trails = useMemo(
-    () => buildTrailFeatures(units, timeSlices, selectedTime),
-    [selectedTime, timeSlices, units],
-  );
-
-  const labels = useMemo(() => buildLabelFeatures(mapLabels), [mapLabels]);
-  const historicLines = useMemo(() => buildHistoricLineFeatures(), []);
-
-  const activeBeat = useMemo(
-    () => narrativeBeats.find((beat) => beat.id === activeBeatId) ?? null,
-    [activeBeatId, narrativeBeats],
-  );
-
-  const focus = useMemo(() => buildFocusFeature(activeBeat), [activeBeat]);
+  const labelFeatures = useMemo(() => buildLabelFeatures(mapLabels), [mapLabels]);
+  const splitMapLayers = useMemo(() => splitLayerPackFeatures(mapLayerPack), [mapLayerPack]);
+  const activeBeat = useMemo(() => resolveBeat(activeBeatId, narrativeBeats), [activeBeatId, narrativeBeats]);
+  const activeChapter = useMemo(() => resolveChapter(chapters, activeChapterId), [activeChapterId, chapters]);
+  const focusFeature = useMemo(() => buildFocusFeature(activeBeat), [activeBeat]);
 
   useEffect(() => {
     if (!mapboxToken || !containerRef.current || mapRef.current) {
@@ -474,12 +984,11 @@ export default function PresentDayMapbox({
 
       const map = new mapbox.Map({
         container: containerRef.current,
-        style: "mapbox://styles/mapbox/standard-satellite",
-        config: { basemap: getBasemapConfig(mapThemeRef.current) },
+        style: STYLE_BY_MODE[normalizedMapMode],
         center: [centerLng, centerLat],
-        zoom: 13.6,
-        pitch: 40,
-        bearing: -18,
+        zoom: 13.7,
+        pitch: normalizedMapMode === "reconstructed" ? 42 : 45,
+        bearing: -17,
         antialias: true,
         cooperativeGestures: true,
       });
@@ -487,9 +996,7 @@ export default function PresentDayMapbox({
       map.addControl(new mapbox.NavigationControl({ visualizePitch: true }), "top-right");
       map.addControl(new mapbox.ScaleControl({ unit: "imperial" }), "bottom-right");
 
-      map.on("load", () => {
-        mapReadyRef.current = true;
-
+      const hydrateSourcesAndLayers = () => {
         if (!map.getSource("battlefield-dem")) {
           map.addSource("battlefield-dem", {
             type: "raster-dem",
@@ -499,200 +1006,44 @@ export default function PresentDayMapbox({
           });
         }
 
-        applyMapTheme(map, mapThemeRef.current);
+        addSourceIfMissing(map, "battle-trails", emptyLineCollection());
+        addSourceIfMissing(map, "troop-dots", emptyPointCollection());
+        addSourceIfMissing(map, "unit-anchors", emptyPointCollection());
+        addSourceIfMissing(map, "battle-labels", emptyPointCollection());
+        addSourceIfMissing(map, "focus-beat", emptyPointCollection());
+        addSourceIfMissing(map, "historic-lines", emptyLineCollection());
+        addSourceIfMissing(map, "historic-points", emptyPointCollection());
+        addSourceIfMissing(map, "historic-polygons", emptyPolygonCollection());
 
-        map.addSource("battle-trails", {
-          type: "geojson",
-          data: emptyLineCollection(),
-        });
+        addLayersIfMissing(map);
 
-        map.addSource("troop-dots", {
-          type: "geojson",
-          data: emptyPointCollection(),
-        });
+        setSourceData(map, "battle-labels", labelFeatures);
+        setSourceData(map, "historic-lines", splitMapLayers.lines);
+        setSourceData(map, "historic-points", splitMapLayers.points);
+        setSourceData(map, "historic-polygons", splitMapLayers.polygons);
+        setSourceData(map, "battle-trails", dynamicTrailFeatures);
+        setSourceData(map, "troop-dots", troopDots);
+        setSourceData(map, "unit-anchors", anchors);
+        setSourceData(map, "focus-beat", focusFeature);
 
-        map.addSource("unit-anchors", {
-          type: "geojson",
-          data: emptyPointCollection(),
-        });
+        applyModeStyling(map, activeMapModeRef.current);
+      };
 
-        map.addSource("battle-labels", {
-          type: "geojson",
-          data: emptyPointCollection(),
-        });
+      map.on("load", () => {
+        mapReadyRef.current = true;
+        hydrateSourcesAndLayers();
 
-        map.addSource("focus-beat", {
-          type: "geojson",
-          data: emptyPointCollection(),
-        });
+        map.on("style.load", () => {
+          if (!mapReadyRef.current) {
+            return;
+          }
 
-        map.addSource("historic-lines", {
-          type: "geojson",
-          data: emptyLineCollection(),
-        });
-
-        map.addLayer({
-          id: "historic-lines",
-          type: "line",
-          source: "historic-lines",
-          paint: {
-            "line-color": [
-              "match",
-              ["get", "type"],
-              "union-works",
-              "#7a9bc1",
-              "assault-axis",
-              "#b14e3e",
-              "#cfb079",
-            ],
-            "line-width": [
-              "match",
-              ["get", "type"],
-              "union-works",
-              3,
-              "assault-axis",
-              2.7,
-              2,
-            ],
-            "line-dasharray": [
-              "match",
-              ["get", "type"],
-              "assault-axis",
-              [1.3, 1],
-              "road-1864",
-              [0.6, 1.2],
-              [1, 0],
-            ],
-            "line-opacity": 0.84,
-          },
-        });
-
-        map.addLayer({
-          id: "battle-trails-shadow",
-          type: "line",
-          source: "battle-trails",
-          paint: {
-            "line-color": "#1b1712",
-            "line-width": 4,
-            "line-opacity": 0.28,
-            "line-blur": 0.6,
-          },
-        });
-
-        map.addLayer({
-          id: "battle-trails",
-          type: "line",
-          source: "battle-trails",
-          paint: {
-            "line-color": [
-              "match",
-              ["get", "side"],
-              "Union",
-              "#2f75c9",
-              "#b0402f",
-            ],
-            "line-width": 2.1,
-            "line-opacity": 0.8,
-          },
-        });
-
-        map.addLayer({
-          id: "troop-dots",
-          type: "circle",
-          source: "troop-dots",
-          paint: {
-            "circle-radius": ["case", ["==", ["get", "selected"], 1], 4.3, 3.1],
-            "circle-color": [
-              "match",
-              ["get", "side"],
-              "Union",
-              "#2f75c9",
-              "#b0402f",
-            ],
-            "circle-opacity": ["case", ["==", ["get", "confidence"], "inferred"], 0.56, 0.9],
-            "circle-stroke-width": ["case", ["==", ["get", "selected"], 1], 1.6, 0],
-            "circle-stroke-color": "#fbe8b6",
-            "circle-pitch-alignment": "viewport",
-            "circle-pitch-scale": "viewport",
-          },
-        });
-
-        map.addLayer({
-          id: "unit-anchors-hit",
-          type: "circle",
-          source: "unit-anchors",
-          paint: {
-            "circle-radius": 14,
-            "circle-opacity": 0,
-          },
-        });
-
-        map.addLayer({
-          id: "unit-labels",
-          type: "symbol",
-          source: "unit-anchors",
-          layout: {
-            "text-field": [
-              "case",
-              ["==", ["get", "selected"], 1],
-              ["get", "shortName"],
-              "",
-            ],
-            "text-size": 12,
-            "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
-            "text-offset": [0, 1.25],
-            "text-allow-overlap": true,
-            "text-ignore-placement": true,
-            "text-pitch-alignment": "viewport",
-            "text-rotation-alignment": "viewport",
-          },
-          paint: {
-            "text-color": "#f5ead5",
-            "text-halo-color": "#17120e",
-            "text-halo-width": 1.35,
-          },
-        });
-
-        map.addLayer({
-          id: "battle-labels",
-          type: "symbol",
-          source: "battle-labels",
-          layout: {
-            "text-field": ["get", "name"],
-            "text-size": ["interpolate", ["linear"], ["get", "importance"], 1, 10, 5, 14],
-            "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-            "text-offset": [0, 0.95],
-            "symbol-sort-key": ["get", "importance"],
-            "text-allow-overlap": true,
-            "text-ignore-placement": true,
-            "text-pitch-alignment": "viewport",
-            "text-rotation-alignment": "viewport",
-          },
-          paint: {
-            "text-color": "#f9ecd1",
-            "text-halo-color": "#2f261d",
-            "text-halo-width": 1.5,
-            "text-opacity": 0.95,
-          },
-        });
-
-        map.addLayer({
-          id: "focus-ring",
-          type: "circle",
-          source: "focus-beat",
-          paint: {
-            "circle-radius": 24,
-            "circle-color": "#000000",
-            "circle-opacity": 0,
-            "circle-stroke-color": "#f3d79f",
-            "circle-stroke-width": 2,
-            "circle-stroke-opacity": 0.88,
-          },
+          hydrateSourcesAndLayers();
         });
 
         map.on("click", "unit-anchors-hit", (event) => {
-          const unitId = event.features?.[0]?.properties?.unitId;
-          onSelectUnitRef.current(typeof unitId === "string" ? unitId : null);
+          const formationId = event.features?.[0]?.properties?.formationId;
+          onSelectRef.current(typeof formationId === "string" ? formationId : null);
         });
 
         map.on("mouseenter", "unit-anchors-hit", () => {
@@ -709,7 +1060,7 @@ export default function PresentDayMapbox({
           }).length;
 
           if (!isUnitClick) {
-            onSelectUnitRef.current(null);
+            onSelectRef.current(null);
           }
         });
 
@@ -721,7 +1072,7 @@ export default function PresentDayMapbox({
         map.fitBounds(bounds, {
           duration: 0,
           padding: { top: 50, right: 50, bottom: 50, left: 50 },
-          maxZoom: 14.9,
+          maxZoom: 14.95,
         });
       });
 
@@ -733,16 +1084,27 @@ export default function PresentDayMapbox({
     return () => {
       cancelled = true;
       mapReadyRef.current = false;
+      if (focusPulseRafRef.current !== null) {
+        cancelAnimationFrame(focusPulseRafRef.current);
+      }
       mapRef.current?.remove();
       mapRef.current = null;
-      previousBeatRef.current = null;
     };
   }, [
+    anchors,
+    dynamicTrailFeatures,
+    focusFeature,
+    labelFeatures,
     manifest.bounds.east,
     manifest.bounds.north,
     manifest.bounds.south,
     manifest.bounds.west,
     mapboxToken,
+    normalizedMapMode,
+    splitMapLayers.lines,
+    splitMapLayers.points,
+    splitMapLayers.polygons,
+    troopDots,
   ]);
 
   useEffect(() => {
@@ -750,38 +1112,136 @@ export default function PresentDayMapbox({
       return;
     }
 
-    applyMapTheme(mapRef.current, mapTheme);
-  }, [mapTheme]);
+    if (normalizedMapMode === activeMapModeRef.current) {
+      applyModeStyling(mapRef.current, normalizedMapMode);
+      return;
+    }
+
+    activeMapModeRef.current = normalizedMapMode;
+    mapRef.current.setStyle(STYLE_BY_MODE[normalizedMapMode]);
+  }, [normalizedMapMode]);
 
   useEffect(() => {
     if (!mapRef.current || !mapReadyRef.current) {
       return;
     }
 
-    setSourceData(mapRef.current, "battle-trails", trails);
+    setSourceData(mapRef.current, "battle-trails", dynamicTrailFeatures);
     setSourceData(mapRef.current, "troop-dots", troopDots);
-    setSourceData(mapRef.current, "unit-anchors", unitAnchors);
-    setSourceData(mapRef.current, "battle-labels", labels);
-    setSourceData(mapRef.current, "focus-beat", focus);
-    setSourceData(mapRef.current, "historic-lines", historicLines);
-  }, [focus, historicLines, labels, trails, troopDots, unitAnchors]);
+    setSourceData(mapRef.current, "unit-anchors", anchors);
+    setSourceData(mapRef.current, "focus-beat", focusFeature);
+  }, [anchors, dynamicTrailFeatures, focusFeature, troopDots]);
 
   useEffect(() => {
-    if (!mapRef.current || !guidedMode || !activeBeat || previousBeatRef.current === activeBeat.id) {
+    if (!mapRef.current || !mapReadyRef.current) {
       return;
     }
 
-    previousBeatRef.current = activeBeat.id;
+    setSourceData(mapRef.current, "battle-labels", labelFeatures);
+    setSourceData(mapRef.current, "historic-lines", splitMapLayers.lines);
+    setSourceData(mapRef.current, "historic-points", splitMapLayers.points);
+    setSourceData(mapRef.current, "historic-polygons", splitMapLayers.polygons);
+  }, [labelFeatures, splitMapLayers.lines, splitMapLayers.points, splitMapLayers.polygons]);
 
-    mapRef.current.flyTo({
-      center: [activeBeat.cameraPose.lng, activeBeat.cameraPose.lat],
-      zoom: 14.7,
-      pitch: Math.min(62, Math.max(42, activeBeat.cameraPose.pitch + 18)),
-      bearing: activeBeat.cameraPose.yaw,
-      duration: 1800,
-      essential: true,
-    });
-  }, [activeBeat, guidedMode]);
+  useEffect(() => {
+    if (!mapRef.current || !guidedMode) {
+      return;
+    }
+
+    const map = mapRef.current;
+
+    if (lockedFormationId) {
+      const lockPosition = positionsByFormation.get(lockedFormationId);
+      if (!lockPosition) {
+        return;
+      }
+
+      map.easeTo({
+        center: [lockPosition.lng, lockPosition.lat],
+        duration: reducedMotion ? 0 : 280,
+        essential: true,
+      });
+      return;
+    }
+
+    const chapterPose = activeChapter ? resolveChapterCameraPose(activeChapter, selectedTime) : null;
+    if (chapterPose) {
+      const now = performance.now();
+      if (reducedMotion || now - lastGuidedCameraUpdateRef.current >= 450) {
+        lastGuidedCameraUpdateRef.current = now;
+        map.easeTo({
+          center: [chapterPose.lng, chapterPose.lat],
+          zoom: chapterPose.zoom,
+          pitch: chapterPose.pitch,
+          bearing: chapterPose.bearing,
+          duration: reducedMotion ? 0 : 420,
+          essential: true,
+        });
+      }
+      return;
+    }
+
+    if (activeBeat) {
+      map.flyTo({
+        center: [activeBeat.cameraPose.lng, activeBeat.cameraPose.lat],
+        zoom: 14.7,
+        pitch: Math.min(64, Math.max(42, activeBeat.cameraPose.pitch + 16)),
+        bearing: activeBeat.cameraPose.yaw,
+        duration: reducedMotion ? 0 : 1200,
+        essential: true,
+      });
+    }
+  }, [
+    activeBeat,
+    activeChapter,
+    guidedMode,
+    lockedFormationId,
+    positionsByFormation,
+    reducedMotion,
+    selectedTime,
+  ]);
+
+  useEffect(() => {
+    if (!mapRef.current || !mapReadyRef.current) {
+      return;
+    }
+
+    if (focusPulseRafRef.current !== null) {
+      cancelAnimationFrame(focusPulseRafRef.current);
+      focusPulseRafRef.current = null;
+    }
+
+    if (!guidedMode || reducedMotion) {
+      mapRef.current.setPaintProperty("focus-ring", "circle-stroke-opacity", 0.88);
+      mapRef.current.setPaintProperty("focus-ring", "circle-radius", 24);
+      return;
+    }
+
+    const animate = (time: number) => {
+      if (!mapRef.current) {
+        return;
+      }
+
+      const pulse = 24 + Math.sin(time / 420) * 5;
+      const opacity = 0.68 + Math.sin(time / 380) * 0.18;
+
+      if (mapRef.current.getLayer("focus-ring")) {
+        mapRef.current.setPaintProperty("focus-ring", "circle-radius", pulse);
+        mapRef.current.setPaintProperty("focus-ring", "circle-stroke-opacity", opacity);
+      }
+
+      focusPulseRafRef.current = requestAnimationFrame(animate);
+    };
+
+    focusPulseRafRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (focusPulseRafRef.current !== null) {
+        cancelAnimationFrame(focusPulseRafRef.current);
+        focusPulseRafRef.current = null;
+      }
+    };
+  }, [guidedMode, reducedMotion]);
 
   if (!mapboxToken) {
     return (
@@ -796,9 +1256,8 @@ export default function PresentDayMapbox({
   }
 
   return (
-    <div className="present-map-wrap">
+    <div className={`present-map-wrap ${normalizedMapMode}`}>
       <div ref={containerRef} className="present-map" data-testid="present-day-map" />
-      <div className={`historic-map-overlay ${mapTheme}`} aria-hidden="true" />
     </div>
   );
 }

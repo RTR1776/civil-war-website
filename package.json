@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "scenario:validate": "node scripts/validate-scenario.mjs",
+    "scenario:pack": "node scripts/build-render-pack.mjs"
   },
   "dependencies": {
     "mapbox-gl": "^3.18.1",

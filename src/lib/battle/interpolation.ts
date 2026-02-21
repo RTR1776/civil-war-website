@@ -1,6 +1,8 @@
 import {
   type ConfidenceLevel,
-  type InterpolatedUnitPosition,
+  type InterpolatedFormationPosition,
+  type MovementKeyframe,
+  type MovementPosition,
   type TimeSlice,
   type UnitPosition,
 } from "@/lib/battle/types";
@@ -35,35 +37,68 @@ function lerpNumber(start: number, end: number, amount: number): number {
   return start + (end - start) * amount;
 }
 
+function normalizeLegacyTimeSlices(timeSlices: TimeSlice[]): MovementKeyframe[] {
+  return timeSlices.map((timeSlice) => ({
+    timestamp: timeSlice.timestamp,
+    confidence: timeSlice.confidence,
+    interpolationHint: "linear",
+    positions: timeSlice.unitPositions.map((position) => ({
+      formationId: position.unitId,
+      lat: position.lat,
+      lng: position.lng,
+      elevation: position.elevation,
+      formation: position.formation,
+      engaged: position.engaged,
+    })),
+  }));
+}
+
+function resolveBlend(interpolationHint: MovementKeyframe["interpolationHint"], amount: number): number {
+  if (interpolationHint === "hold") {
+    return 0;
+  }
+
+  if (interpolationHint === "step-forward") {
+    return amount >= 1 ? 1 : 0;
+  }
+
+  return amount;
+}
+
 function resolveBetween(
-  first: UnitPosition | undefined,
-  second: UnitPosition | undefined,
+  first: MovementPosition | undefined,
+  second: MovementPosition | undefined,
   amount: number,
   confidence: ConfidenceLevel,
-): InterpolatedUnitPosition | null {
+  interpolationHint: MovementKeyframe["interpolationHint"],
+): InterpolatedFormationPosition | null {
   if (!first && !second) {
     return null;
   }
 
   if (!first && second) {
     return {
-      unitId: second.unitId,
+      formationId: second.formationId,
+      unitId: second.formationId,
       lat: second.lat,
       lng: second.lng,
       engaged: Boolean(second.engaged),
       formation: second.formation,
       confidence,
+      uncertaintyMeters: second.uncertaintyMeters,
     };
   }
 
   if (first && !second) {
     return {
-      unitId: first.unitId,
+      formationId: first.formationId,
+      unitId: first.formationId,
       lat: first.lat,
       lng: first.lng,
       engaged: Boolean(first.engaged),
       formation: first.formation,
       confidence,
+      uncertaintyMeters: first.uncertaintyMeters,
     };
   }
 
@@ -71,76 +106,110 @@ function resolveBetween(
     return null;
   }
 
-  const from = first;
-  const to = second;
+  const blend = resolveBlend(interpolationHint, amount);
+  const uncertainty = Math.max(first.uncertaintyMeters ?? 0, second.uncertaintyMeters ?? 0);
 
   return {
-    unitId: from.unitId,
-    lat: lerpNumber(from.lat, to.lat, amount),
-    lng: lerpNumber(from.lng, to.lng, amount),
-    engaged: Boolean(to.engaged ?? from.engaged),
-    formation: to.formation ?? from.formation,
+    formationId: first.formationId,
+    unitId: first.formationId,
+    lat: lerpNumber(first.lat, second.lat, blend),
+    lng: lerpNumber(first.lng, second.lng, blend),
+    engaged: Boolean(second.engaged ?? first.engaged),
+    formation: second.formation ?? first.formation,
     confidence,
+    uncertaintyMeters: uncertainty > 0 ? uncertainty : undefined,
   };
 }
 
-export function interpolateUnitPositions(
+function sortKeyframes(keyframes: MovementKeyframe[]): MovementKeyframe[] {
+  return [...keyframes].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp));
+}
+
+export function interpolateFormationPositions(
   targetTime: number,
-  timeSlices: TimeSlice[],
-): InterpolatedUnitPosition[] {
-  if (timeSlices.length === 0) {
+  movementKeyframes: MovementKeyframe[],
+): InterpolatedFormationPosition[] {
+  if (movementKeyframes.length === 0) {
     return [];
   }
 
-  const orderedSlices = [...timeSlices].sort(
-    (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
-  );
+  const orderedKeyframes = sortKeyframes(movementKeyframes);
 
-  const start = Date.parse(orderedSlices[0].timestamp);
-  const end = Date.parse(orderedSlices[orderedSlices.length - 1].timestamp);
+  const start = Date.parse(orderedKeyframes[0].timestamp);
+  const end = Date.parse(orderedKeyframes[orderedKeyframes.length - 1].timestamp);
   const safeTime = clampTime(targetTime, start, end);
 
-  let leftSlice = orderedSlices[0];
-  let rightSlice = orderedSlices[orderedSlices.length - 1];
+  let leftKeyframe = orderedKeyframes[0];
+  let rightKeyframe = orderedKeyframes[orderedKeyframes.length - 1];
 
-  for (let index = 0; index < orderedSlices.length - 1; index += 1) {
-    const current = orderedSlices[index];
-    const next = orderedSlices[index + 1];
+  for (let index = 0; index < orderedKeyframes.length - 1; index += 1) {
+    const current = orderedKeyframes[index];
+    const next = orderedKeyframes[index + 1];
     const currentTime = Date.parse(current.timestamp);
     const nextTime = Date.parse(next.timestamp);
 
     if (safeTime >= currentTime && safeTime <= nextTime) {
-      leftSlice = current;
-      rightSlice = next;
+      leftKeyframe = current;
+      rightKeyframe = next;
       break;
     }
   }
 
-  const leftTime = Date.parse(leftSlice.timestamp);
-  const rightTime = Date.parse(rightSlice.timestamp);
+  const leftTime = Date.parse(leftKeyframe.timestamp);
+  const rightTime = Date.parse(rightKeyframe.timestamp);
   const timeWindow = Math.max(1, rightTime - leftTime);
   const blend = clampTime((safeTime - leftTime) / timeWindow, 0, 1);
 
-  const byUnit = new Map<string, { left?: UnitPosition; right?: UnitPosition }>();
+  const byFormation = new Map<string, { left?: MovementPosition; right?: MovementPosition }>();
 
-  for (const unitPosition of leftSlice.unitPositions) {
-    byUnit.set(unitPosition.unitId, { left: unitPosition });
+  for (const position of leftKeyframe.positions) {
+    byFormation.set(position.formationId, { left: position });
   }
 
-  for (const unitPosition of rightSlice.unitPositions) {
-    const existing = byUnit.get(unitPosition.unitId);
-    byUnit.set(unitPosition.unitId, {
+  for (const position of rightKeyframe.positions) {
+    const existing = byFormation.get(position.formationId);
+    byFormation.set(position.formationId, {
       left: existing?.left,
-      right: unitPosition,
+      right: position,
     });
   }
 
   const confidence: ConfidenceLevel =
-    leftSlice.confidence === "documented" && rightSlice.confidence === "documented"
+    leftKeyframe.confidence === "documented" && rightKeyframe.confidence === "documented"
       ? "documented"
       : "inferred";
 
-  return [...byUnit.values()]
-    .map((pair) => resolveBetween(pair.left, pair.right, blend, confidence))
-    .filter((value): value is InterpolatedUnitPosition => value !== null);
+  return [...byFormation.values()]
+    .map((pair) =>
+      resolveBetween(pair.left, pair.right, blend, confidence, rightKeyframe.interpolationHint),
+    )
+    .filter((value): value is InterpolatedFormationPosition => value !== null);
+}
+
+export function interpolateUnitPositions(
+  targetTime: number,
+  timeSlices: TimeSlice[] | MovementKeyframe[],
+): InterpolatedFormationPosition[] {
+  if (timeSlices.length === 0) {
+    return [];
+  }
+
+  const first = timeSlices[0] as TimeSlice | MovementKeyframe;
+
+  if ("unitPositions" in first) {
+    return interpolateFormationPositions(targetTime, normalizeLegacyTimeSlices(timeSlices as TimeSlice[]));
+  }
+
+  return interpolateFormationPositions(targetTime, timeSlices as MovementKeyframe[]);
+}
+
+export function toLegacyUnitPosition(position: MovementPosition): UnitPosition {
+  return {
+    unitId: position.formationId,
+    lat: position.lat,
+    lng: position.lng,
+    elevation: position.elevation,
+    formation: position.formation,
+    engaged: position.engaged,
+  };
 }
