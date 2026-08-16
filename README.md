@@ -40,6 +40,16 @@ fully functional on the built-in engine.
 - **Explore mode** — free pan/zoom/pinch, hover tooltips, click a division for
   a live intel card (strength, losses so far, order, engagement, confidence),
   and optionally lock the camera to follow it.
+- **3D Field** — a fully three-dimensional battlefield built with three.js on
+  the same simulation clock: procedural terrain raised from the map data
+  (Winstead Hill, the Harpeth valley, Figuers Bluff), the earthworks and Fort
+  Granger in relief, the town, and the armies as thousands of instanced
+  figures in ranks — infantry, Forrest's and Wilson's cavalry on the flanks,
+  and artillery at the batteries. Muzzle flashes and powder smoke ripple along
+  the engaged fronts (blooming after dark), the fallen accumulate where the
+  lines stood, and casualties thin the ranks in real time. Orbit freely or
+  jump between vantage points — including riding with Cleburne's division on
+  the assault. Click any line to inspect the formation.
 - **Control dock** — scrubbable timeline with chapter segments and event pips,
   play/pause and 1×/2×/4× speeds, a battlefield clock with day-phase badge
   (rendered in the battle's own UTC−6 time, not the visitor's timezone), and a
@@ -67,6 +77,14 @@ src/
       direction.ts          Chapter rails, beat poses, attract shots
       particles.ts          Musket flash + smoke systems
       projection.ts         Local meters projection + Mapbox-zoom mapping
+    three/
+      Battlefield3D         3D host: renderer, orbit controls, raycast select
+      scene3d.ts            Terrain, works, buildings, trees, fort, lighting
+      armies3d.ts           Instanced infantry/cavalry/artillery + the fallen
+      effects3d.ts          Muzzle flash & smoke pools
+      heightfield.ts        Procedural elevation from hills/river data
+      troopLayout.ts        Rank/file formation layout math
+      viewpoints.ts         Cinematic vantage presets
     ControlDock / StoryRail / IntelCard / RecordsPanel /
     IntroOverlay / EpilogueOverlay
     PresentDayMapbox        Optional satellite comparison (token-gated)

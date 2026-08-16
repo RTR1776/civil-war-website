@@ -889,15 +889,25 @@ export class BattlefieldScene {
       ctx.fill();
       ctx.stroke();
 
-      // Rank lines suggest lines of battle.
-      ctx.strokeStyle = "rgba(244, 236, 214, 0.5)";
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(-widthM / 2 + 10, -depthM / 6);
-      ctx.lineTo(widthM / 2 - 10, -depthM / 6);
-      ctx.moveTo(-widthM / 2 + 10, depthM / 6);
-      ctx.lineTo(widthM / 2 - 10, depthM / 6);
-      ctx.stroke();
+      if ((formation.arm ?? "infantry") === "cavalry") {
+        // Classic cavalry symbol: a diagonal slash across the unit box.
+        ctx.strokeStyle = "rgba(244, 236, 214, 0.7)";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(-widthM / 2 + 6, depthM / 2 - 6);
+        ctx.lineTo(widthM / 2 - 6, -depthM / 2 + 6);
+        ctx.stroke();
+      } else {
+        // Rank lines suggest lines of battle.
+        ctx.strokeStyle = "rgba(244, 236, 214, 0.5)";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-widthM / 2 + 10, -depthM / 6);
+        ctx.lineTo(widthM / 2 - 10, -depthM / 6);
+        ctx.moveTo(-widthM / 2 + 10, depthM / 6);
+        ctx.lineTo(widthM / 2 - 10, depthM / 6);
+        ctx.stroke();
+      }
 
       if (position.engaged) {
         ctx.strokeStyle = "rgba(255, 196, 110, 0.85)";

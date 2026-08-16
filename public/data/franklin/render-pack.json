@@ -1,6 +1,6 @@
 {
   "scenarioId": "franklin-1864",
-  "builtAt": "2026-08-16T00:10:39.372Z",
+  "builtAt": "2026-08-16T01:15:38.687Z",
   "window": {
     "start": "1864-11-30T12:00:00-06:00",
     "end": "1864-11-30T21:00:00-06:00"
@@ -602,6 +602,156 @@
           "lat": 35.9217,
           "lng": -86.839,
           "engaged": true,
+          "confidence": "documented"
+        }
+      ]
+    },
+    {
+      "unitId": "conf-forrest-cavalry",
+      "points": [
+        {
+          "t": -3316140000000,
+          "lat": 35.906,
+          "lng": -86.833,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316136400000,
+          "lat": 35.9082,
+          "lng": -86.8305,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316132800000,
+          "lat": 35.9105,
+          "lng": -86.829,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316129200000,
+          "lat": 35.9142,
+          "lng": -86.8275,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316125600000,
+          "lat": 35.9186,
+          "lng": -86.8262,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316122000000,
+          "lat": 35.9224,
+          "lng": -86.8258,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316118400000,
+          "lat": 35.9204,
+          "lng": -86.8272,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316114800000,
+          "lat": 35.9168,
+          "lng": -86.8288,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316111200000,
+          "lat": 35.913,
+          "lng": -86.8302,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316107600000,
+          "lat": 35.9098,
+          "lng": -86.8318,
+          "engaged": false,
+          "confidence": "documented"
+        }
+      ]
+    },
+    {
+      "unitId": "union-wilson-cavalry",
+      "points": [
+        {
+          "t": -3316140000000,
+          "lat": 35.933,
+          "lng": -86.8255,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316136400000,
+          "lat": 35.9322,
+          "lng": -86.825,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316132800000,
+          "lat": 35.931,
+          "lng": -86.8246,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316129200000,
+          "lat": 35.9296,
+          "lng": -86.8242,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316125600000,
+          "lat": 35.9272,
+          "lng": -86.8244,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316122000000,
+          "lat": 35.9252,
+          "lng": -86.825,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316118400000,
+          "lat": 35.9262,
+          "lng": -86.8246,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316114800000,
+          "lat": 35.9276,
+          "lng": -86.8244,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316111200000,
+          "lat": 35.9288,
+          "lng": -86.8244,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316107600000,
+          "lat": 35.9296,
+          "lng": -86.8246,
+          "engaged": false,
           "confidence": "documented"
         }
       ]
@@ -1666,6 +1816,136 @@
           "evidenceRefs": [
             {
               "sourceId": "source-jacobs-2006"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -86.8612,
+            35.9219
+          ]
+        },
+        "properties": {
+          "id": "layer-battery-carter",
+          "name": "Battery at the Carter Salient",
+          "category": "works",
+          "styleKey": "battery",
+          "guns": 4,
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-jacobs-2006"
+            },
+            {
+              "sourceId": "source-atlas-1864"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -86.8689,
+            35.9221
+          ]
+        },
+        "properties": {
+          "id": "layer-battery-west",
+          "name": "Western Works Battery",
+          "category": "works",
+          "styleKey": "battery",
+          "guns": 3,
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-jacobs-2006"
+            },
+            {
+              "sourceId": "source-atlas-1864"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -86.8542,
+            35.9234
+          ]
+        },
+        "properties": {
+          "id": "layer-battery-east",
+          "name": "Eastern Works Battery",
+          "category": "works",
+          "styleKey": "battery",
+          "guns": 3,
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-jacobs-2006"
+            },
+            {
+              "sourceId": "source-atlas-1864"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -86.856,
+            35.9297
+          ]
+        },
+        "properties": {
+          "id": "layer-battery-granger",
+          "name": "Fort Granger Guns",
+          "category": "works",
+          "styleKey": "battery",
+          "guns": 4,
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-jacobs-2006"
+            },
+            {
+              "sourceId": "source-atlas-1864"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -86.8628,
+            35.9146
+          ]
+        },
+        "properties": {
+          "id": "layer-battery-conf",
+          "name": "Confederate Advance Battery",
+          "category": "works",
+          "styleKey": "battery",
+          "guns": 2,
+          "confidence": "inferred",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-jacobs-2006"
+            },
+            {
+              "sourceId": "source-atlas-1864"
             }
           ]
         }

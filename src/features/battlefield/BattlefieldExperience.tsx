@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 
 import CanvasBattlefield from "@/features/battlefield/CanvasBattlefield";
@@ -18,6 +19,19 @@ import { validateScenarioData } from "@/lib/battle/validation";
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN?.trim();
 // Data lives under the app's base path when hosted on a subpath (GitHub Pages).
 const DATA_ROOT = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/data/franklin`;
+
+// The 3D battlefield pulls in three.js, so it loads only when opened.
+const Battlefield3D = dynamic(
+  () => import("@/features/battlefield/three/Battlefield3D"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="status-veil">
+        <p className="status-line">Raising the field&hellip;</p>
+      </div>
+    ),
+  },
+);
 
 function BeatCaption() {
   const data = useBattleStore((state) => state.data);
@@ -79,6 +93,7 @@ export default function BattlefieldExperience() {
     () => typeof window === "undefined" || window.innerWidth > 900,
   );
   const [satelliteView, setSatelliteView] = useState(false);
+  const [view3d, setView3d] = useState(false);
 
   const data = useBattleStore((state) => state.data);
   const sidebarMode = useBattleStore((state) => state.uiState.sidebarMode);
@@ -193,6 +208,7 @@ export default function BattlefieldExperience() {
     setShowIntro(false);
     setShowEpilogue(false);
     setSatelliteView(false);
+    setView3d(false);
     beginStory();
   };
 
@@ -202,11 +218,13 @@ export default function BattlefieldExperience() {
     setSidebarMode("analyze");
   };
 
-  const storyActive = sidebarMode === "story" && guidedMode;
+  const storyActive = sidebarMode === "story" && guidedMode && !view3d;
 
   return (
     <div className="stage-root" data-testid="battlefield-app" data-mode={sidebarMode}>
-      {satelliteView && MAPBOX_TOKEN ? (
+      {view3d ? (
+        <Battlefield3D bundle={data} reducedMotion={reducedMotion} />
+      ) : satelliteView && MAPBOX_TOKEN ? (
         <SatelliteStage />
       ) : (
         <CanvasBattlefield bundle={data} attract={showIntro} reducedMotion={reducedMotion} />
@@ -227,6 +245,7 @@ export default function BattlefieldExperience() {
                 data-testid="mode-story"
                 onClick={() => {
                   setSatelliteView(false);
+                  setView3d(false);
                   if (!storyActive) {
                     beginStory();
                   }
@@ -236,14 +255,26 @@ export default function BattlefieldExperience() {
               </button>
               <button
                 type="button"
-                className={sidebarMode === "analyze" && !satelliteView ? "active" : ""}
+                className={sidebarMode === "analyze" && !satelliteView && !view3d ? "active" : ""}
                 data-testid="mode-explore"
                 onClick={() => {
                   setSatelliteView(false);
+                  setView3d(false);
                   setSidebarMode("analyze");
                 }}
               >
                 Explore
+              </button>
+              <button
+                type="button"
+                className={view3d ? "active" : ""}
+                data-testid="mode-3d"
+                onClick={() => {
+                  setSatelliteView(false);
+                  setView3d(true);
+                }}
+              >
+                3D Field
               </button>
               {MAPBOX_TOKEN ? (
                 <button
@@ -252,6 +283,7 @@ export default function BattlefieldExperience() {
                   data-testid="mode-satellite"
                   onClick={() => {
                     setSatelliteView(true);
+                    setView3d(false);
                     setSidebarMode("analyze");
                   }}
                 >
@@ -283,7 +315,7 @@ export default function BattlefieldExperience() {
             <StoryRail bundle={data} onOpenEpilogue={() => setShowEpilogue(true)} />
           </div>
 
-          {!satelliteView ? <BeatCaption /> : null}
+          {!satelliteView && !view3d ? <BeatCaption /> : null}
           <HoveredEventToast />
           <ControlDock bundle={data} />
           {selectedFormationId ? <IntelCard bundle={data} /> : null}
