@@ -12,7 +12,10 @@
         "pitch": 24,
         "yaw": 30
       },
-      "focusUnitIds": ["conf-cleburne-division", "conf-brown-division"]
+      "focusUnitIds": [
+        "conf-cleburne-division",
+        "conf-brown-division"
+      ]
     },
     {
       "id": "beat-wagner-screen",
@@ -26,7 +29,10 @@
         "pitch": 28,
         "yaw": 52
       },
-      "focusUnitIds": ["union-wagner-division", "conf-cleburne-division"]
+      "focusUnitIds": [
+        "union-wagner-division",
+        "conf-cleburne-division"
+      ]
     },
     {
       "id": "beat-grand-assault",
@@ -40,7 +46,11 @@
         "pitch": 30,
         "yaw": 12
       },
-      "focusUnitIds": ["conf-cleburne-division", "conf-brown-division", "conf-french-division"]
+      "focusUnitIds": [
+        "conf-cleburne-division",
+        "conf-brown-division",
+        "conf-french-division"
+      ]
     },
     {
       "id": "beat-columbia-pike-breach",
@@ -54,7 +64,11 @@
         "pitch": 34,
         "yaw": 73
       },
-      "focusUnitIds": ["union-cox-division", "union-wagner-division", "conf-cleburne-division"]
+      "focusUnitIds": [
+        "union-cox-division",
+        "union-wagner-division",
+        "conf-cleburne-division"
+      ]
     },
     {
       "id": "beat-countercharge",
@@ -68,7 +82,11 @@
         "pitch": 27,
         "yaw": -22
       },
-      "focusUnitIds": ["union-wood-division", "union-kimball-division", "conf-brown-division"]
+      "focusUnitIds": [
+        "union-wood-division",
+        "union-kimball-division",
+        "conf-brown-division"
+      ]
     },
     {
       "id": "beat-night-grind",
@@ -82,7 +100,10 @@
         "pitch": 38,
         "yaw": 115
       },
-      "focusUnitIds": ["conf-cleburne-division", "union-cox-division"]
+      "focusUnitIds": [
+        "conf-cleburne-division",
+        "union-cox-division"
+      ]
     },
     {
       "id": "beat-assault-ebbs",
@@ -96,7 +117,10 @@
         "pitch": 25,
         "yaw": -55
       },
-      "focusUnitIds": ["conf-brown-division", "conf-french-division"]
+      "focusUnitIds": [
+        "conf-brown-division",
+        "conf-french-division"
+      ]
     },
     {
       "id": "beat-aftermath",
@@ -110,7 +134,11 @@
         "pitch": 20,
         "yaw": 180
       },
-      "focusUnitIds": ["union-cox-division", "conf-cleburne-division", "conf-bate-division"]
+      "focusUnitIds": [
+        "union-cox-division",
+        "conf-cleburne-division",
+        "conf-bate-division"
+      ]
     }
   ],
   "mapLabels": [
@@ -118,7 +146,7 @@
       "id": "label-carter-house",
       "name": "Carter House",
       "type": "landmark",
-      "lat": 35.9224,
+      "lat": 35.9229,
       "lng": -86.8597,
       "importance": 5
     },
@@ -126,24 +154,16 @@
       "id": "label-cotton-gin",
       "name": "Carter Cotton Gin",
       "type": "landmark",
-      "lat": 35.9219,
+      "lat": 35.9212,
       "lng": -86.8604,
-      "importance": 4
-    },
-    {
-      "id": "label-columbia-pike",
-      "name": "Columbia Pike",
-      "type": "road",
-      "lat": 35.9207,
-      "lng": -86.8592,
-      "importance": 5
+      "importance": 3
     },
     {
       "id": "label-federal-center",
       "name": "Union Main Works",
       "type": "defensive-line",
-      "lat": 35.9226,
-      "lng": -86.8648,
+      "lat": 35.9222,
+      "lng": -86.8728,
       "importance": 5
     },
     {
@@ -163,19 +183,35 @@
       "importance": 4
     },
     {
-      "id": "label-carters-creek",
-      "name": "Carter's Creek Pike",
-      "type": "road",
-      "lat": 35.9178,
-      "lng": -86.8733,
-      "importance": 3
-    },
-    {
       "id": "label-cemetery-sector",
       "name": "Cemetery Sector",
       "type": "sector",
       "lat": 35.9233,
-      "lng": -86.853,
+      "lng": -86.8498,
+      "importance": 2
+    },
+    {
+      "id": "label-fort-granger",
+      "name": "Fort Granger",
+      "type": "fort",
+      "lat": 35.9298,
+      "lng": -86.856,
+      "importance": 3
+    },
+    {
+      "id": "label-franklin-town",
+      "name": "Franklin",
+      "type": "town",
+      "lat": 35.9268,
+      "lng": -86.8678,
+      "importance": 4
+    },
+    {
+      "id": "label-breezy-hill",
+      "name": "Breezy Hill",
+      "type": "high-ground",
+      "lat": 35.9102,
+      "lng": -86.8556,
       "importance": 2
     }
   ],

@@ -1,56 +1,94 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("Franklin immersive battlefield v2", () => {
-  test("runs story-first guided flow with director controls", async ({ page }) => {
+test.describe("Franklin cinematic battlefield", () => {
+  test("opens on the intro and plays the guided story", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.getByRole("heading", { name: "Battle of Franklin" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Chapter Director" })).toBeVisible();
+    await expect(page.getByTestId("intro-overlay")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "The Battle of Franklin" })).toBeVisible();
 
-    const assaultChapter = page.getByTestId("chapter-chapter-assault");
-    await assaultChapter.click();
-    await expect(assaultChapter).toHaveClass(/active/);
+    await page.getByTestId("intro-begin").click();
 
-    await page.getByRole("button", { name: "Replay Chapter" }).click();
-    await page.getByRole("button", { name: "Skip to Pivotal" }).click();
+    await expect(page.getByTestId("intro-overlay")).toHaveCount(0);
+    await expect(page.getByTestId("battlefield-canvas")).toBeVisible();
+    await expect(page.getByTestId("control-dock")).toBeVisible();
 
-    await page.getByTestId("guided-mode-toggle").click();
-    await expect(page.getByText("Free Analysis")).toBeVisible();
+    // The opening beat caption appears once playback crosses the first beat.
+    await expect(page.getByTestId("beat-caption")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Winstead Hill Observation" }),
+    ).toBeVisible();
   });
 
-  test("switches reconstructed and modern map modes", async ({ page }) => {
+  test("navigates chapters from the story rail", async ({ page }) => {
     await page.goto("/");
+    await page.getByTestId("intro-begin").click();
 
-    const modernButton = page.getByRole("button", { name: "Modern Comparison" });
-    const reconstructedButton = page.getByRole("button", { name: "Reconstructed 1864" });
+    const assault = page.getByTestId("chapter-chapter-assault");
+    await assault.click();
+    await expect(page.locator(".story-rail li.active")).toContainText("Grand Assault");
+    await expect(page.getByTestId("dock-clock-time")).toHaveText(/3:0\d PM/);
 
-    await modernButton.click();
-    await expect(modernButton).toHaveClass(/active/);
-
-    await reconstructedButton.click();
-    await expect(reconstructedButton).toHaveClass(/active/);
+    await page.getByTestId("chapter-chapter-nightfall").click();
+    await expect(page.getByTestId("dock-clock-time")).toHaveText(/7:0\d PM/);
+    await expect(page.getByText("Night", { exact: true })).toBeVisible();
   });
 
-  test("keeps map primary with bottom-sheet modes on mobile", async ({ page }) => {
+  test("scrubs the timeline and pauses playback", async ({ page }) => {
+    await page.goto("/");
+    await page.getByTestId("intro-explore").click();
+
+    const track = page.getByTestId("timeline-track");
+    const box = await track.boundingBox();
+    if (!box) {
+      throw new Error("timeline track not visible");
+    }
+
+    await page.mouse.click(box.x + box.width * 0.5, box.y + box.height / 2);
+    await expect(page.getByTestId("dock-clock-time")).toHaveText(/4:[23]\d PM/);
+
+    await page.getByTestId("play-pause-button").click();
+    await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
+    await page.getByTestId("play-pause-button").click();
+    await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
+  });
+
+  test("opens records with evidence traceability", async ({ page }) => {
+    await page.goto("/");
+    await page.getByTestId("intro-explore").click();
+
+    await page.getByTestId("mode-records").click();
+    await expect(page.getByTestId("records-panel")).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Claims & confidence/ })).toBeVisible();
+
+    await page.getByRole("button", { name: /Trace on timeline/ }).first().click();
+    await expect(page.getByTestId("dock-clock-time")).toHaveText(/3:00 PM/);
+  });
+
+  test("shows the epilogue memorial", async ({ page }) => {
+    await page.goto("/");
+    await page.getByTestId("intro-begin").click();
+
+    await page.getByTestId("chapter-epilogue").click();
+    await expect(page.getByTestId("epilogue-overlay")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "The Cost of Five Hours" })).toBeVisible();
+    await expect(page.getByText("Patrick R. Cleburne")).toBeVisible();
+
+    await page.getByRole("button", { name: "Explore the field" }).click();
+    await expect(page.getByTestId("epilogue-overlay")).toHaveCount(0);
+  });
+
+  test("keeps the stage usable on mobile", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
+    await page.getByTestId("intro-begin").click();
 
-    await expect(page.locator(".panel-stack.bottom-sheet")).toBeVisible();
+    await expect(page.getByTestId("battlefield-canvas")).toBeVisible();
+    await expect(page.getByTestId("control-dock")).toBeVisible();
 
-    await page.getByRole("button", { name: "Analyze" }).click();
-    await expect(page.getByRole("heading", { name: "Casualty Counter" })).toBeVisible();
-
-    await page.getByRole("button", { name: "Evidence" }).click();
-    await expect(page.getByRole("heading", { name: "Claims and Confidence" })).toBeVisible();
-  });
-
-  test("supports evidence traceability to timeline", async ({ page }) => {
-    await page.goto("/");
-
-    await page.getByRole("button", { name: "Evidence" }).click();
-    await expect(page.getByRole("heading", { name: "Claims and Confidence" })).toBeVisible();
-
-    await page.getByRole("button", { name: "Trace on Timeline" }).first().click();
-    await expect(page.locator(".event-callout")).toBeVisible();
+    // The chapter rail starts collapsed on small screens and opens on demand.
+    await expect(page.getByTestId("story-rail")).not.toBeInViewport();
+    await page.getByRole("button", { name: /Chapters/ }).click();
+    await expect(page.getByTestId("story-rail")).toBeVisible();
   });
 });

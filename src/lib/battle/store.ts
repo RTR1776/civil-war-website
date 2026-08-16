@@ -10,7 +10,10 @@ import type {
   TimelineEvent,
 } from "@/lib/battle/types";
 
-const PLAYBACK_SCALE = 360;
+/** Sim-time multiplier for free-analysis playback (1x). */
+const FREE_PLAYBACK_SCALE = 360;
+/** In story mode every chapter plays for roughly this long at 1x. */
+const STORY_SECONDS_PER_CHAPTER = 32;
 const SIMULATION_TICK_MS = 20;
 
 export type PlaybackSpeed = 1 | 2 | 4;
@@ -36,7 +39,8 @@ export interface StoryState {
   activeBeatId: string | null;
   activeChapterId: string | null;
   lockedFormationId: string | null;
-  overlayText: string | null;
+  /** Set once guided playback has run the full timeline to its end. */
+  storyComplete: boolean;
 }
 
 interface BattlefieldState {
@@ -45,25 +49,13 @@ interface BattlefieldState {
   uiState: UIState;
   storyState: StoryState;
 
-  // Backward-compatible flat fields.
-  selectedTime: number;
-  isPlaying: boolean;
-  speed: PlaybackSpeed;
-  guidedMode: boolean;
-  activeBeatId: string | null;
-  hoveredEventId: string | null;
-  sidebarMode: SidebarMode;
-  mapMode: MapMode;
-
   setData: (nextData: ScenarioDataBundle) => void;
 
   play: () => void;
   pause: () => void;
   togglePlayback: () => void;
-  setPlaying: (value: boolean) => void;
   setSpeed: (nextSpeed: PlaybackSpeed) => void;
   seek: (nextTime: number) => void;
-  setTime: (nextTime: number) => void;
   advanceTimeline: (realElapsedMs: number) => void;
 
   setGuidedMode: (value: boolean) => void;
@@ -72,20 +64,18 @@ interface BattlefieldState {
   setHoveredEventId: (eventId: string | null) => void;
   selectFormation: (formationId: string | null) => void;
 
+  beginStory: () => void;
+  acknowledgeStoryComplete: () => void;
   selectBeat: (beat: NarrativeBeat) => void;
   selectChapter: (chapterId: string) => void;
   replayChapter: () => void;
   skipToPivotal: () => void;
   lockCameraToFormation: (formationId: string | null) => void;
-  setStoryOverlay: (value: string | null) => void;
 }
 
 function getRange(data: ScenarioDataBundle | null): { start: number; end: number } {
   if (!data) {
-    return {
-      start: 0,
-      end: 0,
-    };
+    return { start: 0, end: 0 };
   }
 
   return {
@@ -94,33 +84,46 @@ function getRange(data: ScenarioDataBundle | null): { start: number; end: number
   };
 }
 
-function setFlatState(
-  set: (partial: Partial<BattlefieldState>) => void,
-  simulationState: SimulationState,
-  uiState: UIState,
-  storyState: StoryState,
-) {
-  set({
-    simulationState,
-    uiState,
-    storyState,
-    selectedTime: simulationState.simTimeMs,
-    isPlaying: simulationState.isPlaying,
-    speed: simulationState.speed,
-    guidedMode: uiState.guidedMode,
-    activeBeatId: storyState.activeBeatId,
-    hoveredEventId: uiState.hoveredEventId,
-    sidebarMode: uiState.sidebarMode,
-    mapMode: uiState.mapMode,
-  });
-}
-
 function chapterById(data: ScenarioDataBundle | null, chapterId: string | null): ChapterScene | null {
   if (!data || !chapterId) {
     return null;
   }
 
   return data.chapters.find((chapter) => chapter.id === chapterId) ?? null;
+}
+
+/** The chapter whose window contains the given time (last one whose start has passed). */
+export function chapterAtTime(data: ScenarioDataBundle, timeMs: number): ChapterScene | null {
+  let candidate: ChapterScene | null = null;
+
+  for (const chapterId of data.manifest.chapterOrder) {
+    const chapter = data.chapters.find((entry) => entry.id === chapterId);
+    if (!chapter) {
+      continue;
+    }
+
+    if (Date.parse(chapter.startTime) <= timeMs) {
+      candidate = chapter;
+    }
+  }
+
+  return candidate ?? data.chapters[0] ?? null;
+}
+
+/** The most recent narrative beat the timeline has crossed. */
+export function beatAtTime(data: ScenarioDataBundle, timeMs: number): NarrativeBeat | null {
+  let candidate: NarrativeBeat | null = null;
+  let candidateTime = -Infinity;
+
+  for (const beat of data.narrativeBeats) {
+    const beatTime = Date.parse(beat.time);
+    if (beatTime <= timeMs && beatTime > candidateTime) {
+      candidate = beat;
+      candidateTime = beatTime;
+    }
+  }
+
+  return candidate;
 }
 
 export function resolveActiveTimelineEvent(
@@ -145,6 +148,32 @@ export function resolveActiveTimelineEvent(
   return nearestDistance <= 25 * 60 * 1000 ? nearest : null;
 }
 
+function syncStoryPointers(
+  data: ScenarioDataBundle | null,
+  timeMs: number,
+  storyState: StoryState,
+): StoryState {
+  if (!data) {
+    return storyState;
+  }
+
+  const chapter = chapterAtTime(data, timeMs);
+  const beat = beatAtTime(data, timeMs);
+
+  if (
+    storyState.activeChapterId === (chapter?.id ?? null)
+    && storyState.activeBeatId === (beat?.id ?? null)
+  ) {
+    return storyState;
+  }
+
+  return {
+    ...storyState,
+    activeChapterId: chapter?.id ?? null,
+    activeBeatId: beat?.id ?? null,
+  };
+}
+
 export const useBattleStore = create<BattlefieldState>((set, get) => ({
   data: null,
   simulationState: {
@@ -158,7 +187,7 @@ export const useBattleStore = create<BattlefieldState>((set, get) => ({
   uiState: {
     sidebarMode: "story",
     mapMode: "reconstructed",
-    guidedMode: false,
+    guidedMode: true,
     hoveredEventId: null,
     selectedFormationId: null,
   },
@@ -166,139 +195,111 @@ export const useBattleStore = create<BattlefieldState>((set, get) => ({
     activeBeatId: null,
     activeChapterId: null,
     lockedFormationId: null,
-    overlayText: null,
+    storyComplete: false,
   },
-
-  selectedTime: 0,
-  isPlaying: false,
-  speed: 1,
-  guidedMode: false,
-  activeBeatId: null,
-  hoveredEventId: null,
-  sidebarMode: "story",
-  mapMode: "reconstructed",
 
   setData: (nextData) => {
     const start = Date.parse(nextData.manifest.timeStart);
     const end = Date.parse(nextData.manifest.timeEnd);
     const firstChapterId = nextData.manifest.chapterOrder[0] ?? nextData.chapters[0]?.id ?? null;
-    const defaultMapMode = nextData.manifest.mapModes.includes("reconstructed")
-      ? "reconstructed"
-      : nextData.manifest.mapModes[0] ?? "reconstructed";
 
-    const simulationState: SimulationState = {
-      simTimeMs: start,
-      minTimeMs: start,
-      maxTimeMs: end,
-      isPlaying: false,
-      speed: 1,
-      tickAccumulatorMs: 0,
-    };
-
-    const uiState: UIState = {
-      sidebarMode: nextData.manifest.defaultMode,
-      mapMode: defaultMapMode,
-      guidedMode: nextData.manifest.defaultMode === "story",
-      hoveredEventId: null,
-      selectedFormationId: nextData.formations[0]?.id ?? null,
-    };
-
-    const storyState: StoryState = {
-      activeBeatId: null,
-      activeChapterId: firstChapterId,
-      lockedFormationId: null,
-      overlayText: null,
-    };
-
-    set({ data: nextData });
-    setFlatState(set, simulationState, uiState, storyState);
+    set({
+      data: nextData,
+      simulationState: {
+        simTimeMs: start,
+        minTimeMs: start,
+        maxTimeMs: end,
+        isPlaying: false,
+        speed: 1,
+        tickAccumulatorMs: 0,
+      },
+      uiState: {
+        sidebarMode: nextData.manifest.defaultMode,
+        mapMode: "reconstructed",
+        guidedMode: nextData.manifest.defaultMode === "story",
+        hoveredEventId: null,
+        selectedFormationId: null,
+      },
+      storyState: {
+        activeBeatId: null,
+        activeChapterId: firstChapterId,
+        lockedFormationId: null,
+        storyComplete: false,
+      },
+    });
   },
 
   play: () => {
-    const { simulationState, uiState } = get();
-    if (uiState.guidedMode) {
-      return;
-    }
+    const { simulationState } = get();
+    const atEnd = simulationState.simTimeMs >= simulationState.maxTimeMs;
 
-    const nextSimulation: SimulationState = {
-      ...simulationState,
-      isPlaying: true,
-    };
-
-    setFlatState(set, nextSimulation, uiState, get().storyState);
+    set({
+      simulationState: {
+        ...simulationState,
+        simTimeMs: atEnd ? simulationState.minTimeMs : simulationState.simTimeMs,
+        isPlaying: true,
+      },
+    });
   },
 
   pause: () => {
-    const { simulationState, uiState, storyState } = get();
-    const nextSimulation: SimulationState = {
-      ...simulationState,
-      isPlaying: false,
-      tickAccumulatorMs: 0,
-    };
-
-    setFlatState(set, nextSimulation, uiState, storyState);
+    const { simulationState } = get();
+    set({
+      simulationState: {
+        ...simulationState,
+        isPlaying: false,
+        tickAccumulatorMs: 0,
+      },
+    });
   },
 
   togglePlayback: () => {
-    const { simulationState, uiState, storyState } = get();
-    if (uiState.guidedMode) {
-      return;
+    const { simulationState } = get();
+    if (simulationState.isPlaying) {
+      get().pause();
+    } else {
+      get().play();
     }
-
-    const nextSimulation: SimulationState = {
-      ...simulationState,
-      isPlaying: !simulationState.isPlaying,
-      tickAccumulatorMs: simulationState.isPlaying ? 0 : simulationState.tickAccumulatorMs,
-    };
-
-    setFlatState(set, nextSimulation, uiState, storyState);
-  },
-
-  setPlaying: (value) => {
-    const { simulationState, uiState, storyState } = get();
-    const nextSimulation: SimulationState = {
-      ...simulationState,
-      isPlaying: value,
-      tickAccumulatorMs: value ? simulationState.tickAccumulatorMs : 0,
-    };
-
-    setFlatState(set, nextSimulation, uiState, storyState);
   },
 
   setSpeed: (nextSpeed) => {
-    const { simulationState, uiState, storyState } = get();
-    const nextSimulation: SimulationState = {
-      ...simulationState,
-      speed: nextSpeed,
-    };
-
-    setFlatState(set, nextSimulation, uiState, storyState);
+    const { simulationState } = get();
+    set({ simulationState: { ...simulationState, speed: nextSpeed } });
   },
 
   seek: (nextTime) => {
-    const { data, simulationState, uiState, storyState } = get();
+    const { data, simulationState, storyState } = get();
     const { start, end } = getRange(data);
     const clamped = clampTime(nextTime, start, end);
 
-    const nextSimulation: SimulationState = {
-      ...simulationState,
-      simTimeMs: clamped,
-      minTimeMs: start,
-      maxTimeMs: end,
-      isPlaying: clamped < end ? simulationState.isPlaying : false,
-    };
-
-    setFlatState(set, nextSimulation, uiState, storyState);
-  },
-
-  setTime: (nextTime) => {
-    get().seek(nextTime);
+    set({
+      simulationState: {
+        ...simulationState,
+        simTimeMs: clamped,
+        minTimeMs: start,
+        maxTimeMs: end,
+        isPlaying: clamped < end ? simulationState.isPlaying : false,
+      },
+      storyState: syncStoryPointers(data, clamped, storyState),
+    });
   },
 
   advanceTimeline: (realElapsedMs) => {
     const { data, simulationState, uiState, storyState } = get();
-    if (!data || !simulationState.isPlaying || uiState.guidedMode) {
+    if (!data || !simulationState.isPlaying) {
       return;
+    }
+
+    // Story mode paces each chapter to a similar screen duration; free mode
+    // runs at a fixed sim-time multiplier.
+    let ratePerMs = FREE_PLAYBACK_SCALE;
+    if (uiState.guidedMode) {
+      const chapter = chapterById(data, storyState.activeChapterId)
+        ?? chapterAtTime(data, simulationState.simTimeMs);
+      if (chapter) {
+        const spanMs = Math.max(60_000, Date.parse(chapter.endTime) - Date.parse(chapter.startTime));
+        ratePerMs = spanMs / (STORY_SECONDS_PER_CHAPTER * 1000);
+      }
     }
 
     const frameDuration = Math.max(0, Math.min(realElapsedMs, 120));
@@ -307,57 +308,44 @@ export const useBattleStore = create<BattlefieldState>((set, get) => ({
 
     while (accumulator >= SIMULATION_TICK_MS) {
       accumulator -= SIMULATION_TICK_MS;
-      simTime += SIMULATION_TICK_MS * PLAYBACK_SCALE * simulationState.speed;
+      simTime += SIMULATION_TICK_MS * ratePerMs * simulationState.speed;
     }
 
     const nextTime = clampTime(simTime, simulationState.minTimeMs, simulationState.maxTimeMs);
+    const reachedEnd = nextTime >= simulationState.maxTimeMs;
 
-    const nextSimulation: SimulationState = {
-      ...simulationState,
-      simTimeMs: nextTime,
-      tickAccumulatorMs: accumulator,
-      isPlaying: nextTime < simulationState.maxTimeMs,
-    };
-
-    setFlatState(set, nextSimulation, uiState, storyState);
+    set({
+      simulationState: {
+        ...simulationState,
+        simTimeMs: nextTime,
+        tickAccumulatorMs: accumulator,
+        isPlaying: !reachedEnd,
+      },
+      storyState: {
+        ...syncStoryPointers(data, nextTime, storyState),
+        storyComplete: storyState.storyComplete || (reachedEnd && uiState.guidedMode),
+      },
+    });
   },
 
   setGuidedMode: (value) => {
-    const { simulationState, uiState, storyState } = get();
-
-    const nextSimulation: SimulationState = {
-      ...simulationState,
-      isPlaying: value ? false : simulationState.isPlaying,
-      tickAccumulatorMs: value ? 0 : simulationState.tickAccumulatorMs,
-    };
-
-    const nextUiState: UIState = {
-      ...uiState,
-      guidedMode: value,
-      sidebarMode: value ? "story" : uiState.sidebarMode,
-    };
-
-    setFlatState(set, nextSimulation, nextUiState, storyState);
+    const { uiState } = get();
+    set({ uiState: { ...uiState, guidedMode: value } });
   },
 
   setSidebarMode: (mode) => {
-    const { simulationState, uiState, storyState } = get();
-    const nextUiState: UIState = {
-      ...uiState,
-      sidebarMode: mode,
-      guidedMode: mode === "story" ? true : uiState.guidedMode,
-    };
-
-    const nextSimulation: SimulationState = {
-      ...simulationState,
-      isPlaying: mode === "story" ? false : simulationState.isPlaying,
-    };
-
-    setFlatState(set, nextSimulation, nextUiState, storyState);
+    const { uiState } = get();
+    set({
+      uiState: {
+        ...uiState,
+        sidebarMode: mode,
+        guidedMode: mode === "story" ? true : mode === "analyze" ? false : uiState.guidedMode,
+      },
+    });
   },
 
   toggleMapMode: (mode) => {
-    const { data, simulationState, uiState, storyState } = get();
+    const { data, uiState } = get();
     if (!data) {
       return;
     }
@@ -369,32 +357,56 @@ export const useBattleStore = create<BattlefieldState>((set, get) => ({
       return;
     }
 
-    const nextUiState: UIState = {
-      ...uiState,
-      mapMode: candidate,
-    };
-
-    setFlatState(set, simulationState, nextUiState, storyState);
+    set({ uiState: { ...uiState, mapMode: candidate } });
   },
 
   setHoveredEventId: (eventId) => {
-    const { simulationState, uiState, storyState } = get();
-    const nextUiState: UIState = {
-      ...uiState,
-      hoveredEventId: eventId,
-    };
-
-    setFlatState(set, simulationState, nextUiState, storyState);
+    const { uiState } = get();
+    if (uiState.hoveredEventId === eventId) {
+      return;
+    }
+    set({ uiState: { ...uiState, hoveredEventId: eventId } });
   },
 
   selectFormation: (formationId) => {
-    const { simulationState, uiState, storyState } = get();
-    const nextUiState: UIState = {
-      ...uiState,
-      selectedFormationId: formationId,
-    };
+    const { uiState } = get();
+    set({ uiState: { ...uiState, selectedFormationId: formationId } });
+  },
 
-    setFlatState(set, simulationState, nextUiState, storyState);
+  beginStory: () => {
+    const { data, simulationState, uiState, storyState } = get();
+    if (!data) {
+      return;
+    }
+
+    const { start } = getRange(data);
+
+    set({
+      simulationState: {
+        ...simulationState,
+        simTimeMs: start,
+        isPlaying: true,
+        tickAccumulatorMs: 0,
+      },
+      uiState: {
+        ...uiState,
+        sidebarMode: "story",
+        guidedMode: true,
+      },
+      storyState: {
+        ...syncStoryPointers(data, start, storyState),
+        lockedFormationId: null,
+        storyComplete: false,
+      },
+    });
+  },
+
+  acknowledgeStoryComplete: () => {
+    const { storyState } = get();
+    if (!storyState.storyComplete) {
+      return;
+    }
+    set({ storyState: { ...storyState, storyComplete: false } });
   },
 
   selectBeat: (beat) => {
@@ -405,28 +417,25 @@ export const useBattleStore = create<BattlefieldState>((set, get) => ({
       data?.chapters.find((chapter) => chapter.beatIds.includes(beat.id))?.id
       ?? storyState.activeChapterId;
 
-    const nextStoryState: StoryState = {
-      ...storyState,
-      activeBeatId: beat.id,
-      activeChapterId: chapterId,
-      overlayText: beat.title,
-      lockedFormationId: storyState.lockedFormationId,
-    };
-
-    const nextUiState: UIState = {
-      ...uiState,
-      guidedMode: true,
-      sidebarMode: "story",
-    };
-
-    const nextSimulation: SimulationState = {
-      ...simulationState,
-      simTimeMs: beatTime,
-      isPlaying: false,
-      tickAccumulatorMs: 0,
-    };
-
-    setFlatState(set, nextSimulation, nextUiState, nextStoryState);
+    set({
+      simulationState: {
+        ...simulationState,
+        simTimeMs: data
+          ? clampTime(beatTime, simulationState.minTimeMs, simulationState.maxTimeMs)
+          : beatTime,
+        tickAccumulatorMs: 0,
+      },
+      uiState: {
+        ...uiState,
+        sidebarMode: "story",
+        guidedMode: true,
+      },
+      storyState: {
+        ...storyState,
+        activeBeatId: beat.id,
+        activeChapterId: chapterId,
+      },
+    });
   },
 
   selectChapter: (chapterId) => {
@@ -437,29 +446,24 @@ export const useBattleStore = create<BattlefieldState>((set, get) => ({
     }
 
     const start = Date.parse(chapter.startTime);
-    const firstBeatId = chapter.beatIds[0] ?? storyState.activeBeatId;
 
-    const nextSimulation: SimulationState = {
-      ...simulationState,
-      simTimeMs: start,
-      isPlaying: false,
-      tickAccumulatorMs: 0,
-    };
-
-    const nextUiState: UIState = {
-      ...uiState,
-      guidedMode: true,
-      sidebarMode: "story",
-    };
-
-    const nextStoryState: StoryState = {
-      ...storyState,
-      activeChapterId: chapterId,
-      activeBeatId: firstBeatId,
-      overlayText: chapter.summary,
-    };
-
-    setFlatState(set, nextSimulation, nextUiState, nextStoryState);
+    set({
+      simulationState: {
+        ...simulationState,
+        simTimeMs: start,
+        tickAccumulatorMs: 0,
+      },
+      uiState: {
+        ...uiState,
+        sidebarMode: "story",
+        guidedMode: true,
+      },
+      storyState: {
+        ...storyState,
+        activeChapterId: chapterId,
+        activeBeatId: chapter.beatIds[0] ?? null,
+      },
+    });
   },
 
   replayChapter: () => {
@@ -488,22 +492,7 @@ export const useBattleStore = create<BattlefieldState>((set, get) => ({
   },
 
   lockCameraToFormation: (formationId) => {
-    const { simulationState, uiState, storyState } = get();
-    const nextStoryState: StoryState = {
-      ...storyState,
-      lockedFormationId: formationId,
-    };
-
-    setFlatState(set, simulationState, uiState, nextStoryState);
-  },
-
-  setStoryOverlay: (value) => {
-    const { simulationState, uiState, storyState } = get();
-    const nextStoryState: StoryState = {
-      ...storyState,
-      overlayText: value,
-    };
-
-    setFlatState(set, simulationState, uiState, nextStoryState);
+    const { storyState } = get();
+    set({ storyState: { ...storyState, lockedFormationId: formationId } });
   },
 }));

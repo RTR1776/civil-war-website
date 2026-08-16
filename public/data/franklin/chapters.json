@@ -17,7 +17,7 @@
         "lng": -86.862,
         "zoom": 13.9,
         "pitch": 38,
-        "bearing": 24,
+        "bearing": 8,
         "overlayText": "Commanders read the ground from Winstead Hill.",
         "focusFormationIds": [
           "conf-cleburne-division",
@@ -25,12 +25,24 @@
         ]
       },
       {
-        "timeOffsetMs": 9000,
+        "timeOffsetMs": 5400000,
+        "lat": 35.9152,
+        "lng": -86.8608,
+        "zoom": 14.05,
+        "pitch": 40,
+        "bearing": 16,
+        "overlayText": "Two miles of open ground separate the armies along Columbia Pike.",
+        "focusFormationIds": [
+          "union-wagner-division"
+        ]
+      },
+      {
+        "timeOffsetMs": 10200000,
         "lat": 35.9189,
         "lng": -86.8602,
         "zoom": 14.25,
         "pitch": 42,
-        "bearing": 54,
+        "bearing": 22,
         "overlayText": "Wagner's exposed brigades begin falling back.",
         "focusFormationIds": [
           "union-wagner-division"
@@ -57,11 +69,11 @@
     "cameraRail": [
       {
         "timeOffsetMs": 0,
-        "lat": 35.9167,
+        "lat": 35.9155,
         "lng": -86.8601,
-        "zoom": 14.1,
+        "zoom": 14.0,
         "pitch": 44,
-        "bearing": 14,
+        "bearing": 6,
         "overlayText": "The main Confederate wave forms and surges.",
         "focusFormationIds": [
           "conf-cleburne-division",
@@ -70,12 +82,25 @@
         ]
       },
       {
-        "timeOffsetMs": 11000,
-        "lat": 35.9202,
-        "lng": -86.8594,
-        "zoom": 14.45,
+        "timeOffsetMs": 3600000,
+        "lat": 35.9182,
+        "lng": -86.8597,
+        "zoom": 14.3,
+        "pitch": 47,
+        "bearing": 12,
+        "overlayText": "Massed lines cross the open plain under artillery fire.",
+        "focusFormationIds": [
+          "conf-cleburne-division",
+          "conf-brown-division"
+        ]
+      },
+      {
+        "timeOffsetMs": 6900000,
+        "lat": 35.9206,
+        "lng": -86.8596,
+        "zoom": 14.5,
         "pitch": 50,
-        "bearing": 19,
+        "bearing": 16,
         "overlayText": "Federal artillery and musketry intensify near the line.",
         "focusFormationIds": [
           "union-cox-division"
@@ -106,7 +131,7 @@
         "lng": -86.859,
         "zoom": 14.7,
         "pitch": 52,
-        "bearing": 78,
+        "bearing": 26,
         "overlayText": "The center buckles near Carter House.",
         "focusFormationIds": [
           "conf-cleburne-division",
@@ -114,12 +139,12 @@
         ]
       },
       {
-        "timeOffsetMs": 10000,
+        "timeOffsetMs": 3300000,
         "lat": 35.9221,
         "lng": -86.8604,
         "zoom": 14.85,
         "pitch": 55,
-        "bearing": 95,
+        "bearing": 34,
         "overlayText": "Counterfire and reserves prevent a full collapse.",
         "focusFormationIds": [
           "union-wood-division",
@@ -151,11 +176,24 @@
         "lng": -86.8616,
         "zoom": 14.55,
         "pitch": 47,
-        "bearing": -20,
+        "bearing": -8,
         "overlayText": "Union reserves launch local counterattacks.",
         "focusFormationIds": [
           "union-wood-division",
           "union-kimball-division"
+        ]
+      },
+      {
+        "timeOffsetMs": 3300000,
+        "lat": 35.9219,
+        "lng": -86.8598,
+        "zoom": 14.65,
+        "pitch": 49,
+        "bearing": -16,
+        "overlayText": "The inner line is restored in the darkness.",
+        "focusFormationIds": [
+          "union-wagner-division",
+          "union-cox-division"
         ]
       }
     ],
@@ -185,7 +223,7 @@
         "lng": -86.8579,
         "zoom": 14.5,
         "pitch": 57,
-        "bearing": 112,
+        "bearing": 30,
         "overlayText": "Combat continues in darkness at near point-blank range.",
         "focusFormationIds": [
           "conf-cleburne-division",
@@ -193,13 +231,26 @@
         ]
       },
       {
-        "timeOffsetMs": 9000,
-        "lat": 35.9227,
-        "lng": -86.8637,
-        "zoom": 14.1,
+        "timeOffsetMs": 3600000,
+        "lat": 35.9221,
+        "lng": -86.8608,
+        "zoom": 14.35,
+        "pitch": 46,
+        "bearing": 12,
+        "overlayText": "Attacks lose cohesion against the strongest Federal positions.",
+        "focusFormationIds": [
+          "conf-brown-division",
+          "conf-french-division"
+        ]
+      },
+      {
+        "timeOffsetMs": 6900000,
+        "lat": 35.9212,
+        "lng": -86.8622,
+        "zoom": 13.95,
         "pitch": 38,
-        "bearing": 178,
-        "overlayText": "By late evening, Confederate assaults lose cohesion.",
+        "bearing": 0,
+        "overlayText": "By nine o'clock the field falls quiet, littered with the fallen.",
         "focusFormationIds": [
           "conf-bate-division",
           "conf-french-division"

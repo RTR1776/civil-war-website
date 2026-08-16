@@ -11,10 +11,9 @@ import type {
 } from "geojson";
 import type { GeoJSONSource, Map as MapboxMap } from "mapbox-gl";
 
-import { interpolateFormationPositions, interpolateUnitPositions } from "@/lib/battle/interpolation";
+import { interpolateFormationPositions } from "@/lib/battle/interpolation";
 import type {
   ChapterScene,
-  DivisionUnit,
   Formation,
   MapLabel,
   MapLayerFeature,
@@ -23,17 +22,12 @@ import type {
   MovementKeyframe,
   NarrativeBeat,
   ScenarioManifest,
-  TimeSlice,
 } from "@/lib/battle/types";
-
-export type MapTheme = "historical" | "modern";
 
 interface PresentDayMapboxProps {
   manifest: ScenarioManifest;
-  formations?: Formation[];
-  units?: DivisionUnit[];
-  movementKeyframes?: MovementKeyframe[];
-  timeSlices?: TimeSlice[];
+  formations: Formation[];
+  movementKeyframes: MovementKeyframe[];
   mapLabels: MapLabel[];
   narrativeBeats: NarrativeBeat[];
   chapters?: ChapterScene[];
@@ -43,13 +37,10 @@ interface PresentDayMapboxProps {
   activeChapterId?: string | null;
   guidedMode: boolean;
   selectedFormationId?: string | null;
-  selectedUnitId?: string | null;
   mapMode?: MapMode;
-  mapTheme?: MapTheme;
   lockedFormationId?: string | null;
   reducedMotion?: boolean;
   onSelectFormation?: (formationId: string | null) => void;
-  onSelectUnit?: (unitId: string | null) => void;
 }
 
 const STYLE_BY_MODE: Record<MapMode, string> = {
@@ -84,39 +75,6 @@ interface Track {
   formationId: string;
   side: Formation["side"];
   points: TimedPoint[];
-}
-
-function normalizeMapMode(mode?: MapMode, theme?: MapTheme): MapMode {
-  if (mode) {
-    return mode;
-  }
-
-  return theme === "modern" ? "modern" : "reconstructed";
-}
-
-function normalizeFormations(formations?: Formation[], units?: DivisionUnit[]): Formation[] {
-  return formations ?? units ?? [];
-}
-
-function normalizeKeyframes(movementKeyframes?: MovementKeyframe[], timeSlices?: TimeSlice[]): MovementKeyframe[] {
-  if (movementKeyframes) {
-    return movementKeyframes;
-  }
-
-  return (timeSlices ?? []).map((timeSlice) => ({
-    timestamp: timeSlice.timestamp,
-    confidence: timeSlice.confidence,
-    interpolationHint: "linear",
-    positions: timeSlice.unitPositions.map((position) => ({
-      formationId: position.unitId,
-      lat: position.lat,
-      lng: position.lng,
-      engaged: position.engaged,
-      formation: position.formation,
-      elevation: position.elevation,
-      uncertaintyMeters: timeSlice.confidence === "inferred" ? 110 : 45,
-    })),
-  }));
 }
 
 function getShortName(value: string): string {
@@ -876,9 +834,7 @@ function resolveChapterCameraPose(chapter: ChapterScene, selectedTime: number): 
 export default function PresentDayMapbox({
   manifest,
   formations,
-  units,
   movementKeyframes,
-  timeSlices,
   mapLabels,
   narrativeBeats,
   chapters,
@@ -888,60 +844,43 @@ export default function PresentDayMapbox({
   activeChapterId,
   guidedMode,
   selectedFormationId,
-  selectedUnitId,
   mapMode,
-  mapTheme,
   lockedFormationId,
   reducedMotion = false,
   onSelectFormation,
-  onSelectUnit,
 }: PresentDayMapboxProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapboxMap | null>(null);
   const mapReadyRef = useRef(false);
-  const activeMapModeRef = useRef<MapMode>(normalizeMapMode(mapMode, mapTheme));
+  const activeMapModeRef = useRef<MapMode>(mapMode ?? "modern");
   const onSelectRef = useRef<(formationId: string | null) => void>(() => {});
   const lastGuidedCameraUpdateRef = useRef<number>(0);
   const focusPulseRafRef = useRef<number | null>(null);
 
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN?.trim();
 
-  const normalizedMapMode = normalizeMapMode(mapMode, mapTheme);
-  const normalizedFormations = useMemo(() => normalizeFormations(formations, units), [formations, units]);
-  const normalizedKeyframes = useMemo(
-    () => normalizeKeyframes(movementKeyframes, timeSlices),
-    [movementKeyframes, timeSlices],
-  );
-
-  const selectedId = selectedFormationId ?? selectedUnitId ?? null;
+  const normalizedMapMode: MapMode = mapMode ?? "modern";
 
   useEffect(() => {
     onSelectRef.current = (formationId) => {
-      if (onSelectFormation) {
-        onSelectFormation(formationId);
-      } else {
-        onSelectUnit?.(formationId);
-      }
+      onSelectFormation?.(formationId);
     };
-  }, [onSelectFormation, onSelectUnit]);
+  }, [onSelectFormation]);
 
-  const tracks = useMemo(() => buildTracks(normalizedFormations, normalizedKeyframes), [normalizedFormations, normalizedKeyframes]);
+  const tracks = useMemo(() => buildTracks(formations, movementKeyframes), [formations, movementKeyframes]);
 
   const offsetsByFormation = useMemo(() => {
     const map = new Map<string, Array<{ east: number; north: number }>>();
-    for (const formation of normalizedFormations) {
+    for (const formation of formations) {
       map.set(formation.id, buildFormationOffsets(troopDotCount(formation.strengthEstimate)));
     }
     return map;
-  }, [normalizedFormations]);
+  }, [formations]);
 
   const positionsByFormation = useMemo(() => {
-    const interpolated = movementKeyframes
-      ? interpolateFormationPositions(selectedTime, normalizedKeyframes)
-      : interpolateUnitPositions(selectedTime, normalizedKeyframes);
-
+    const interpolated = interpolateFormationPositions(selectedTime, movementKeyframes);
     return new Map(interpolated.map((position) => [position.formationId, position]));
-  }, [movementKeyframes, normalizedKeyframes, selectedTime]);
+  }, [movementKeyframes, selectedTime]);
 
   const dynamicTrailFeatures = useMemo(
     () => buildTrailFeatures(tracks, selectedTime),
@@ -949,13 +888,13 @@ export default function PresentDayMapbox({
   );
 
   const troopDots = useMemo(
-    () => buildTroopFeatures(normalizedFormations, positionsByFormation, selectedId, offsetsByFormation),
-    [normalizedFormations, offsetsByFormation, positionsByFormation, selectedId],
+    () => buildTroopFeatures(formations, positionsByFormation, selectedFormationId ?? null, offsetsByFormation),
+    [formations, offsetsByFormation, positionsByFormation, selectedFormationId],
   );
 
   const anchors = useMemo(
-    () => buildAnchorFeatures(normalizedFormations, positionsByFormation, selectedId),
-    [normalizedFormations, positionsByFormation, selectedId],
+    () => buildAnchorFeatures(formations, positionsByFormation, selectedFormationId ?? null),
+    [formations, positionsByFormation, selectedFormationId],
   );
 
   const labelFeatures = useMemo(() => buildLabelFeatures(mapLabels), [mapLabels]);
@@ -963,6 +902,28 @@ export default function PresentDayMapbox({
   const activeBeat = useMemo(() => resolveBeat(activeBeatId, narrativeBeats), [activeBeatId, narrativeBeats]);
   const activeChapter = useMemo(() => resolveChapter(chapters, activeChapterId), [activeChapterId, chapters]);
   const focusFeature = useMemo(() => buildFocusFeature(activeBeat), [activeBeat]);
+
+  // Latest render data, readable from long-lived map callbacks without
+  // retriggering the init effect (recreating the map every frame was the old
+  // failure mode here).
+  const latestRef = useRef({
+    labelFeatures,
+    splitMapLayers,
+    dynamicTrailFeatures,
+    troopDots,
+    anchors,
+    focusFeature,
+    bounds: manifest.bounds,
+  });
+  latestRef.current = {
+    labelFeatures,
+    splitMapLayers,
+    dynamicTrailFeatures,
+    troopDots,
+    anchors,
+    focusFeature,
+    bounds: manifest.bounds,
+  };
 
   useEffect(() => {
     if (!mapboxToken || !containerRef.current || mapRef.current) {
@@ -979,8 +940,9 @@ export default function PresentDayMapbox({
 
       mapbox.accessToken = mapboxToken;
 
-      const centerLat = (manifest.bounds.north + manifest.bounds.south) / 2;
-      const centerLng = (manifest.bounds.east + manifest.bounds.west) / 2;
+      const initialBounds = latestRef.current.bounds;
+      const centerLat = (initialBounds.north + initialBounds.south) / 2;
+      const centerLng = (initialBounds.east + initialBounds.west) / 2;
 
       const map = new mapbox.Map({
         container: containerRef.current,
@@ -1017,14 +979,15 @@ export default function PresentDayMapbox({
 
         addLayersIfMissing(map);
 
-        setSourceData(map, "battle-labels", labelFeatures);
-        setSourceData(map, "historic-lines", splitMapLayers.lines);
-        setSourceData(map, "historic-points", splitMapLayers.points);
-        setSourceData(map, "historic-polygons", splitMapLayers.polygons);
-        setSourceData(map, "battle-trails", dynamicTrailFeatures);
-        setSourceData(map, "troop-dots", troopDots);
-        setSourceData(map, "unit-anchors", anchors);
-        setSourceData(map, "focus-beat", focusFeature);
+        const latest = latestRef.current;
+        setSourceData(map, "battle-labels", latest.labelFeatures);
+        setSourceData(map, "historic-lines", latest.splitMapLayers.lines);
+        setSourceData(map, "historic-points", latest.splitMapLayers.points);
+        setSourceData(map, "historic-polygons", latest.splitMapLayers.polygons);
+        setSourceData(map, "battle-trails", latest.dynamicTrailFeatures);
+        setSourceData(map, "troop-dots", latest.troopDots);
+        setSourceData(map, "unit-anchors", latest.anchors);
+        setSourceData(map, "focus-beat", latest.focusFeature);
 
         applyModeStyling(map, activeMapModeRef.current);
       };
@@ -1064,9 +1027,10 @@ export default function PresentDayMapbox({
           }
         });
 
+        const fitTo = latestRef.current.bounds;
         const bounds: [[number, number], [number, number]] = [
-          [manifest.bounds.west, manifest.bounds.south],
-          [manifest.bounds.east, manifest.bounds.north],
+          [fitTo.west, fitTo.south],
+          [fitTo.east, fitTo.north],
         ];
 
         map.fitBounds(bounds, {
@@ -1090,22 +1054,10 @@ export default function PresentDayMapbox({
       mapRef.current?.remove();
       mapRef.current = null;
     };
-  }, [
-    anchors,
-    dynamicTrailFeatures,
-    focusFeature,
-    labelFeatures,
-    manifest.bounds.east,
-    manifest.bounds.north,
-    manifest.bounds.south,
-    manifest.bounds.west,
-    mapboxToken,
-    normalizedMapMode,
-    splitMapLayers.lines,
-    splitMapLayers.points,
-    splitMapLayers.polygons,
-    troopDots,
-  ]);
+    // The map is created once per token; live data flows in via the update
+    // effects below and latestRef, never by re-initializing the map.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapboxToken]);
 
   useEffect(() => {
     if (!mapRef.current || !mapReadyRef.current) {

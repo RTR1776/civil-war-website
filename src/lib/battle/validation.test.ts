@@ -1,33 +1,17 @@
-import manifest from "../../../public/data/franklin/manifest.json";
-import divisions from "../../../public/data/franklin/divisions.json";
-import events from "../../../public/data/franklin/events.json";
-import sources from "../../../public/data/franklin/sources.json";
-import chapters from "../../../public/data/franklin/chapters.json";
-import mapLayers from "../../../public/data/franklin/mapLayers.json";
-import evidence from "../../../public/data/franklin/evidence.json";
-
+import { buildFranklinBundle, franklinFiles } from "@/test-utils/franklinFixture";
 import { buildScenarioBundle } from "@/lib/battle/scenarioLoader";
 import { validateScenarioData } from "@/lib/battle/validation";
 
 describe("validateScenarioData", () => {
   it("accepts the Franklin dataset", () => {
-    const result = validateScenarioData(
-      buildScenarioBundle({
-        manifest,
-        divisions,
-        events,
-        sources,
-        chapters,
-        mapLayers,
-        evidence,
-      }),
-    );
+    const result = validateScenarioData(buildFranklinBundle());
 
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
 
   it("fails when an unknown formation id is referenced", () => {
+    const divisions = franklinFiles.divisions;
     const tamperedDivisions = {
       ...divisions,
       timeSlices: [
@@ -43,13 +27,8 @@ describe("validateScenarioData", () => {
 
     const result = validateScenarioData(
       buildScenarioBundle({
-        manifest,
+        ...franklinFiles,
         divisions: tamperedDivisions,
-        events,
-        sources,
-        chapters,
-        mapLayers,
-        evidence,
       }),
     );
 
@@ -58,6 +37,7 @@ describe("validateScenarioData", () => {
   });
 
   it("fails when a chapter has no evidence refs", () => {
+    const chapters = franklinFiles.chapters ?? [];
     const tamperedChapters = [
       {
         ...chapters[0],
@@ -68,13 +48,8 @@ describe("validateScenarioData", () => {
 
     const result = validateScenarioData(
       buildScenarioBundle({
-        manifest,
-        divisions,
-        events,
-        sources,
+        ...franklinFiles,
         chapters: tamperedChapters,
-        mapLayers,
-        evidence,
       }),
     );
 
