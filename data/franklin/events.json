@@ -1,0 +1,313 @@
+{
+  "narrativeBeats": [
+    {
+      "id": "beat-winstead-overlook",
+      "time": "1864-11-30T12:00:00-06:00",
+      "title": "Winstead Hill Observation",
+      "description": "Hood's command surveys Franklin from Winstead Hill while Union engineers strengthen interior lines.",
+      "cameraPose": {
+        "lat": 35.9105,
+        "lng": -86.862,
+        "distance": 72,
+        "pitch": 24,
+        "yaw": 30
+      },
+      "focusUnitIds": [
+        "conf-cleburne-division",
+        "conf-brown-division"
+      ]
+    },
+    {
+      "id": "beat-wagner-screen",
+      "time": "1864-11-30T15:00:00-06:00",
+      "title": "Wagner's Advanced Line",
+      "description": "Forward Union brigades become exposed and begin a pressured fallback toward the main works.",
+      "cameraPose": {
+        "lat": 35.919,
+        "lng": -86.86,
+        "distance": 58,
+        "pitch": 28,
+        "yaw": 52
+      },
+      "focusUnitIds": [
+        "union-wagner-division",
+        "conf-cleburne-division"
+      ]
+    },
+    {
+      "id": "beat-grand-assault",
+      "time": "1864-11-30T16:00:00-06:00",
+      "title": "Grand Confederate Assault",
+      "description": "Cheatham's corps advances in massed lines across open ground under intensifying Federal fire.",
+      "cameraPose": {
+        "lat": 35.9185,
+        "lng": -86.8585,
+        "distance": 66,
+        "pitch": 30,
+        "yaw": 12
+      },
+      "focusUnitIds": [
+        "conf-cleburne-division",
+        "conf-brown-division",
+        "conf-french-division"
+      ]
+    },
+    {
+      "id": "beat-columbia-pike-breach",
+      "time": "1864-11-30T17:00:00-06:00",
+      "title": "Columbia Pike Breach",
+      "description": "Combat compresses near the Carter House as Confederate formations penetrate portions of the line.",
+      "cameraPose": {
+        "lat": 35.9213,
+        "lng": -86.859,
+        "distance": 44,
+        "pitch": 34,
+        "yaw": 73
+      },
+      "focusUnitIds": [
+        "union-cox-division",
+        "union-wagner-division",
+        "conf-cleburne-division"
+      ]
+    },
+    {
+      "id": "beat-countercharge",
+      "time": "1864-11-30T18:00:00-06:00",
+      "title": "Union Countercharge",
+      "description": "Union reserves counterattack to seal breaks and restore the inner line under close-range fire.",
+      "cameraPose": {
+        "lat": 35.922,
+        "lng": -86.862,
+        "distance": 48,
+        "pitch": 27,
+        "yaw": -22
+      },
+      "focusUnitIds": [
+        "union-wood-division",
+        "union-kimball-division",
+        "conf-brown-division"
+      ]
+    },
+    {
+      "id": "beat-night-grind",
+      "time": "1864-11-30T19:00:00-06:00",
+      "title": "Nightfall Attrition",
+      "description": "Fighting continues in darkness with shattered regiments trading short-range volleys and bayonet thrusts.",
+      "cameraPose": {
+        "lat": 35.9222,
+        "lng": -86.8578,
+        "distance": 42,
+        "pitch": 38,
+        "yaw": 115
+      },
+      "focusUnitIds": [
+        "conf-cleburne-division",
+        "union-cox-division"
+      ]
+    },
+    {
+      "id": "beat-assault-ebbs",
+      "time": "1864-11-30T20:00:00-06:00",
+      "title": "Assault Momentum Erodes",
+      "description": "Confederate attacks lose cohesion; surviving formations recoil from the strongest Federal positions.",
+      "cameraPose": {
+        "lat": 35.9217,
+        "lng": -86.8608,
+        "distance": 54,
+        "pitch": 25,
+        "yaw": -55
+      },
+      "focusUnitIds": [
+        "conf-brown-division",
+        "conf-french-division"
+      ]
+    },
+    {
+      "id": "beat-aftermath",
+      "time": "1864-11-30T21:00:00-06:00",
+      "title": "Aftermath at the Works",
+      "description": "By late evening, the field is littered with casualties and Confederate command structure is devastated.",
+      "cameraPose": {
+        "lat": 35.9226,
+        "lng": -86.864,
+        "distance": 76,
+        "pitch": 20,
+        "yaw": 180
+      },
+      "focusUnitIds": [
+        "union-cox-division",
+        "conf-cleburne-division",
+        "conf-bate-division"
+      ]
+    }
+  ],
+  "mapLabels": [
+    {
+      "id": "label-carter-house",
+      "name": "Carter House",
+      "type": "landmark",
+      "lat": 35.9229,
+      "lng": -86.8597,
+      "importance": 5
+    },
+    {
+      "id": "label-cotton-gin",
+      "name": "Carter Cotton Gin",
+      "type": "landmark",
+      "lat": 35.9212,
+      "lng": -86.8604,
+      "importance": 3
+    },
+    {
+      "id": "label-federal-center",
+      "name": "Union Main Works",
+      "type": "defensive-line",
+      "lat": 35.9222,
+      "lng": -86.8728,
+      "importance": 5
+    },
+    {
+      "id": "label-harpeth",
+      "name": "Harpeth River Crossing",
+      "type": "river-crossing",
+      "lat": 35.9278,
+      "lng": -86.8694,
+      "importance": 3
+    },
+    {
+      "id": "label-winstead",
+      "name": "Winstead Hill",
+      "type": "high-ground",
+      "lat": 35.9096,
+      "lng": -86.862,
+      "importance": 4
+    },
+    {
+      "id": "label-cemetery-sector",
+      "name": "Cemetery Sector",
+      "type": "sector",
+      "lat": 35.9233,
+      "lng": -86.8498,
+      "importance": 2
+    },
+    {
+      "id": "label-fort-granger",
+      "name": "Fort Granger",
+      "type": "fort",
+      "lat": 35.9298,
+      "lng": -86.856,
+      "importance": 3
+    },
+    {
+      "id": "label-franklin-town",
+      "name": "Franklin",
+      "type": "town",
+      "lat": 35.9268,
+      "lng": -86.8678,
+      "importance": 4
+    },
+    {
+      "id": "label-breezy-hill",
+      "name": "Breezy Hill",
+      "type": "high-ground",
+      "lat": 35.9102,
+      "lng": -86.8556,
+      "importance": 2
+    }
+  ],
+  "timelineEvents": [
+    {
+      "id": "event-noon-setup",
+      "time": "1864-11-30T12:00:00-06:00",
+      "title": "Deployment and Observation",
+      "detail": "Commanders complete reconnaissance and battle lines form.",
+      "confidence": "documented"
+    },
+    {
+      "id": "event-forward-screen-pressure",
+      "time": "1864-11-30T15:00:00-06:00",
+      "title": "Forward Screen Pressured",
+      "detail": "Wagner's advanced brigades become exposed during Confederate approach.",
+      "confidence": "documented"
+    },
+    {
+      "id": "event-grand-assault-start",
+      "time": "1864-11-30T16:00:00-06:00",
+      "title": "Mass Assault Begins",
+      "detail": "Confederate divisions launch the principal assault wave.",
+      "confidence": "documented"
+    },
+    {
+      "id": "event-breach-fight",
+      "time": "1864-11-30T17:00:00-06:00",
+      "title": "Breach Fighting",
+      "detail": "Close-quarters combat erupts around Columbia Pike and Carter House.",
+      "confidence": "documented"
+    },
+    {
+      "id": "event-countercharge",
+      "time": "1864-11-30T18:00:00-06:00",
+      "title": "Countercharge",
+      "detail": "Union reinforcements counterattack to restore line continuity.",
+      "confidence": "inferred"
+    },
+    {
+      "id": "event-nightfall",
+      "time": "1864-11-30T19:00:00-06:00",
+      "title": "Nightfall Attrition",
+      "detail": "Fighting persists into darkness with heavy casualties.",
+      "confidence": "documented"
+    },
+    {
+      "id": "event-assault-ends",
+      "time": "1864-11-30T21:00:00-06:00",
+      "title": "Assault Exhausted",
+      "detail": "Major offensive momentum ceases by late evening.",
+      "confidence": "documented"
+    }
+  ],
+  "casualtyTimeline": [
+    {
+      "time": "1864-11-30T12:00:00-06:00",
+      "cumulativeCasualties": 0,
+      "confidence": "documented",
+      "note": "Major engagement not yet underway."
+    },
+    {
+      "time": "1864-11-30T15:00:00-06:00",
+      "cumulativeCasualties": 420,
+      "confidence": "inferred",
+      "note": "Skirmish and advance-line losses rise as contact intensifies."
+    },
+    {
+      "time": "1864-11-30T16:00:00-06:00",
+      "cumulativeCasualties": 1750,
+      "confidence": "documented",
+      "note": "Main assault opens with heavy casualties."
+    },
+    {
+      "time": "1864-11-30T17:00:00-06:00",
+      "cumulativeCasualties": 4550,
+      "confidence": "documented",
+      "note": "Breach fighting around the Carter House drives major losses."
+    },
+    {
+      "time": "1864-11-30T18:00:00-06:00",
+      "cumulativeCasualties": 6820,
+      "confidence": "inferred",
+      "note": "Countercharges and close combat sustain severe attrition."
+    },
+    {
+      "time": "1864-11-30T19:00:00-06:00",
+      "cumulativeCasualties": 8150,
+      "confidence": "documented",
+      "note": "Night fighting continues with diminishing offensive cohesion."
+    },
+    {
+      "time": "1864-11-30T21:00:00-06:00",
+      "cumulativeCasualties": 9300,
+      "confidence": "documented",
+      "note": "Approximate end-of-battle cumulative casualties (both sides)."
+    }
+  ]
+}

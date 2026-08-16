@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[4067,["/civil-war-website/_next/static/chunks/1efde4766b08ad53.js","/civil-war-website/_next/static/chunks/c40599327ab7971c.js"],"default"]
+3:I[97367,["/civil-war-website/_next/static/chunks/556032224453dfbc.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"buildId":"nb1uybpNINv7C7jmH5N5w","rsc":["$","$1","c",{"children":[["$","main",null,{"className":"app-shell","children":["$","$L2",null,{}]}],[["$","script","script-0",{"src":"/civil-war-website/_next/static/chunks/1efde4766b08ad53.js","async":true}],["$","script","script-1",{"src":"/civil-war-website/_next/static/chunks/c40599327ab7971c.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
+5:null

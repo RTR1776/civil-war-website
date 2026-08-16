@@ -1,0 +1,733 @@
+{
+  "id": "franklin-historic-layers",
+  "name": "Franklin 1864 Reconstruction",
+  "description": "Roads, works, waterways, and terrain landmarks reconstructed from period cartography and battle studies. Alignments are approximate and stylized for readability.",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -86.8626,
+            35.9042
+          ],
+          [
+            -86.8621,
+            35.9078
+          ],
+          [
+            -86.8612,
+            35.9105
+          ],
+          [
+            -86.8601,
+            35.9138
+          ],
+          [
+            -86.8596,
+            35.9172
+          ],
+          [
+            -86.8593,
+            35.9208
+          ],
+          [
+            -86.8594,
+            35.9232
+          ],
+          [
+            -86.8598,
+            35.9258
+          ],
+          [
+            -86.8604,
+            35.9282
+          ]
+        ]
+      },
+      "properties": {
+        "id": "layer-columbia-pike",
+        "name": "Columbia Pike",
+        "category": "road",
+        "styleKey": "road-primary",
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-atlas-1864"
+          },
+          {
+            "sourceId": "source-opdycke-1880"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -86.8604,
+            35.9282
+          ],
+          [
+            -86.8567,
+            35.9243
+          ],
+          [
+            -86.8531,
+            35.9204
+          ],
+          [
+            -86.8487,
+            35.9161
+          ],
+          [
+            -86.8438,
+            35.9118
+          ],
+          [
+            -86.8394,
+            35.9078
+          ]
+        ]
+      },
+      "properties": {
+        "id": "layer-lewisburg-pike",
+        "name": "Lewisburg Pike",
+        "category": "road",
+        "styleKey": "road-secondary",
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-atlas-1864"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -86.8604,
+            35.9282
+          ],
+          [
+            -86.8646,
+            35.9247
+          ],
+          [
+            -86.8691,
+            35.9212
+          ],
+          [
+            -86.8741,
+            35.9178
+          ],
+          [
+            -86.8796,
+            35.9142
+          ],
+          [
+            -86.8852,
+            35.911
+          ]
+        ]
+      },
+      "properties": {
+        "id": "layer-carters-creek-pike",
+        "name": "Carter's Creek Pike",
+        "category": "road",
+        "styleKey": "road-secondary",
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-atlas-1864"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -86.8489,
+            35.9036
+          ],
+          [
+            -86.8501,
+            35.9082
+          ],
+          [
+            -86.8513,
+            35.9128
+          ],
+          [
+            -86.8525,
+            35.9174
+          ],
+          [
+            -86.8534,
+            35.9216
+          ],
+          [
+            -86.8541,
+            35.9252
+          ],
+          [
+            -86.8531,
+            35.9289
+          ],
+          [
+            -86.8506,
+            35.9319
+          ]
+        ]
+      },
+      "properties": {
+        "id": "layer-railroad",
+        "name": "Nashville & Decatur R.R.",
+        "category": "road",
+        "styleKey": "railroad",
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-atlas-1864"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -86.8306,
+            35.9102
+          ],
+          [
+            -86.8322,
+            35.9151
+          ],
+          [
+            -86.8347,
+            35.9198
+          ],
+          [
+            -86.8389,
+            35.9243
+          ],
+          [
+            -86.8438,
+            35.9277
+          ],
+          [
+            -86.8492,
+            35.9305
+          ],
+          [
+            -86.8542,
+            35.9324
+          ],
+          [
+            -86.8586,
+            35.9318
+          ],
+          [
+            -86.8615,
+            35.9291
+          ],
+          [
+            -86.8656,
+            35.9276
+          ],
+          [
+            -86.8702,
+            35.9285
+          ],
+          [
+            -86.8734,
+            35.9315
+          ],
+          [
+            -86.8773,
+            35.9348
+          ],
+          [
+            -86.8822,
+            35.9365
+          ]
+        ]
+      },
+      "properties": {
+        "id": "layer-harpeth",
+        "name": "Harpeth River",
+        "category": "river",
+        "styleKey": "river-main",
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-atlas-1864"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -86.8737,
+            35.9268
+          ],
+          [
+            -86.8724,
+            35.9243
+          ],
+          [
+            -86.8703,
+            35.9226
+          ],
+          [
+            -86.8672,
+            35.9218
+          ],
+          [
+            -86.8638,
+            35.9214
+          ],
+          [
+            -86.8607,
+            35.9212
+          ],
+          [
+            -86.8592,
+            35.9214
+          ],
+          [
+            -86.8576,
+            35.9218
+          ],
+          [
+            -86.8548,
+            35.9227
+          ],
+          [
+            -86.8523,
+            35.9243
+          ],
+          [
+            -86.8508,
+            35.9266
+          ]
+        ]
+      },
+      "properties": {
+        "id": "layer-federal-works",
+        "name": "Federal Main Works",
+        "category": "works",
+        "styleKey": "works-main",
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-jacobs-2006"
+          },
+          {
+            "sourceId": "source-opdycke-1880"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -86.8626,
+            35.9227
+          ],
+          [
+            -86.8604,
+            35.9224
+          ],
+          [
+            -86.8582,
+            35.9226
+          ]
+        ]
+      },
+      "properties": {
+        "id": "layer-retrenchment",
+        "name": "Retrenchment Line",
+        "category": "works",
+        "styleKey": "works-secondary",
+        "confidence": "inferred",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-jacobs-2006"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -86.872,
+              35.924
+            ],
+            [
+              -86.8636,
+              35.924
+            ],
+            [
+              -86.8636,
+              35.929
+            ],
+            [
+              -86.872,
+              35.929
+            ],
+            [
+              -86.872,
+              35.924
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "layer-town-core",
+        "name": "Franklin",
+        "category": "sector",
+        "styleKey": "town-core",
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-atlas-1864"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -86.8622,
+              35.9231
+            ],
+            [
+              -86.8574,
+              35.9231
+            ],
+            [
+              -86.8574,
+              35.9206
+            ],
+            [
+              -86.8622,
+              35.9206
+            ],
+            [
+              -86.8622,
+              35.9231
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "layer-carter-sector",
+        "name": "Carter House Sector",
+        "category": "sector",
+        "styleKey": "sector-contested",
+        "confidence": "inferred",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-jacobs-2006"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -86.862,
+          35.9096
+        ]
+      },
+      "properties": {
+        "id": "layer-winstead-hill",
+        "name": "Winstead Hill",
+        "category": "terrain",
+        "styleKey": "hill",
+        "radiusM": 430,
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-atlas-1864"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -86.8556,
+          35.9102
+        ]
+      },
+      "properties": {
+        "id": "layer-breezy-hill",
+        "name": "Breezy Hill",
+        "category": "terrain",
+        "styleKey": "hill",
+        "radiusM": 360,
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-atlas-1864"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -86.8577,
+          35.9138
+        ]
+      },
+      "properties": {
+        "id": "layer-privet-knob",
+        "name": "Privet Knob",
+        "category": "terrain",
+        "styleKey": "hill",
+        "radiusM": 190,
+        "confidence": "inferred",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-jacobs-2006"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -86.8564,
+          35.9296
+        ]
+      },
+      "properties": {
+        "id": "layer-fort-granger",
+        "name": "Fort Granger",
+        "category": "works",
+        "styleKey": "fort",
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-atlas-1864"
+          },
+          {
+            "sourceId": "source-jacobs-2006"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -86.8597,
+          35.9224
+        ]
+      },
+      "properties": {
+        "id": "layer-carter-house",
+        "name": "Carter House",
+        "category": "landmark",
+        "styleKey": "landmark-primary",
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-jacobs-2006"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -86.8604,
+          35.9219
+        ]
+      },
+      "properties": {
+        "id": "layer-cotton-gin",
+        "name": "Carter Cotton Gin",
+        "category": "landmark",
+        "styleKey": "landmark-primary",
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-jacobs-2006"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -86.8612,
+          35.9219
+        ]
+      },
+      "properties": {
+        "id": "layer-battery-carter",
+        "name": "Battery at the Carter Salient",
+        "category": "works",
+        "styleKey": "battery",
+        "guns": 4,
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-jacobs-2006"
+          },
+          {
+            "sourceId": "source-atlas-1864"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -86.8689,
+          35.9221
+        ]
+      },
+      "properties": {
+        "id": "layer-battery-west",
+        "name": "Western Works Battery",
+        "category": "works",
+        "styleKey": "battery",
+        "guns": 3,
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-jacobs-2006"
+          },
+          {
+            "sourceId": "source-atlas-1864"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -86.8542,
+          35.9234
+        ]
+      },
+      "properties": {
+        "id": "layer-battery-east",
+        "name": "Eastern Works Battery",
+        "category": "works",
+        "styleKey": "battery",
+        "guns": 3,
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-jacobs-2006"
+          },
+          {
+            "sourceId": "source-atlas-1864"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -86.856,
+          35.9297
+        ]
+      },
+      "properties": {
+        "id": "layer-battery-granger",
+        "name": "Fort Granger Guns",
+        "category": "works",
+        "styleKey": "battery",
+        "guns": 4,
+        "confidence": "documented",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-jacobs-2006"
+          },
+          {
+            "sourceId": "source-atlas-1864"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -86.8628,
+          35.9146
+        ]
+      },
+      "properties": {
+        "id": "layer-battery-conf",
+        "name": "Confederate Advance Battery",
+        "category": "works",
+        "styleKey": "battery",
+        "guns": 2,
+        "confidence": "inferred",
+        "evidenceRefs": [
+          {
+            "sourceId": "source-jacobs-2006"
+          },
+          {
+            "sourceId": "source-atlas-1864"
+          }
+        ]
+      }
+    }
+  ]
+}
