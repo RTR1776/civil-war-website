@@ -9,7 +9,6 @@ import { Armies3D } from "@/features/battlefield/three/armies3d";
 import { Effects3D } from "@/features/battlefield/three/effects3d";
 import { BattlefieldWorld } from "@/features/battlefield/three/scene3d";
 import { vantagePoints, type Vantage } from "@/features/battlefield/three/viewpoints";
-import { interpolateFormationPositions } from "@/lib/battle/interpolation";
 import { useBattleStore } from "@/lib/battle/store";
 import { nightness } from "@/lib/battle/time";
 import type { ScenarioDataBundle } from "@/lib/battle/types";
@@ -221,7 +220,7 @@ export default function Battlefield3D({ bundle, reducedMotion }: Battlefield3DPr
 
       // Camera follow: keep the orbit target on the tracked formation.
       if (followRef.current) {
-        const followed = interpolatedWorld(bundle, world, followRef.current, timeMs);
+        const followed = armies.worldPositionOf(followRef.current);
         if (followed) {
           followTarget.set(followed.x, followed.y + 6, followed.z);
           controls.target.lerp(followTarget, reducedMotionRef.current ? 1 : 0.08);
@@ -292,17 +291,3 @@ export default function Battlefield3D({ bundle, reducedMotion }: Battlefield3DPr
   );
 }
 
-function interpolatedWorld(
-  bundle: ScenarioDataBundle,
-  world: BattlefieldWorld,
-  formationId: string,
-  timeMs: number,
-): { x: number; y: number; z: number } | null {
-  const position = interpolateFormationPositions(timeMs, bundle.movementKeyframes)
-    .find((entry) => entry.formationId === formationId);
-  if (!position) {
-    return null;
-  }
-  const point = world.terrainModel.projection.toWorld(position.lat, position.lng);
-  return { x: point.x, y: world.groundHeight(point.x, point.y), z: point.y };
-}

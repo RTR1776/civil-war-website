@@ -1,6 +1,6 @@
 {
   "scenarioId": "franklin-1864",
-  "builtAt": "2026-08-16T01:15:38.687Z",
+  "builtAt": "2026-08-16T03:11:56.275Z",
   "window": {
     "start": "1864-11-30T12:00:00-06:00",
     "end": "1864-11-30T21:00:00-06:00"
@@ -611,71 +611,71 @@
       "points": [
         {
           "t": -3316140000000,
-          "lat": 35.906,
-          "lng": -86.833,
+          "lat": 35.9052,
+          "lng": -86.8338,
           "engaged": false,
           "confidence": "documented"
         },
         {
           "t": -3316136400000,
-          "lat": 35.9082,
-          "lng": -86.8305,
+          "lat": 35.9086,
+          "lng": -86.8306,
           "engaged": false,
           "confidence": "inferred"
         },
         {
           "t": -3316132800000,
-          "lat": 35.9105,
-          "lng": -86.829,
-          "engaged": false,
+          "lat": 35.9138,
+          "lng": -86.8286,
+          "engaged": true,
           "confidence": "inferred"
         },
         {
           "t": -3316129200000,
-          "lat": 35.9142,
-          "lng": -86.8275,
-          "engaged": false,
+          "lat": 35.9196,
+          "lng": -86.8268,
+          "engaged": true,
           "confidence": "documented"
         },
         {
           "t": -3316125600000,
-          "lat": 35.9186,
-          "lng": -86.8262,
+          "lat": 35.9238,
+          "lng": -86.8258,
           "engaged": true,
           "confidence": "inferred"
         },
         {
           "t": -3316122000000,
-          "lat": 35.9224,
-          "lng": -86.8258,
+          "lat": 35.9186,
+          "lng": -86.828,
           "engaged": true,
           "confidence": "documented"
         },
         {
           "t": -3316118400000,
-          "lat": 35.9204,
-          "lng": -86.8272,
-          "engaged": true,
+          "lat": 35.9114,
+          "lng": -86.8304,
+          "engaged": false,
           "confidence": "inferred"
         },
         {
           "t": -3316114800000,
-          "lat": 35.9168,
-          "lng": -86.8288,
-          "engaged": true,
+          "lat": 35.9074,
+          "lng": -86.8322,
+          "engaged": false,
           "confidence": "documented"
         },
         {
           "t": -3316111200000,
-          "lat": 35.913,
-          "lng": -86.8302,
+          "lat": 35.9056,
+          "lng": -86.8334,
           "engaged": false,
           "confidence": "inferred"
         },
         {
           "t": -3316107600000,
-          "lat": 35.9098,
-          "lng": -86.8318,
+          "lat": 35.9048,
+          "lng": -86.8342,
           "engaged": false,
           "confidence": "documented"
         }
@@ -687,70 +687,145 @@
         {
           "t": -3316140000000,
           "lat": 35.933,
-          "lng": -86.8255,
+          "lng": -86.8262,
           "engaged": false,
           "confidence": "documented"
         },
         {
           "t": -3316136400000,
-          "lat": 35.9322,
-          "lng": -86.825,
+          "lat": 35.9318,
+          "lng": -86.8256,
           "engaged": false,
           "confidence": "inferred"
         },
         {
           "t": -3316132800000,
-          "lat": 35.931,
-          "lng": -86.8246,
-          "engaged": false,
+          "lat": 35.9296,
+          "lng": -86.825,
+          "engaged": true,
           "confidence": "inferred"
         },
         {
           "t": -3316129200000,
-          "lat": 35.9296,
-          "lng": -86.8242,
-          "engaged": false,
+          "lat": 35.9264,
+          "lng": -86.8248,
+          "engaged": true,
           "confidence": "documented"
         },
         {
           "t": -3316125600000,
-          "lat": 35.9272,
-          "lng": -86.8244,
+          "lat": 35.925,
+          "lng": -86.8252,
           "engaged": true,
           "confidence": "inferred"
         },
         {
           "t": -3316122000000,
-          "lat": 35.9252,
-          "lng": -86.825,
+          "lat": 35.9232,
+          "lng": -86.8262,
           "engaged": true,
           "confidence": "documented"
         },
         {
           "t": -3316118400000,
-          "lat": 35.9262,
-          "lng": -86.8246,
-          "engaged": true,
+          "lat": 35.9268,
+          "lng": -86.8252,
+          "engaged": false,
           "confidence": "inferred"
         },
         {
           "t": -3316114800000,
-          "lat": 35.9276,
-          "lng": -86.8244,
-          "engaged": true,
+          "lat": 35.9288,
+          "lng": -86.8248,
+          "engaged": false,
           "confidence": "documented"
         },
         {
           "t": -3316111200000,
-          "lat": 35.9288,
-          "lng": -86.8244,
+          "lat": 35.93,
+          "lng": -86.8248,
           "engaged": false,
           "confidence": "inferred"
         },
         {
           "t": -3316107600000,
-          "lat": 35.9296,
-          "lng": -86.8246,
+          "lat": 35.9308,
+          "lng": -86.825,
+          "engaged": false,
+          "confidence": "documented"
+        }
+      ]
+    },
+    {
+      "unitId": "conf-chalmers-cavalry",
+      "points": [
+        {
+          "t": -3316140000000,
+          "lat": 35.9098,
+          "lng": -86.8802,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316136400000,
+          "lat": 35.9128,
+          "lng": -86.8788,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316132800000,
+          "lat": 35.9162,
+          "lng": -86.8772,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316129200000,
+          "lat": 35.9196,
+          "lng": -86.8758,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316125600000,
+          "lat": 35.9218,
+          "lng": -86.8748,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316122000000,
+          "lat": 35.9226,
+          "lng": -86.8742,
+          "engaged": true,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316118400000,
+          "lat": 35.9222,
+          "lng": -86.8748,
+          "engaged": true,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316114800000,
+          "lat": 35.921,
+          "lng": -86.8756,
+          "engaged": false,
+          "confidence": "documented"
+        },
+        {
+          "t": -3316111200000,
+          "lat": 35.9198,
+          "lng": -86.8764,
+          "engaged": false,
+          "confidence": "inferred"
+        },
+        {
+          "t": -3316107600000,
+          "lat": 35.919,
+          "lng": -86.877,
           "engaged": false,
           "confidence": "documented"
         }

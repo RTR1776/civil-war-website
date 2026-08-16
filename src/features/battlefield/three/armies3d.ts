@@ -118,6 +118,7 @@ export class Armies3D {
   private fallen: THREE.InstancedMesh;
   private cannons: THREE.InstancedMesh;
   private lastUpdateTime = Number.NaN;
+  private worldByFormation = new Map<string, { x: number; y: number; z: number }>();
   private disposables: Array<{ dispose(): void }> = [];
   private globalFinalCasualties: number;
   private frontPoints: FrontPoint[] = [];
@@ -339,6 +340,14 @@ export class Armies3D {
     return this.frontPoints;
   }
 
+  /**
+   * Ground-level world position of a formation as of the last update() — lets
+   * the camera follow a formation without repeating the interpolation.
+   */
+  worldPositionOf(formationId: string): { x: number; y: number; z: number } | null {
+    return this.worldByFormation.get(formationId) ?? null;
+  }
+
   /** Rebuild instance transforms for the given sim time (no-op if unchanged). */
   update(timeMs: number, force = false) {
     if (!force && timeMs === this.lastUpdateTime) {
@@ -369,6 +378,7 @@ export class Armies3D {
       set.formationByInstance.length = 0;
     }
     this.frontPoints.length = 0;
+    this.worldByFormation.clear();
 
     const matrix = new THREE.Matrix4();
     const quaternion = new THREE.Quaternion();
@@ -403,6 +413,11 @@ export class Armies3D {
       }
 
       const center = this.terrain.projection.toWorld(position.lat, position.lng);
+      this.worldByFormation.set(formation.id, {
+        x: center.x,
+        y: this.terrain.elevation(center.x, center.y),
+        z: center.y,
+      });
       const heading = this.headingOf(formation.id, beforeById, afterById);
       quaternion.setFromAxisAngle(axisY, -heading);
 
