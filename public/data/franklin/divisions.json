@@ -90,27 +90,39 @@
     },
     {
       "id": "conf-forrest-cavalry",
-      "name": "Forrest's Cavalry (East Flank)",
+      "name": "Forrest's Cavalry, East Wing (Buford & Jackson)",
       "side": "Confederate",
       "arm": "cavalry",
       "commander": "Maj. Gen. Nathan Bedford Forrest",
-      "strengthEstimate": 4500,
-      "corps": "Cavalry Corps",
+      "strengthEstimate": 2500,
+      "corps": "Forrest's Cavalry Corps",
       "army": "Army of Tennessee",
-      "casualtyEstimate": 250,
-      "notes": "Screened the Confederate right, pushing across the Harpeth against Wilson's troopers before being forced back in the evening."
+      "casualtyEstimate": 180,
+      "notes": "Forrest crossed the Harpeth upstream with Buford's and Jackson's divisions to turn the Union left, met Wilson's troopers in the afternoon, and was forced back across the river before nightfall."
     },
     {
       "id": "union-wilson-cavalry",
-      "name": "Wilson's Cavalry Division",
+      "name": "Wilson's Cavalry (Hatch's Division, Croxton's Brigade)",
       "side": "Union",
       "arm": "cavalry",
       "commander": "Bvt. Maj. Gen. James H. Wilson",
-      "strengthEstimate": 4300,
-      "corps": "Cavalry Corps, M.D.M.",
-      "army": "Army of the Cumberland",
-      "casualtyEstimate": 120,
-      "notes": "Met Forrest east of the Harpeth and held the fords, keeping the Union left rear secure through the night."
+      "strengthEstimate": 4000,
+      "corps": "Cavalry Corps, Military Division of the Mississippi",
+      "army": "Military Division of the Mississippi",
+      "casualtyEstimate": 110,
+      "notes": "Wilson held the fords east of the Harpeth with Hatch's division and Croxton's brigade, meeting Forrest's crossing in the afternoon and driving him back over the river before dark, keeping the Union left and rear secure."
+    },
+    {
+      "id": "conf-chalmers-cavalry",
+      "name": "Chalmers' Cavalry Division",
+      "side": "Confederate",
+      "arm": "cavalry",
+      "commander": "Brig. Gen. James R. Chalmers",
+      "strengthEstimate": 1500,
+      "corps": "Forrest's Cavalry Corps",
+      "army": "Army of Tennessee",
+      "casualtyEstimate": 90,
+      "notes": "Screened the Confederate left west of Columbia Pike, pressing toward Carter's Creek Pike against the Federal right."
     }
   ],
   "timeSlices": [
@@ -176,16 +188,23 @@
         },
         {
           "unitId": "conf-forrest-cavalry",
-          "lat": 35.906,
-          "lng": -86.833,
+          "lat": 35.9052,
+          "lng": -86.8338,
           "formation": "column",
           "engaged": false
         },
         {
           "unitId": "union-wilson-cavalry",
           "lat": 35.933,
-          "lng": -86.8255,
+          "lng": -86.8262,
           "formation": "vedettes",
+          "engaged": false
+        },
+        {
+          "unitId": "conf-chalmers-cavalry",
+          "lat": 35.9098,
+          "lng": -86.8802,
+          "formation": "column",
           "engaged": false
         }
       ]
@@ -252,16 +271,23 @@
         },
         {
           "unitId": "conf-forrest-cavalry",
-          "lat": 35.9082,
-          "lng": -86.8305,
+          "lat": 35.9086,
+          "lng": -86.8306,
           "formation": "column",
           "engaged": false
         },
         {
           "unitId": "union-wilson-cavalry",
-          "lat": 35.9322,
-          "lng": -86.825,
+          "lat": 35.9318,
+          "lng": -86.8256,
           "formation": "vedettes",
+          "engaged": false
+        },
+        {
+          "unitId": "conf-chalmers-cavalry",
+          "lat": 35.9128,
+          "lng": -86.8788,
+          "formation": "screen",
           "engaged": false
         }
       ]
@@ -328,16 +354,23 @@
         },
         {
           "unitId": "conf-forrest-cavalry",
-          "lat": 35.9105,
-          "lng": -86.829,
-          "formation": "screen",
-          "engaged": false
+          "lat": 35.9138,
+          "lng": -86.8286,
+          "formation": "crossing-the-ford",
+          "engaged": true
         },
         {
           "unitId": "union-wilson-cavalry",
-          "lat": 35.931,
-          "lng": -86.8246,
+          "lat": 35.9296,
+          "lng": -86.825,
           "formation": "mounted-line",
+          "engaged": true
+        },
+        {
+          "unitId": "conf-chalmers-cavalry",
+          "lat": 35.9162,
+          "lng": -86.8772,
+          "formation": "screen",
           "engaged": false
         }
       ]
@@ -404,17 +437,24 @@
         },
         {
           "unitId": "conf-forrest-cavalry",
-          "lat": 35.9142,
-          "lng": -86.8275,
-          "formation": "screen",
-          "engaged": false
+          "lat": 35.9196,
+          "lng": -86.8268,
+          "formation": "mounted-line",
+          "engaged": true
         },
         {
           "unitId": "union-wilson-cavalry",
-          "lat": 35.9296,
-          "lng": -86.8242,
+          "lat": 35.9264,
+          "lng": -86.8248,
           "formation": "mounted-line",
-          "engaged": false
+          "engaged": true
+        },
+        {
+          "unitId": "conf-chalmers-cavalry",
+          "lat": 35.9196,
+          "lng": -86.8758,
+          "formation": "dismounted-line",
+          "engaged": true
         }
       ]
     },
@@ -480,16 +520,23 @@
         },
         {
           "unitId": "conf-forrest-cavalry",
-          "lat": 35.9186,
-          "lng": -86.8262,
-          "formation": "mounted-line",
+          "lat": 35.9238,
+          "lng": -86.8258,
+          "formation": "dismounted-line",
           "engaged": true
         },
         {
           "unitId": "union-wilson-cavalry",
-          "lat": 35.9272,
-          "lng": -86.8244,
-          "formation": "mounted-line",
+          "lat": 35.925,
+          "lng": -86.8252,
+          "formation": "countercharge",
+          "engaged": true
+        },
+        {
+          "unitId": "conf-chalmers-cavalry",
+          "lat": 35.9218,
+          "lng": -86.8748,
+          "formation": "dismounted-line",
           "engaged": true
         }
       ]
@@ -556,16 +603,23 @@
         },
         {
           "unitId": "conf-forrest-cavalry",
-          "lat": 35.9224,
-          "lng": -86.8258,
-          "formation": "dismounted-line",
+          "lat": 35.9186,
+          "lng": -86.828,
+          "formation": "driven-back",
           "engaged": true
         },
         {
           "unitId": "union-wilson-cavalry",
-          "lat": 35.9252,
-          "lng": -86.825,
-          "formation": "countercharge",
+          "lat": 35.9232,
+          "lng": -86.8262,
+          "formation": "pursuit-to-the-river",
+          "engaged": true
+        },
+        {
+          "unitId": "conf-chalmers-cavalry",
+          "lat": 35.9226,
+          "lng": -86.8742,
+          "formation": "dismounted-line",
           "engaged": true
         }
       ]
@@ -632,16 +686,23 @@
         },
         {
           "unitId": "conf-forrest-cavalry",
-          "lat": 35.9204,
-          "lng": -86.8272,
-          "formation": "dismounted-line",
-          "engaged": true
+          "lat": 35.9114,
+          "lng": -86.8304,
+          "formation": "recrossed",
+          "engaged": false
         },
         {
           "unitId": "union-wilson-cavalry",
-          "lat": 35.9262,
-          "lng": -86.8246,
-          "formation": "mounted-line",
+          "lat": 35.9268,
+          "lng": -86.8252,
+          "formation": "picket-line",
+          "engaged": false
+        },
+        {
+          "unitId": "conf-chalmers-cavalry",
+          "lat": 35.9222,
+          "lng": -86.8748,
+          "formation": "dismounted-line",
           "engaged": true
         }
       ]
@@ -708,17 +769,24 @@
         },
         {
           "unitId": "conf-forrest-cavalry",
-          "lat": 35.9168,
-          "lng": -86.8288,
-          "formation": "withdrawing",
-          "engaged": true
+          "lat": 35.9074,
+          "lng": -86.8322,
+          "formation": "screening",
+          "engaged": false
         },
         {
           "unitId": "union-wilson-cavalry",
-          "lat": 35.9276,
-          "lng": -86.8244,
+          "lat": 35.9288,
+          "lng": -86.8248,
           "formation": "picket-line",
-          "engaged": true
+          "engaged": false
+        },
+        {
+          "unitId": "conf-chalmers-cavalry",
+          "lat": 35.921,
+          "lng": -86.8756,
+          "formation": "holding",
+          "engaged": false
         }
       ]
     },
@@ -784,16 +852,23 @@
         },
         {
           "unitId": "conf-forrest-cavalry",
-          "lat": 35.913,
-          "lng": -86.8302,
-          "formation": "withdrawing",
+          "lat": 35.9056,
+          "lng": -86.8334,
+          "formation": "screening",
           "engaged": false
         },
         {
           "unitId": "union-wilson-cavalry",
-          "lat": 35.9288,
-          "lng": -86.8244,
+          "lat": 35.93,
+          "lng": -86.8248,
           "formation": "picket-line",
+          "engaged": false
+        },
+        {
+          "unitId": "conf-chalmers-cavalry",
+          "lat": 35.9198,
+          "lng": -86.8764,
+          "formation": "holding",
           "engaged": false
         }
       ]
@@ -860,16 +935,23 @@
         },
         {
           "unitId": "conf-forrest-cavalry",
-          "lat": 35.9098,
-          "lng": -86.8318,
-          "formation": "rally",
+          "lat": 35.9048,
+          "lng": -86.8342,
+          "formation": "screening",
           "engaged": false
         },
         {
           "unitId": "union-wilson-cavalry",
-          "lat": 35.9296,
-          "lng": -86.8246,
+          "lat": 35.9308,
+          "lng": -86.825,
           "formation": "picket-line",
+          "engaged": false
+        },
+        {
+          "unitId": "conf-chalmers-cavalry",
+          "lat": 35.919,
+          "lng": -86.877,
+          "formation": "holding",
           "engaged": false
         }
       ]

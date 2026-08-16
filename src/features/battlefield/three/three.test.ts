@@ -104,17 +104,42 @@ describe("vantage points", () => {
 });
 
 describe("cavalry data", () => {
-  it("includes both cavalry commands with movement tracks", () => {
-    const forrest = bundle.formations.find((formation) => formation.id === "conf-forrest-cavalry");
-    const wilson = bundle.formations.find((formation) => formation.id === "union-wilson-cavalry");
+  const cavalryIds = ["conf-forrest-cavalry", "union-wilson-cavalry", "conf-chalmers-cavalry"];
 
-    expect(forrest?.arm).toBe("cavalry");
-    expect(wilson?.arm).toBe("cavalry");
+  it("includes every cavalry command with a movement track", () => {
+    for (const id of cavalryIds) {
+      expect(bundle.formations.find((formation) => formation.id === id)?.arm).toBe("cavalry");
+    }
 
     for (const keyframe of bundle.movementKeyframes) {
       const ids = keyframe.positions.map((position) => position.formationId);
-      expect(ids).toContain("conf-forrest-cavalry");
-      expect(ids).toContain("union-wilson-cavalry");
+      for (const id of cavalryIds) {
+        expect(ids).toContain(id);
+      }
     }
+  });
+
+  it("places Wilson's command in its own corps, not the Army of the Cumberland", () => {
+    const wilson = bundle.formations.find((formation) => formation.id === "union-wilson-cavalry");
+
+    // Wilson led the Cavalry Corps of the Military Division of the Mississippi;
+    // Schofield's infantry corps belonged to different armies.
+    expect(wilson?.army).toMatch(/Military Division of the Mississippi/);
+    expect(wilson?.army).not.toMatch(/Army of the Cumberland/);
+  });
+
+  it("keeps the river crossing to Forrest's east wing and returns it by nightfall", () => {
+    const forrest = bundle.formations.find((formation) => formation.id === "conf-forrest-cavalry");
+    // Only Buford's and Jackson's divisions crossed; Chalmers screened the west flank.
+    expect(forrest?.strengthEstimate).toBeLessThan(3000);
+
+    const engagedAt = (iso: string) =>
+      bundle.movementKeyframes
+        .find((keyframe) => keyframe.timestamp === iso)
+        ?.positions.find((position) => position.formationId === "conf-forrest-cavalry")?.engaged;
+
+    // The cavalry fight peaks in the afternoon and is over before full dark.
+    expect(engagedAt("1864-11-30T16:00:00-06:00")).toBe(true);
+    expect(engagedAt("1864-11-30T19:00:00-06:00")).toBe(false);
   });
 });
