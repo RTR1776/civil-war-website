@@ -1,6 +1,6 @@
 {
   "scenarioId": "franklin-1864",
-  "builtAt": "2026-02-21T00:23:18.528Z",
+  "builtAt": "2026-08-16T00:10:39.372Z",
   "window": {
     "start": "1864-11-30T12:00:00-06:00",
     "end": "1864-11-30T21:00:00-06:00"
@@ -627,7 +627,7 @@
             "lng": -86.862,
             "zoom": 13.9,
             "pitch": 38,
-            "bearing": 24,
+            "bearing": 8,
             "overlayText": "Commanders read the ground from Winstead Hill.",
             "focusFormationIds": [
               "conf-cleburne-division",
@@ -635,12 +635,24 @@
             ]
           },
           {
-            "timeOffsetMs": 9000,
+            "timeOffsetMs": 5400000,
+            "lat": 35.9152,
+            "lng": -86.8608,
+            "zoom": 14.05,
+            "pitch": 40,
+            "bearing": 16,
+            "overlayText": "Two miles of open ground separate the armies along Columbia Pike.",
+            "focusFormationIds": [
+              "union-wagner-division"
+            ]
+          },
+          {
+            "timeOffsetMs": 10200000,
             "lat": 35.9189,
             "lng": -86.8602,
             "zoom": 14.25,
             "pitch": 42,
-            "bearing": 54,
+            "bearing": 22,
             "overlayText": "Wagner's exposed brigades begin falling back.",
             "focusFormationIds": [
               "union-wagner-division"
@@ -667,11 +679,11 @@
         "cameraRail": [
           {
             "timeOffsetMs": 0,
-            "lat": 35.9167,
+            "lat": 35.9155,
             "lng": -86.8601,
-            "zoom": 14.1,
+            "zoom": 14,
             "pitch": 44,
-            "bearing": 14,
+            "bearing": 6,
             "overlayText": "The main Confederate wave forms and surges.",
             "focusFormationIds": [
               "conf-cleburne-division",
@@ -680,12 +692,25 @@
             ]
           },
           {
-            "timeOffsetMs": 11000,
-            "lat": 35.9202,
-            "lng": -86.8594,
-            "zoom": 14.45,
+            "timeOffsetMs": 3600000,
+            "lat": 35.9182,
+            "lng": -86.8597,
+            "zoom": 14.3,
+            "pitch": 47,
+            "bearing": 12,
+            "overlayText": "Massed lines cross the open plain under artillery fire.",
+            "focusFormationIds": [
+              "conf-cleburne-division",
+              "conf-brown-division"
+            ]
+          },
+          {
+            "timeOffsetMs": 6900000,
+            "lat": 35.9206,
+            "lng": -86.8596,
+            "zoom": 14.5,
             "pitch": 50,
-            "bearing": 19,
+            "bearing": 16,
             "overlayText": "Federal artillery and musketry intensify near the line.",
             "focusFormationIds": [
               "union-cox-division"
@@ -716,7 +741,7 @@
             "lng": -86.859,
             "zoom": 14.7,
             "pitch": 52,
-            "bearing": 78,
+            "bearing": 26,
             "overlayText": "The center buckles near Carter House.",
             "focusFormationIds": [
               "conf-cleburne-division",
@@ -724,12 +749,12 @@
             ]
           },
           {
-            "timeOffsetMs": 10000,
+            "timeOffsetMs": 3300000,
             "lat": 35.9221,
             "lng": -86.8604,
             "zoom": 14.85,
             "pitch": 55,
-            "bearing": 95,
+            "bearing": 34,
             "overlayText": "Counterfire and reserves prevent a full collapse.",
             "focusFormationIds": [
               "union-wood-division",
@@ -761,11 +786,24 @@
             "lng": -86.8616,
             "zoom": 14.55,
             "pitch": 47,
-            "bearing": -20,
+            "bearing": -8,
             "overlayText": "Union reserves launch local counterattacks.",
             "focusFormationIds": [
               "union-wood-division",
               "union-kimball-division"
+            ]
+          },
+          {
+            "timeOffsetMs": 3300000,
+            "lat": 35.9219,
+            "lng": -86.8598,
+            "zoom": 14.65,
+            "pitch": 49,
+            "bearing": -16,
+            "overlayText": "The inner line is restored in the darkness.",
+            "focusFormationIds": [
+              "union-wagner-division",
+              "union-cox-division"
             ]
           }
         ],
@@ -787,7 +825,7 @@
           "beat-assault-ebbs",
           "beat-aftermath"
         ],
-        "pivotalEventId": "event-assault-ebbs",
+        "pivotalEventId": "event-assault-ends",
         "cameraRail": [
           {
             "timeOffsetMs": 0,
@@ -795,7 +833,7 @@
             "lng": -86.8579,
             "zoom": 14.5,
             "pitch": 57,
-            "bearing": 112,
+            "bearing": 30,
             "overlayText": "Combat continues in darkness at near point-blank range.",
             "focusFormationIds": [
               "conf-cleburne-division",
@@ -803,13 +841,26 @@
             ]
           },
           {
-            "timeOffsetMs": 9000,
-            "lat": 35.9227,
-            "lng": -86.8637,
-            "zoom": 14.1,
+            "timeOffsetMs": 3600000,
+            "lat": 35.9221,
+            "lng": -86.8608,
+            "zoom": 14.35,
+            "pitch": 46,
+            "bearing": 12,
+            "overlayText": "Attacks lose cohesion against the strongest Federal positions.",
+            "focusFormationIds": [
+              "conf-brown-division",
+              "conf-french-division"
+            ]
+          },
+          {
+            "timeOffsetMs": 6900000,
+            "lat": 35.9212,
+            "lng": -86.8622,
+            "zoom": 13.95,
             "pitch": 38,
-            "bearing": 178,
-            "overlayText": "By late evening, Confederate assaults lose cohesion.",
+            "bearing": 0,
+            "overlayText": "By nine o'clock the field falls quiet, littered with the fallen.",
             "focusFormationIds": [
               "conf-bate-division",
               "conf-french-division"
@@ -1019,9 +1070,9 @@
     ]
   },
   "mapLayers": {
-    "id": "franklin-map-layers-v1",
-    "name": "Franklin 1864 Reconstructed Layer Pack",
-    "description": "Reconstructed roads, works, river line, and terrain sectors for cinematic playback.",
+    "id": "franklin-historic-layers",
+    "name": "Franklin 1864 Reconstruction",
+    "description": "Roads, works, waterways, and terrain landmarks reconstructed from period cartography and battle studies. Alignments are approximate and stylized for readability.",
     "features": [
       {
         "type": "Feature",
@@ -1029,30 +1080,53 @@
           "type": "LineString",
           "coordinates": [
             [
-              -86.8598,
-              35.9093
+              -86.8626,
+              35.9042
+            ],
+            [
+              -86.8621,
+              35.9078
+            ],
+            [
+              -86.8612,
+              35.9105
+            ],
+            [
+              -86.8601,
+              35.9138
             ],
             [
               -86.8596,
-              35.9152
+              35.9172
             ],
             [
               -86.8593,
               35.9208
             ],
             [
-              -86.8596,
-              35.925
+              -86.8594,
+              35.9232
+            ],
+            [
+              -86.8598,
+              35.9258
+            ],
+            [
+              -86.8604,
+              35.9282
             ]
           ]
         },
         "properties": {
           "id": "layer-columbia-pike",
-          "name": "Columbia Pike (1864 axis)",
+          "name": "Columbia Pike",
           "category": "road",
           "styleKey": "road-primary",
           "confidence": "documented",
           "evidenceRefs": [
+            {
+              "sourceId": "source-atlas-1864"
+            },
             {
               "sourceId": "source-opdycke-1880"
             }
@@ -1065,40 +1139,40 @@
           "type": "LineString",
           "coordinates": [
             [
-              -86.874,
-              35.9222
+              -86.8604,
+              35.9282
             ],
             [
-              -86.8696,
-              35.9225
+              -86.8567,
+              35.9243
             ],
             [
-              -86.8654,
-              35.9226
+              -86.8531,
+              35.9204
             ],
             [
-              -86.8614,
-              35.9224
+              -86.8487,
+              35.9161
             ],
             [
-              -86.8572,
-              35.9222
+              -86.8438,
+              35.9118
             ],
             [
-              -86.8528,
-              35.9231
+              -86.8394,
+              35.9078
             ]
           ]
         },
         "properties": {
-          "id": "layer-federal-works",
-          "name": "Federal Main Works",
-          "category": "works",
-          "styleKey": "works-main",
+          "id": "layer-lewisburg-pike",
+          "name": "Lewisburg Pike",
+          "category": "road",
+          "styleKey": "road-secondary",
           "confidence": "documented",
           "evidenceRefs": [
             {
-              "sourceId": "source-jacobs-2006"
+              "sourceId": "source-atlas-1864"
             }
           ]
         }
@@ -1109,24 +1183,156 @@
           "type": "LineString",
           "coordinates": [
             [
-              -86.8716,
-              35.9264
+              -86.8604,
+              35.9282
             ],
             [
-              -86.8685,
+              -86.8646,
+              35.9247
+            ],
+            [
+              -86.8691,
+              35.9212
+            ],
+            [
+              -86.8741,
+              35.9178
+            ],
+            [
+              -86.8796,
+              35.9142
+            ],
+            [
+              -86.8852,
+              35.911
+            ]
+          ]
+        },
+        "properties": {
+          "id": "layer-carters-creek-pike",
+          "name": "Carter's Creek Pike",
+          "category": "road",
+          "styleKey": "road-secondary",
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-atlas-1864"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -86.8489,
+              35.9036
+            ],
+            [
+              -86.8501,
+              35.9082
+            ],
+            [
+              -86.8513,
+              35.9128
+            ],
+            [
+              -86.8525,
+              35.9174
+            ],
+            [
+              -86.8534,
+              35.9216
+            ],
+            [
+              -86.8541,
+              35.9252
+            ],
+            [
+              -86.8531,
+              35.9289
+            ],
+            [
+              -86.8506,
+              35.9319
+            ]
+          ]
+        },
+        "properties": {
+          "id": "layer-railroad",
+          "name": "Nashville & Decatur R.R.",
+          "category": "road",
+          "styleKey": "railroad",
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-atlas-1864"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -86.8306,
+              35.9102
+            ],
+            [
+              -86.8322,
+              35.9151
+            ],
+            [
+              -86.8347,
+              35.9198
+            ],
+            [
+              -86.8389,
+              35.9243
+            ],
+            [
+              -86.8438,
+              35.9277
+            ],
+            [
+              -86.8492,
+              35.9305
+            ],
+            [
+              -86.8542,
+              35.9324
+            ],
+            [
+              -86.8586,
+              35.9318
+            ],
+            [
+              -86.8615,
+              35.9291
+            ],
+            [
+              -86.8656,
               35.9276
             ],
             [
-              -86.8649,
-              35.928
+              -86.8702,
+              35.9285
             ],
             [
-              -86.8602,
-              35.9275
+              -86.8734,
+              35.9315
             ],
             [
-              -86.8558,
-              35.9268
+              -86.8773,
+              35.9348
+            ],
+            [
+              -86.8822,
+              35.9365
             ]
           ]
         },
@@ -1146,28 +1352,169 @@
       {
         "type": "Feature",
         "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -86.8737,
+              35.9268
+            ],
+            [
+              -86.8724,
+              35.9243
+            ],
+            [
+              -86.8703,
+              35.9226
+            ],
+            [
+              -86.8672,
+              35.9218
+            ],
+            [
+              -86.8638,
+              35.9214
+            ],
+            [
+              -86.8607,
+              35.9212
+            ],
+            [
+              -86.8592,
+              35.9214
+            ],
+            [
+              -86.8576,
+              35.9218
+            ],
+            [
+              -86.8548,
+              35.9227
+            ],
+            [
+              -86.8523,
+              35.9243
+            ],
+            [
+              -86.8508,
+              35.9266
+            ]
+          ]
+        },
+        "properties": {
+          "id": "layer-federal-works",
+          "name": "Federal Main Works",
+          "category": "works",
+          "styleKey": "works-main",
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-jacobs-2006"
+            },
+            {
+              "sourceId": "source-opdycke-1880"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -86.8626,
+              35.9227
+            ],
+            [
+              -86.8604,
+              35.9224
+            ],
+            [
+              -86.8582,
+              35.9226
+            ]
+          ]
+        },
+        "properties": {
+          "id": "layer-retrenchment",
+          "name": "Retrenchment Line",
+          "category": "works",
+          "styleKey": "works-secondary",
+          "confidence": "inferred",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-jacobs-2006"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
           "type": "Polygon",
           "coordinates": [
             [
               [
-                -86.8612,
-                35.9232
+                -86.872,
+                35.924
               ],
               [
-                -86.8582,
-                35.9232
+                -86.8636,
+                35.924
               ],
               [
-                -86.8582,
-                35.9217
+                -86.8636,
+                35.929
               ],
               [
-                -86.8612,
-                35.9217
+                -86.872,
+                35.929
               ],
               [
-                -86.8612,
-                35.9232
+                -86.872,
+                35.924
+              ]
+            ]
+          ]
+        },
+        "properties": {
+          "id": "layer-town-core",
+          "name": "Franklin",
+          "category": "sector",
+          "styleKey": "town-core",
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-atlas-1864"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -86.8622,
+                35.9231
+              ],
+              [
+                -86.8574,
+                35.9231
+              ],
+              [
+                -86.8574,
+                35.9206
+              ],
+              [
+                -86.8622,
+                35.9206
+              ],
+              [
+                -86.8622,
+                35.9231
               ]
             ]
           ]
@@ -1190,6 +1537,100 @@
         "geometry": {
           "type": "Point",
           "coordinates": [
+            -86.862,
+            35.9096
+          ]
+        },
+        "properties": {
+          "id": "layer-winstead-hill",
+          "name": "Winstead Hill",
+          "category": "terrain",
+          "styleKey": "hill",
+          "radiusM": 430,
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-atlas-1864"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -86.8556,
+            35.9102
+          ]
+        },
+        "properties": {
+          "id": "layer-breezy-hill",
+          "name": "Breezy Hill",
+          "category": "terrain",
+          "styleKey": "hill",
+          "radiusM": 360,
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-atlas-1864"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -86.8577,
+            35.9138
+          ]
+        },
+        "properties": {
+          "id": "layer-privet-knob",
+          "name": "Privet Knob",
+          "category": "terrain",
+          "styleKey": "hill",
+          "radiusM": 190,
+          "confidence": "inferred",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-jacobs-2006"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -86.8564,
+            35.9296
+          ]
+        },
+        "properties": {
+          "id": "layer-fort-granger",
+          "name": "Fort Granger",
+          "category": "works",
+          "styleKey": "fort",
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-atlas-1864"
+            },
+            {
+              "sourceId": "source-jacobs-2006"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
             -86.8597,
             35.9224
           ]
@@ -1197,6 +1638,28 @@
         "properties": {
           "id": "layer-carter-house",
           "name": "Carter House",
+          "category": "landmark",
+          "styleKey": "landmark-primary",
+          "confidence": "documented",
+          "evidenceRefs": [
+            {
+              "sourceId": "source-jacobs-2006"
+            }
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -86.8604,
+            35.9219
+          ]
+        },
+        "properties": {
+          "id": "layer-cotton-gin",
+          "name": "Carter Cotton Gin",
           "category": "landmark",
           "styleKey": "landmark-primary",
           "confidence": "documented",
@@ -1298,7 +1761,7 @@
         "confidence": "documented",
         "linkedEventIds": [
           "event-nightfall",
-          "event-assault-ebbs"
+          "event-assault-ends"
         ],
         "linkedBeatIds": [
           "beat-night-grind",

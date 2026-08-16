@@ -1,4 +1,5 @@
 import {
+  type CasualtyTick,
   type ConfidenceLevel,
   type InterpolatedFormationPosition,
   type MovementKeyframe,
@@ -201,6 +202,46 @@ export function interpolateUnitPositions(
   }
 
   return interpolateFormationPositions(targetTime, timeSlices as MovementKeyframe[]);
+}
+
+export interface CasualtyStateAt {
+  value: number;
+  confidence: ConfidenceLevel;
+  note?: string;
+}
+
+export function casualtiesAtTime(timeline: CasualtyTick[], targetTime: number): CasualtyStateAt {
+  if (timeline.length === 0) {
+    return { value: 0, confidence: "inferred" };
+  }
+
+  const ordered = [...timeline].sort((a, b) => Date.parse(a.time) - Date.parse(b.time));
+  const first = ordered[0];
+  const last = ordered[ordered.length - 1];
+  const clamped = clampTime(targetTime, Date.parse(first.time), Date.parse(last.time));
+
+  for (let index = 0; index < ordered.length - 1; index += 1) {
+    const left = ordered[index];
+    const right = ordered[index + 1];
+    const leftTime = Date.parse(left.time);
+    const rightTime = Date.parse(right.time);
+
+    if (clamped >= leftTime && clamped <= rightTime) {
+      const ratio = (clamped - leftTime) / Math.max(1, rightTime - leftTime);
+      return {
+        value: Math.round(
+          left.cumulativeCasualties + (right.cumulativeCasualties - left.cumulativeCasualties) * ratio,
+        ),
+        confidence:
+          left.confidence === "documented" && right.confidence === "documented"
+            ? "documented"
+            : "inferred",
+        note: right.note ?? left.note,
+      };
+    }
+  }
+
+  return { value: last.cumulativeCasualties, confidence: last.confidence, note: last.note };
 }
 
 export function toLegacyUnitPosition(position: MovementPosition): UnitPosition {

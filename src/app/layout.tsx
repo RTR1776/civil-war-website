@@ -15,9 +15,9 @@ const spectral = Spectral({
 });
 
 export const metadata: Metadata = {
-  title: "Battle of Franklin | Civil War Immersive",
+  title: "The Battle of Franklin — November 30, 1864",
   description:
-    "Interactive hour-by-hour battlefield visualization of the Battle of Franklin with division movements and guided narrative beats.",
+    "A cinematic, interactive reconstruction of the Battle of Franklin: watch five hours of fighting unfold hour by hour on a hand-drawn 1864 map, from the grand assault to the fight in darkness.",
 };
 
 export default function RootLayout({
