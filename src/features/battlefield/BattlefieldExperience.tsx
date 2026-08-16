@@ -16,6 +16,8 @@ import { formatBattleClock } from "@/lib/battle/time";
 import { validateScenarioData } from "@/lib/battle/validation";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN?.trim();
+// Data lives under the app's base path when hosted on a subpath (GitHub Pages).
+const DATA_ROOT = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/data/franklin`;
 
 function BeatCaption() {
   const data = useBattleStore((state) => state.data);
@@ -106,7 +108,7 @@ export default function BattlefieldExperience() {
     const load = async () => {
       try {
         setLoading(true);
-        const bundle = await loadScenarioData("/data/franklin");
+        const bundle = await loadScenarioData(DATA_ROOT);
         const validation = validateScenarioData(bundle);
 
         if (!cancelled) {
