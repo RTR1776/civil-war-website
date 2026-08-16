@@ -22,6 +22,12 @@ interface PaintablePath {
 const TERRAIN_SEGMENTS_X = 240;
 const TERRAIN_SEGMENTS_Y = 120;
 
+// Sky/fog keyframe colors, reused every frame.
+const SKY_DAY = new THREE.Color(0xb9c8d8);
+const SKY_DUSK = new THREE.Color(0xd98d4f);
+const SKY_NIGHT = new THREE.Color(0x070a14);
+const FOG_HAZE = new THREE.Color(0x777264);
+
 function samplePolyline(points: WorldPoint[], stepM: number): Array<{ point: WorldPoint; heading: number }> {
   const samples: Array<{ point: WorldPoint; heading: number }> = [];
 
@@ -312,11 +318,11 @@ export class BattlefieldWorld {
 
     const parapet = this.track(new THREE.BoxGeometry(14.5, 2.4, 5.2));
     const material = this.track(new THREE.MeshLambertMaterial({ color: 0x50412c }));
-    const instanced = new THREE.InstancedMesh(parapet, material, samples.length);
+    const instanced = this.track(new THREE.InstancedMesh(parapet, material, samples.length));
 
     const headlog = this.track(new THREE.BoxGeometry(14.5, 0.5, 0.7));
     const headlogMaterial = this.track(new THREE.MeshLambertMaterial({ color: 0x33281a }));
-    const headlogs = new THREE.InstancedMesh(headlog, headlogMaterial, samples.length);
+    const headlogs = this.track(new THREE.InstancedMesh(headlog, headlogMaterial, samples.length));
 
     const matrix = new THREE.Matrix4();
     const quaternion = new THREE.Quaternion();
@@ -394,7 +400,7 @@ export class BattlefieldWorld {
     }
 
     const material = this.track(new THREE.MeshLambertMaterial({ color: 0xcfc4ae }));
-    const instanced = new THREE.InstancedMesh(house, material, positions.length);
+    const instanced = this.track(new THREE.InstancedMesh(house, material, positions.length));
     const matrix = new THREE.Matrix4();
     const quaternion = new THREE.Quaternion();
     const axisY = new THREE.Vector3(0, 1, 0);
@@ -442,7 +448,7 @@ export class BattlefieldWorld {
     }
 
     const material = this.track(new THREE.MeshLambertMaterial({ color: 0x5c6640 }));
-    const instanced = new THREE.InstancedMesh(tree, material, slots.length);
+    const instanced = this.track(new THREE.InstancedMesh(tree, material, slots.length));
     const matrix = new THREE.Matrix4();
     const quaternion = new THREE.Quaternion();
     const color = new THREE.Color();
@@ -483,7 +489,7 @@ export class BattlefieldWorld {
 
     const wall = this.track(new THREE.BoxGeometry(13, 3.2, 4.4));
     const material = this.track(new THREE.MeshLambertMaterial({ color: 0x54462f }));
-    const instanced = new THREE.InstancedMesh(wall, material, wallSamples.length);
+    const instanced = this.track(new THREE.InstancedMesh(wall, material, wallSamples.length));
     const matrix = new THREE.Matrix4();
     const quaternion = new THREE.Quaternion();
     const axisY = new THREE.Vector3(0, 1, 0);
@@ -512,16 +518,13 @@ export class BattlefieldWorld {
     const golden = goldenness(timeMs);
 
     // Sky: afternoon blue -> amber sunset -> near-black, moonless night.
-    const day = new THREE.Color(0xb9c8d8);
-    const dusk = new THREE.Color(0xd98d4f);
-    const dark = new THREE.Color(0x070a14);
-    this.skyColor.copy(day).lerp(dusk, Math.min(1, golden * 1.1));
-    this.skyColor.lerp(dark, night);
+    this.skyColor.copy(SKY_DAY).lerp(SKY_DUSK, Math.min(1, golden * 1.1));
+    this.skyColor.lerp(SKY_NIGHT, night);
     this.scene.background = this.skyColor;
 
     const fog = this.scene.fog as THREE.FogExp2 | null;
     if (fog) {
-      fog.color.copy(this.skyColor).lerp(new THREE.Color(0x777264), 0.35 * (1 - night));
+      fog.color.copy(this.skyColor).lerp(FOG_HAZE, 0.35 * (1 - night));
       fog.density = 0.00016 + night * 0.00006;
     }
 

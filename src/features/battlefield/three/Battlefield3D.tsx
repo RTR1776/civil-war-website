@@ -19,23 +19,36 @@ interface Battlefield3DProps {
   reducedMotion: boolean;
 }
 
-function intensityFrom(bundle: ScenarioDataBundle, timeMs: number): number {
+interface IntensityCurve {
+  segments: Array<{ t0: number; t1: number; rate: number }>;
+  maxRate: number;
+}
+
+/** Casualty-rate curve in numeric time — constant per bundle, built once. */
+function buildIntensityCurve(bundle: ScenarioDataBundle): IntensityCurve {
   const ticks = bundle.casualtyTimeline;
+  const segments: IntensityCurve["segments"] = [];
   let maxRate = 1e-9;
-  let rate = 0;
 
   for (let index = 0; index < ticks.length - 1; index += 1) {
     const t0 = Date.parse(ticks[index].time);
     const t1 = Date.parse(ticks[index + 1].time);
-    const segment = (ticks[index + 1].cumulativeCasualties - ticks[index].cumulativeCasualties)
+    const rate = (ticks[index + 1].cumulativeCasualties - ticks[index].cumulativeCasualties)
       / Math.max(1, t1 - t0);
-    maxRate = Math.max(maxRate, segment);
-    if (timeMs >= t0 && timeMs <= t1) {
-      rate = segment;
-    }
+    segments.push({ t0, t1, rate });
+    maxRate = Math.max(maxRate, rate);
   }
 
-  return Math.min(1, rate / maxRate);
+  return { segments, maxRate };
+}
+
+function intensityAt(curve: IntensityCurve, timeMs: number): number {
+  for (const segment of curve.segments) {
+    if (timeMs >= segment.t0 && timeMs <= segment.t1) {
+      return Math.min(1, segment.rate / curve.maxRate);
+    }
+  }
+  return 0;
 }
 
 export default function Battlefield3D({ bundle, reducedMotion }: Battlefield3DProps) {
@@ -71,6 +84,7 @@ export default function Battlefield3D({ bundle, reducedMotion }: Battlefield3DPr
     }
 
     const scene = new THREE.Scene();
+    const intensityCurve = buildIntensityCurve(bundle);
     const world = new BattlefieldWorld(bundle, scene);
     const armies = new Armies3D(bundle, world.terrainModel, world.batteries);
     const effects = new Effects3D();
@@ -176,6 +190,7 @@ export default function Battlefield3D({ bundle, reducedMotion }: Battlefield3DPr
 
     let rafId = 0;
     let lastFrame = 0;
+    const followTarget = new THREE.Vector3();
 
     const frame = (now: number) => {
       const dtMs = lastFrame === 0 ? 16 : Math.min(90, now - lastFrame);
@@ -199,7 +214,7 @@ export default function Battlefield3D({ bundle, reducedMotion }: Battlefield3DPr
         armies.fronts,
         armies.gunSlots,
         (x, y) => world.groundHeight(x, y),
-        intensityFrom(bundle, timeMs),
+        intensityAt(intensityCurve, timeMs),
         night,
         reducedMotionRef.current,
       );
@@ -208,10 +223,8 @@ export default function Battlefield3D({ bundle, reducedMotion }: Battlefield3DPr
       if (followRef.current) {
         const followed = interpolatedWorld(bundle, world, followRef.current, timeMs);
         if (followed) {
-          controls.target.lerp(
-            new THREE.Vector3(followed.x, followed.y + 6, followed.z),
-            reducedMotionRef.current ? 1 : 0.08,
-          );
+          followTarget.set(followed.x, followed.y + 6, followed.z);
+          controls.target.lerp(followTarget, reducedMotionRef.current ? 1 : 0.08);
         }
       }
 
@@ -233,6 +246,10 @@ export default function Battlefield3D({ bundle, reducedMotion }: Battlefield3DPr
       armies.dispose();
       effects.dispose();
       renderer.dispose();
+      // dispose() frees three.js caches but leaves the GL context alive until
+      // GC; browsers cap live contexts, so release it now — mode toggles
+      // mount/unmount this component repeatedly.
+      renderer.forceContextLoss();
       if (renderer.domElement.parentElement === mount) {
         mount.removeChild(renderer.domElement);
       }

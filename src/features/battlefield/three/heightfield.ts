@@ -19,6 +19,7 @@ export class TerrainModel {
   readonly projection: Projection;
   private hills: HillDef[] = [];
   private riverPoints: WorldPoint[] = [];
+  private riverBounds = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
 
   constructor(bundle: ScenarioDataBundle) {
     this.projection = createProjection(bundle.manifest.bounds);
@@ -49,7 +50,12 @@ export class TerrainModel {
 
       if (feature.geometry.type === "LineString" && props.category === "river") {
         for (const [lng, lat] of feature.geometry.coordinates) {
-          this.riverPoints.push(this.projection.toWorld(lat, lng));
+          const point = this.projection.toWorld(lat, lng);
+          this.riverPoints.push(point);
+          this.riverBounds.minX = Math.min(this.riverBounds.minX, point.x);
+          this.riverBounds.minY = Math.min(this.riverBounds.minY, point.y);
+          this.riverBounds.maxX = Math.max(this.riverBounds.maxX, point.x);
+          this.riverBounds.maxY = Math.max(this.riverBounds.maxY, point.y);
         }
       }
     }
@@ -57,6 +63,23 @@ export class TerrainModel {
 
   /** Distance in meters from the river centerline (Infinity when no river). */
   riverDistance(x: number, y: number): number {
+    if (this.riverPoints.length < 2) {
+      return Infinity;
+    }
+
+    // Cheap reject: far outside the river's bounding box, the exact distance
+    // never matters to the terrain (the valley term is clamped at 600 m).
+    const bounds = this.riverBounds;
+    const outside = Math.max(
+      bounds.minX - x,
+      x - bounds.maxX,
+      bounds.minY - y,
+      y - bounds.maxY,
+    );
+    if (outside > 700) {
+      return outside;
+    }
+
     let best = Infinity;
 
     for (let index = 0; index < this.riverPoints.length - 1; index += 1) {

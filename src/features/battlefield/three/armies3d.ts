@@ -160,7 +160,7 @@ export class Armies3D {
       baseColor: number,
       name: string,
     ): ArmyMeshSet => {
-      const mesh = new THREE.InstancedMesh(geometry, material, Math.max(1, count));
+      const mesh = this.track(new THREE.InstancedMesh(geometry, material, Math.max(1, count)));
       mesh.name = name;
       mesh.count = 0;
       mesh.frustumCulled = false;
@@ -186,7 +186,7 @@ export class Armies3D {
     };
 
     const totalFallenCapacity = 900;
-    this.fallen = new THREE.InstancedMesh(fallen, fallenMaterial, totalFallenCapacity);
+    this.fallen = this.track(new THREE.InstancedMesh(fallen, fallenMaterial, totalFallenCapacity));
     this.fallen.name = "fallen";
     this.fallen.count = 0;
     this.fallen.frustumCulled = false;
@@ -206,7 +206,9 @@ export class Armies3D {
       }
     }
 
-    this.cannons = new THREE.InstancedMesh(cannon, cannonMaterial, Math.max(1, gunSlots.length));
+    this.cannons = this.track(
+      new THREE.InstancedMesh(cannon, cannonMaterial, Math.max(1, gunSlots.length)),
+    );
     this.cannons.name = "cannons";
     const matrix = new THREE.Matrix4();
     const quaternion = new THREE.Quaternion();
@@ -298,12 +300,13 @@ export class Armies3D {
     return anchors;
   }
 
-  private headingOf(formationId: string, timeMs: number): number {
-    const windowMs = 30 * 60 * 1000;
-    const before = interpolateFormationPositions(timeMs - windowMs, this.bundle.movementKeyframes)
-      .find((entry) => entry.formationId === formationId);
-    const after = interpolateFormationPositions(timeMs + windowMs, this.bundle.movementKeyframes)
-      .find((entry) => entry.formationId === formationId);
+  private headingOf(
+    formationId: string,
+    beforeById: Map<string, { lat: number; lng: number }>,
+    afterById: Map<string, { lat: number; lng: number }>,
+  ): number {
+    const before = beforeById.get(formationId);
+    const after = afterById.get(formationId);
 
     if (before && after) {
       const a = this.terrain.projection.toWorld(before.lat, before.lng);
@@ -344,6 +347,20 @@ export class Armies3D {
     this.lastUpdateTime = timeMs;
 
     const positions = interpolateFormationPositions(timeMs, this.bundle.movementKeyframes);
+
+    // Heading needs the field a half hour either side of now. Those two
+    // interpolations are identical for every formation, so run them once per
+    // frame and index the results instead of per-formation (was O(F^2)).
+    const headingWindowMs = 30 * 60 * 1000;
+    const beforeById = new Map(
+      interpolateFormationPositions(timeMs - headingWindowMs, this.bundle.movementKeyframes)
+        .map((entry) => [entry.formationId, entry] as const),
+    );
+    const afterById = new Map(
+      interpolateFormationPositions(timeMs + headingWindowMs, this.bundle.movementKeyframes)
+        .map((entry) => [entry.formationId, entry] as const),
+    );
+
     const globalNow = casualtiesAtTime(this.bundle.casualtyTimeline, timeMs).value;
     const casualtyRatio = globalNow / Math.max(1, this.globalFinalCasualties);
 
@@ -355,8 +372,10 @@ export class Armies3D {
 
     const matrix = new THREE.Matrix4();
     const quaternion = new THREE.Quaternion();
+    const fallenQuaternion = new THREE.Quaternion();
     const axisY = new THREE.Vector3(0, 1, 0);
     const scale = new THREE.Vector3(FIGURE_SCALE, FIGURE_SCALE, FIGURE_SCALE);
+    const placement = new THREE.Vector3();
     let fallenCursor = 0;
 
     for (const position of positions) {
@@ -384,13 +403,14 @@ export class Armies3D {
       }
 
       const center = this.terrain.projection.toWorld(position.lat, position.lng);
-      const heading = this.headingOf(formation.id, timeMs);
+      const heading = this.headingOf(formation.id, beforeById, afterById);
       quaternion.setFromAxisAngle(axisY, -heading);
 
       for (let index = 0; index < count && set.cursor < set.mesh.instanceMatrix.count; index += 1) {
         const world = offsetToWorld(center.x, center.y, heading, runtime.offsets[index]);
         const ground = this.terrain.elevation(world.x, world.y);
-        matrix.compose(new THREE.Vector3(world.x, ground, world.y), quaternion, scale);
+        placement.set(world.x, ground, world.y);
+        matrix.compose(placement, quaternion, scale);
         set.mesh.setMatrixAt(set.cursor, matrix);
         set.formationByInstance[set.cursor] = formation.id;
         set.cursor += 1;
@@ -415,22 +435,14 @@ export class Armies3D {
       }
 
       // The fallen: fixed where the line stood at the moment each dropped.
-      const fallenQuaternion = new THREE.Quaternion();
       for (const anchor of runtime.fallenAnchors) {
         if (anchor.timeMs > timeMs || fallenCursor >= this.fallen.instanceMatrix.count) {
           continue;
         }
 
         fallenQuaternion.setFromAxisAngle(axisY, anchor.rotation);
-        matrix.compose(
-          new THREE.Vector3(
-            anchor.x,
-            this.terrain.elevation(anchor.x, anchor.y) + 0.1,
-            anchor.y,
-          ),
-          fallenQuaternion,
-          scale,
-        );
+        placement.set(anchor.x, this.terrain.elevation(anchor.x, anchor.y) + 0.1, anchor.y);
+        matrix.compose(placement, fallenQuaternion, scale);
         this.fallen.setMatrixAt(fallenCursor, matrix);
         fallenCursor += 1;
       }
