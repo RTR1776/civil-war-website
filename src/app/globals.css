@@ -1377,6 +1377,115 @@ button {
   font-style: italic;
 }
 
+/* --------------------------------------------------------------- 3D field -- */
+
+.stage-3d {
+  position: absolute;
+  inset: 0;
+}
+
+.mount-3d {
+  position: absolute;
+  inset: 0;
+}
+
+.mount-3d canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.vantage-chips {
+  position: absolute;
+  top: 4.9rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 16;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.3rem;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--panel-soft);
+  backdrop-filter: blur(10px);
+  max-width: min(46rem, calc(100vw - 2rem));
+}
+
+.vantage-chips button {
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 150ms ease, background-color 150ms ease;
+  white-space: nowrap;
+}
+
+.vantage-chips button:hover {
+  color: var(--bone);
+}
+
+.vantage-chips button.active {
+  background: rgba(216, 173, 98, 0.2);
+  border-color: var(--hairline-strong);
+  color: var(--gold-bright);
+}
+
+.figure-legend {
+  position: absolute;
+  right: 1.1rem;
+  bottom: 7.4rem;
+  z-index: 14;
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: rgba(240, 231, 211, 0.75);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  max-width: 20rem;
+  text-align: right;
+}
+
+.webgl-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  background: var(--ink);
+  padding: 2rem;
+}
+
+.webgl-fallback h3 {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.4rem;
+}
+
+.webgl-fallback p {
+  margin: 0;
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .vantage-chips {
+    top: auto;
+    bottom: 12rem;
+    max-width: calc(100vw - 1rem);
+  }
+
+  .figure-legend {
+    display: none;
+  }
+}
+
 /* ------------------------------------------------------------------ mapbox -- */
 
 .present-map-wrap,

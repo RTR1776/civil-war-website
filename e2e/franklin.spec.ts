@@ -78,6 +78,28 @@ test.describe("Franklin cinematic battlefield", () => {
     await expect(page.getByTestId("epilogue-overlay")).toHaveCount(0);
   });
 
+  test("opens the 3D battlefield with vantage points", async ({ page }) => {
+    await page.goto("/");
+    await page.getByTestId("intro-explore").click();
+
+    await page.getByTestId("mode-3d").click();
+    await expect(page.getByTestId("battlefield-3d")).toBeVisible({ timeout: 30000 });
+    await expect(page.locator(".mount-3d canvas")).toBeVisible();
+
+    const winstead = page.getByTestId("vantage-winstead");
+    await winstead.click();
+    await expect(winstead).toHaveClass(/active/);
+
+    // Time controls continue to drive the 3D scene.
+    await page.getByTestId("play-pause-button").click();
+    await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
+    await page.getByTestId("play-pause-button").click();
+
+    // Back to the 2D map.
+    await page.getByTestId("mode-explore").click();
+    await expect(page.getByTestId("battlefield-canvas")).toBeVisible();
+  });
+
   test("keeps the stage usable on mobile", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");

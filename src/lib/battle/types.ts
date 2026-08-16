@@ -44,10 +44,14 @@ export interface ScenarioManifest {
   chapterOrder: string[];
 }
 
+export type FormationArm = "infantry" | "cavalry";
+
 export interface Formation {
   id: string;
   name: string;
   side: Side;
+  /** Branch of service; infantry when omitted. */
+  arm?: FormationArm;
   commander: string;
   strengthEstimate: number;
   corps?: string;
