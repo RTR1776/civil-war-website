@@ -107,6 +107,10 @@ export default function IntroOverlay({ onBeginStory, onExplore, reducedMotion }:
         <p className="intro-hint">
           <kbd>Space</kbd> play / pause · <kbd>←</kbd><kbd>→</kbd> step time · drag to pan · scroll to zoom
         </p>
+        <p className="intro-hint intro-hint-quiet">
+          The field has a voice: the speaker in the control bar turns on wind, musketry, and guns,
+          synthesized live from the casualty curve. It starts silent.
+        </p>
       </div>
     </div>
   );

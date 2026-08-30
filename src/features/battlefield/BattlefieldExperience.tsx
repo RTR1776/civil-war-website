@@ -13,6 +13,7 @@ import RecordsPanel from "@/features/battlefield/RecordsPanel";
 import StoryRail from "@/features/battlefield/StoryRail";
 import VoiceCard from "@/features/battlefield/VoiceCard";
 import VoicesPanel from "@/features/battlefield/VoicesPanel";
+import { useBattlefieldAudio } from "@/features/battlefield/useBattlefieldAudio";
 import { useBattleStore } from "@/lib/battle/store";
 import { loadScenarioData } from "@/lib/battle/scenarioLoader";
 import { formatBattleClock } from "@/lib/battle/time";
@@ -97,6 +98,8 @@ export default function BattlefieldExperience() {
   );
   const [satelliteView, setSatelliteView] = useState(false);
   const [view3d, setView3d] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [audioVolume, setAudioVolume] = useState(0.65);
 
   const data = useBattleStore((state) => state.data);
   const sidebarMode = useBattleStore((state) => state.uiState.sidebarMode);
@@ -107,6 +110,8 @@ export default function BattlefieldExperience() {
   const setSidebarMode = useBattleStore((state) => state.setSidebarMode);
   const beginStory = useBattleStore((state) => state.beginStory);
   const acknowledgeStoryComplete = useBattleStore((state) => state.acknowledgeStoryComplete);
+
+  useBattlefieldAudio(data, audioEnabled, audioVolume);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -345,7 +350,13 @@ export default function BattlefieldExperience() {
             }}
           />
           <HoveredEventToast />
-          <ControlDock bundle={data} />
+          <ControlDock
+            bundle={data}
+            audioEnabled={audioEnabled}
+            audioVolume={audioVolume}
+            onToggleAudio={() => setAudioEnabled((on) => !on)}
+            onChangeAudioVolume={setAudioVolume}
+          />
           {selectedFormationId ? <IntelCard bundle={data} /> : null}
           {showVoices ? (
             <VoicesPanel bundle={data} onClose={() => setShowVoices(false)} />

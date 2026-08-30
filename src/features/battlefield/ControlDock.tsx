@@ -9,6 +9,10 @@ import type { ScenarioDataBundle } from "@/lib/battle/types";
 
 interface ControlDockProps {
   bundle: ScenarioDataBundle;
+  audioEnabled: boolean;
+  audioVolume: number;
+  onToggleAudio: () => void;
+  onChangeAudioVolume: (value: number) => void;
 }
 
 function PhaseGlyph({ phase }: { phase: ReturnType<typeof dayPhase> }) {
@@ -46,7 +50,38 @@ function PhaseGlyph({ phase }: { phase: ReturnType<typeof dayPhase> }) {
   );
 }
 
-export default function ControlDock({ bundle }: ControlDockProps) {
+function SpeakerGlyph({ on }: { on: boolean }) {
+  return (
+    <svg viewBox="0 0 20 20" className="phase-glyph" aria-hidden="true">
+      <path d="M4 7.6h2.6L10 4.6v10.8L6.6 12.4H4Z" fill="currentColor" />
+      {on ? (
+        <path
+          d="M12.6 7.1a4 4 0 0 1 0 5.8M14.7 5a7 7 0 0 1 0 10"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+        />
+      ) : (
+        <path
+          d="m12.8 7.8 4.2 4.4M17 7.8l-4.2 4.4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+        />
+      )}
+    </svg>
+  );
+}
+
+export default function ControlDock({
+  bundle,
+  audioEnabled,
+  audioVolume,
+  onToggleAudio,
+  onChangeAudioVolume,
+}: ControlDockProps) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const draggingRef = useRef(false);
 
@@ -239,6 +274,35 @@ export default function ControlDock({ bundle }: ControlDockProps) {
               </svg>
             )}
           </button>
+          <div className="dock-audio">
+            <button
+              type="button"
+              className={`audio-button ${audioEnabled ? "active" : ""}`}
+              data-testid="audio-toggle"
+              aria-pressed={audioEnabled}
+              aria-label={audioEnabled ? "Mute the field" : "Sound of the field"}
+              title={
+                audioEnabled
+                  ? "Mute the field"
+                  : "Sound of the field — synthesized wind, musketry, and guns"
+              }
+              onClick={onToggleAudio}
+            >
+              <SpeakerGlyph on={audioEnabled} />
+            </button>
+            {audioEnabled ? (
+              <input
+                className="audio-volume"
+                type="range"
+                min={0}
+                max={100}
+                value={Math.round(audioVolume * 100)}
+                aria-label="Field volume"
+                onChange={(event) => onChangeAudioVolume(Number(event.target.value) / 100)}
+              />
+            ) : null}
+          </div>
+
           <div className="speed-cluster" role="group" aria-label="Playback speed">
             {([1, 2, 4] as PlaybackSpeed[]).map((candidate) => (
               <button

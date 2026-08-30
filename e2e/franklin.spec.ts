@@ -123,6 +123,67 @@ test.describe("Franklin cinematic battlefield", () => {
     await expect(card).toHaveCount(0);
   });
 
+  test("turns the synthesized field audio on and off", async ({ page }) => {
+    // Probe the audio graph from the page: nothing in the app exposes it, and
+    // the point of the test is that the sound is built, not fetched.
+    await page.addInitScript(() => {
+      const Real = window.AudioContext;
+      const probe = { started: 0, context: null as AudioContext | null };
+      (window as unknown as { __audioProbe: typeof probe }).__audioProbe = probe;
+
+      window.AudioContext = class extends Real {
+        constructor(options?: AudioContextOptions) {
+          super(options);
+          probe.context = this;
+        }
+
+        createBufferSource() {
+          const source = super.createBufferSource();
+          const start = source.start.bind(source);
+          source.start = (...args: Parameters<typeof start>) => {
+            probe.started += 1;
+            return start(...args);
+          };
+          return source;
+        }
+      };
+    });
+
+    const requests: string[] = [];
+    page.on("request", (request) => requests.push(request.url()));
+
+    await page.goto("/");
+    await page.getByTestId("intro-explore").click();
+
+    const toggle = page.getByTestId("audio-toggle");
+    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+    await expect(page.getByLabel("Field volume")).toHaveCount(0);
+
+    // The height of the assault, where the fire is heaviest.
+    await page.getByTestId("chapter-chapter-breach").click();
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByLabel("Field volume")).toBeVisible();
+
+    const readProbe = () =>
+      page.evaluate(() => {
+        const probe = (window as unknown as {
+          __audioProbe: { started: number; context: AudioContext | null };
+        }).__audioProbe;
+        return { started: probe.started, state: probe.context?.state ?? null };
+      });
+
+    await expect.poll(async () => (await readProbe()).state).toBe("running");
+    // Wind and the musketry roll loop; the cracks and guns are fired on top.
+    await expect.poll(async () => (await readProbe()).started).toBeGreaterThan(12);
+
+    expect(requests.filter((url) => /\.(mp3|ogg|wav|m4a)(\?|$)/i.test(url))).toEqual([]);
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+    await expect(page.getByLabel("Field volume")).toHaveCount(0);
+  });
+
   test("keeps the stage usable on mobile", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");

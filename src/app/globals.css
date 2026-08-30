@@ -1189,6 +1189,16 @@ button {
   animation: fade-up 900ms ease 1400ms both;
 }
 
+.intro-hint-quiet {
+  max-width: 34rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0.5rem;
+  line-height: 1.5;
+  color: rgba(177, 162, 137, 0.72);
+  animation-delay: 1550ms;
+}
+
 .intro-hint kbd {
   border: 1px solid rgba(240, 231, 211, 0.3);
   border-bottom-width: 2px;
@@ -1523,6 +1533,48 @@ button {
 .mapbox-empty p {
   color: var(--muted);
   max-width: 44ch;
+}
+
+.dock-audio {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.audio-button {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+
+.audio-button .phase-glyph {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.audio-button:hover {
+  color: var(--bone);
+  border-color: var(--hairline-strong);
+}
+
+.audio-button.active {
+  color: var(--gold-bright);
+  border-color: var(--hairline-strong);
+  background: rgba(216, 173, 98, 0.16);
+}
+
+.audio-volume {
+  width: 4.4rem;
+  height: 0.9rem;
+  accent-color: var(--gold);
+  cursor: pointer;
 }
 
 /* ---------------------------------------------------------------- voices -- */
@@ -1948,6 +2000,10 @@ button {
 
   .dock-transport {
     justify-content: space-between;
+  }
+
+  .audio-volume {
+    width: 3.2rem;
   }
 
   .dock-casualties {

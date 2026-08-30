@@ -9,6 +9,7 @@ import { Armies3D } from "@/features/battlefield/three/armies3d";
 import { Effects3D } from "@/features/battlefield/three/effects3d";
 import { BattlefieldWorld } from "@/features/battlefield/three/scene3d";
 import { vantagePoints, type Vantage } from "@/features/battlefield/three/viewpoints";
+import { buildIntensityCurve, intensityAt } from "@/lib/battle/intensity";
 import { useBattleStore } from "@/lib/battle/store";
 import { nightness } from "@/lib/battle/time";
 import type { ScenarioDataBundle } from "@/lib/battle/types";
@@ -16,38 +17,6 @@ import type { ScenarioDataBundle } from "@/lib/battle/types";
 interface Battlefield3DProps {
   bundle: ScenarioDataBundle;
   reducedMotion: boolean;
-}
-
-interface IntensityCurve {
-  segments: Array<{ t0: number; t1: number; rate: number }>;
-  maxRate: number;
-}
-
-/** Casualty-rate curve in numeric time — constant per bundle, built once. */
-function buildIntensityCurve(bundle: ScenarioDataBundle): IntensityCurve {
-  const ticks = bundle.casualtyTimeline;
-  const segments: IntensityCurve["segments"] = [];
-  let maxRate = 1e-9;
-
-  for (let index = 0; index < ticks.length - 1; index += 1) {
-    const t0 = Date.parse(ticks[index].time);
-    const t1 = Date.parse(ticks[index + 1].time);
-    const rate = (ticks[index + 1].cumulativeCasualties - ticks[index].cumulativeCasualties)
-      / Math.max(1, t1 - t0);
-    segments.push({ t0, t1, rate });
-    maxRate = Math.max(maxRate, rate);
-  }
-
-  return { segments, maxRate };
-}
-
-function intensityAt(curve: IntensityCurve, timeMs: number): number {
-  for (const segment of curve.segments) {
-    if (timeMs >= segment.t0 && timeMs <= segment.t1) {
-      return Math.min(1, segment.rate / curve.maxRate);
-    }
-  }
-  return 0;
 }
 
 export default function Battlefield3D({ bundle, reducedMotion }: Battlefield3DProps) {
@@ -83,7 +52,7 @@ export default function Battlefield3D({ bundle, reducedMotion }: Battlefield3DPr
     }
 
     const scene = new THREE.Scene();
-    const intensityCurve = buildIntensityCurve(bundle);
+    const intensityCurve = buildIntensityCurve(bundle.casualtyTimeline);
     const world = new BattlefieldWorld(bundle, scene);
     const armies = new Armies3D(bundle, world.terrainModel, world.batteries);
     const effects = new Effects3D();
