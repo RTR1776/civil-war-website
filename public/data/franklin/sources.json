@@ -34,5 +34,59 @@
     "author": "O. Edward Cunningham",
     "year": 2012,
     "note": "Detailed operational account used for late-evening attrition and collapse-of-momentum interpretation."
+  },
+  {
+    "id": "source-watkins-1882",
+    "title": "Co. Aytch: A Side Show of the Big Show",
+    "author": "Sam R. Watkins",
+    "year": 1882,
+    "url": "https://docsouth.unc.edu/fpn/watkins/menu.html",
+    "note": "Memoir of a private in the 1st Tennessee Infantry, present at Franklin. Quoted for first-person accounts of the assault, the darkness, and the field afterward."
+  },
+  {
+    "id": "source-shellenberger-1916",
+    "title": "The Battle of Franklin, Tennessee",
+    "author": "John K. Shellenberger",
+    "year": 1916,
+    "url": "https://www.gutenberg.org/ebooks/31468",
+    "note": "Account by a captain of the 64th Ohio, in Conrad's brigade of Wagner's advanced line. Read as a paper in 1902; published 1916. Quoted for the forward position, the rout, and the fight at the works."
+  },
+  {
+    "id": "source-copley-1893",
+    "title": "A Sketch of the Battle of Franklin, Tenn.; with Reminiscences of Camp Douglas",
+    "author": "John M. Copley",
+    "year": 1893,
+    "url": "https://docsouth.unc.edu/fpn/copley/menu.html",
+    "note": "Memoir of a private in the 49th Tennessee, captured at the cotton gin. Quoted for the Confederate ranks before the advance."
+  },
+  {
+    "id": "source-buck-1908",
+    "title": "Cleburne and His Command",
+    "author": "Irving A. Buck",
+    "year": 1908,
+    "url": "https://archive.org/details/03888368.3189.emory.edu",
+    "note": "Cleburne's adjutant, absent wounded from Franklin, who gathered the accounts of Brig. Gen. Daniel C. Govan and others. Source for the Winstead Hill exchange."
+  },
+  {
+    "id": "source-hood-1880",
+    "title": "Advance and Retreat: Personal Experiences in the United States and Confederate States Armies",
+    "author": "John Bell Hood",
+    "year": 1880,
+    "note": "Hood's own account of the campaign, quoted for the decision to attack at Franklin."
+  },
+  {
+    "id": "source-bennett-haigh-1876",
+    "title": "History of the Thirty-sixth Regiment Illinois Volunteers, During the War of the Rebellion",
+    "author": "L. G. Bennett and William M. Haigh",
+    "year": 1876,
+    "note": "Regimental history of a Union regiment on the field, quoted for how the advance sounded from behind the works."
+  },
+  {
+    "id": "source-abt-franklin",
+    "title": "Franklin: battle summary and 10 Facts",
+    "author": "American Battlefield Trust",
+    "year": 2024,
+    "url": "https://www.battlefields.org/learn/articles/10-facts-battle-franklin",
+    "note": "Modern reference used for casualty totals and for quotations whose original publication is a periodical or regimental paper not reproduced here."
   }
 ]

@@ -5,6 +5,7 @@ import sourcesJson from "../../public/data/franklin/sources.json";
 import chaptersJson from "../../public/data/franklin/chapters.json";
 import mapLayersJson from "../../public/data/franklin/mapLayers.json";
 import evidenceJson from "../../public/data/franklin/evidence.json";
+import voicesJson from "../../public/data/franklin/voices.json";
 
 import { buildScenarioBundle } from "@/lib/battle/scenarioLoader";
 import type {
@@ -28,6 +29,7 @@ export const franklinFiles: ScenarioFiles = {
   chapters: chaptersJson as unknown as ChapterScene[],
   mapLayers: mapLayersJson as unknown as MapLayerPack,
   evidence: evidenceJson as unknown as ScenarioFiles["evidence"],
+  voices: voicesJson as unknown as ScenarioFiles["voices"],
 };
 
 export function buildFranklinBundle() {

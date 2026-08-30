@@ -60,6 +60,7 @@ export default function ControlDock({ bundle }: ControlDockProps) {
   const setSpeed = useBattleStore((state) => state.setSpeed);
   const seek = useBattleStore((state) => state.seek);
   const setHoveredEventId = useBattleStore((state) => state.setHoveredEventId);
+  const cueVoice = useBattleStore((state) => state.cueVoice);
 
   const start = Date.parse(bundle.manifest.timeStart);
   const end = Date.parse(bundle.manifest.timeEnd);
@@ -193,6 +194,30 @@ export default function ControlDock({ bundle }: ControlDockProps) {
               />
             );
           })}
+
+          <div className="timeline-voices" aria-hidden="true">
+            {bundle.voices.map((voice) => {
+              if (!voice.time) {
+                return null;
+              }
+              const offset = ((Date.parse(voice.time) - start) / span) * 100;
+              return (
+                <button
+                  key={voice.id}
+                  type="button"
+                  className={`timeline-voice-pip side-${voice.side.toLowerCase()}`}
+                  style={{ left: `${offset}%` }}
+                  tabIndex={-1}
+                  title={`${formatBattleClock(Date.parse(voice.time))} — ${voice.speaker}`}
+                  onClick={(clickEvent) => {
+                    clickEvent.stopPropagation();
+                    cueVoice(voice);
+                  }}
+                  onPointerDown={(pointerEvent) => pointerEvent.stopPropagation()}
+                />
+              );
+            })}
+          </div>
         </div>
 
         <div className="dock-transport">

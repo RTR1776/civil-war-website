@@ -100,6 +100,29 @@ test.describe("Franklin cinematic battlefield", () => {
     await expect(page.getByTestId("battlefield-canvas")).toBeVisible();
   });
 
+  test("surfaces first-person accounts and lists them with citations", async ({ page }) => {
+    await page.goto("/");
+    await page.getByTestId("intro-explore").click();
+
+    await page.getByTestId("mode-voices").click();
+    const panel = page.getByTestId("voices-panel");
+    await expect(panel).toBeVisible();
+    await expect(panel.getByText("Maj. Gen. Patrick R. Cleburne").first()).toBeVisible();
+
+    // Choosing an account moves the clock to it and raises it over the map.
+    await page.getByTestId("voice-voice-govan-cleburne").click();
+    await expect(page.getByTestId("dock-clock-time")).toHaveText(/3:3\d PM/);
+
+    await page.getByTestId("mode-voices").click();
+    const card = page.getByTestId("voice-card");
+    await expect(card).toBeVisible();
+    await expect(card).toContainText("let us die like men");
+    await expect(card).toContainText("Cleburne and His Command");
+
+    await card.getByRole("button", { name: "Dismiss account" }).click();
+    await expect(card).toHaveCount(0);
+  });
+
   test("keeps the stage usable on mobile", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");

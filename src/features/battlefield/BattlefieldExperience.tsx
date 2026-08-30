@@ -11,6 +11,8 @@ import IntroOverlay from "@/features/battlefield/IntroOverlay";
 import PresentDayMapbox from "@/features/battlefield/PresentDayMapbox";
 import RecordsPanel from "@/features/battlefield/RecordsPanel";
 import StoryRail from "@/features/battlefield/StoryRail";
+import VoiceCard from "@/features/battlefield/VoiceCard";
+import VoicesPanel from "@/features/battlefield/VoicesPanel";
 import { useBattleStore } from "@/lib/battle/store";
 import { loadScenarioData } from "@/lib/battle/scenarioLoader";
 import { formatBattleClock } from "@/lib/battle/time";
@@ -89,6 +91,7 @@ export default function BattlefieldExperience() {
   const [showIntro, setShowIntro] = useState(true);
   const [showEpilogue, setShowEpilogue] = useState(false);
   const [showRecords, setShowRecords] = useState(false);
+  const [showVoices, setShowVoices] = useState(false);
   const [railOpen, setRailOpen] = useState(
     () => typeof window === "undefined" || window.innerWidth > 900,
   );
@@ -176,6 +179,8 @@ export default function BattlefieldExperience() {
           setShowEpilogue(false);
         } else if (showRecords) {
           setShowRecords(false);
+        } else if (showVoices) {
+          setShowVoices(false);
         } else if (store.uiState.selectedFormationId) {
           store.selectFormation(null);
         }
@@ -184,7 +189,7 @@ export default function BattlefieldExperience() {
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [showEpilogue, showIntro, showRecords]);
+  }, [showEpilogue, showIntro, showRecords, showVoices]);
 
   if (loading) {
     return (
@@ -207,6 +212,8 @@ export default function BattlefieldExperience() {
   const handleBeginStory = () => {
     setShowIntro(false);
     setShowEpilogue(false);
+    setShowVoices(false);
+    setShowRecords(false);
     setSatelliteView(false);
     setView3d(false);
     beginStory();
@@ -292,9 +299,23 @@ export default function BattlefieldExperience() {
               ) : null}
               <button
                 type="button"
+                className={showVoices ? "active" : ""}
+                data-testid="mode-voices"
+                onClick={() => {
+                  setShowVoices((open) => !open);
+                  setShowRecords(false);
+                }}
+              >
+                Voices
+              </button>
+              <button
+                type="button"
                 className={showRecords ? "active" : ""}
                 data-testid="mode-records"
-                onClick={() => setShowRecords((open) => !open)}
+                onClick={() => {
+                  setShowRecords((open) => !open);
+                  setShowVoices(false);
+                }}
               >
                 Records
               </button>
@@ -316,9 +337,19 @@ export default function BattlefieldExperience() {
           </div>
 
           {!satelliteView && !view3d ? <BeatCaption /> : null}
+          <VoiceCard
+            bundle={data}
+            onOpenVoices={() => {
+              setShowVoices(true);
+              setShowRecords(false);
+            }}
+          />
           <HoveredEventToast />
           <ControlDock bundle={data} />
           {selectedFormationId ? <IntelCard bundle={data} /> : null}
+          {showVoices ? (
+            <VoicesPanel bundle={data} onClose={() => setShowVoices(false)} />
+          ) : null}
           {showRecords ? (
             <RecordsPanel
               bundle={data}

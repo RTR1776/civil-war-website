@@ -35,11 +35,14 @@ function resetStore() {
       guidedMode: true,
       hoveredEventId: null,
       selectedFormationId: null,
+      voicesEnabled: true,
     },
     storyState: {
       activeBeatId: null,
       activeChapterId: null,
+      activeVoiceId: null,
       lockedFormationId: null,
+      voiceCue: 0,
       storyComplete: false,
     },
   });
