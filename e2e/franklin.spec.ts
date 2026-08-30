@@ -184,6 +184,31 @@ test.describe("Franklin cinematic battlefield", () => {
     await expect(page.getByLabel("Field volume")).toHaveCount(0);
   });
 
+  test("links to a moment and reopens it", async ({ page, context }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+
+    await page.goto("/");
+    await page.getByTestId("intro-explore").click();
+    await page.getByTestId("chapter-chapter-breach").click();
+
+    // The address bar tracks the clock on its own.
+    await expect.poll(() => page.url()).toContain("t=1700");
+
+    await page.getByTestId("share-link").click();
+    await expect(page.getByText("Link copied")).toBeVisible();
+
+    const shared = await page.evaluate(() => navigator.clipboard.readText());
+    expect(shared).toContain("t=1700");
+
+    const visitor = await context.newPage();
+    await visitor.goto(shared);
+
+    // A shared link opens on its moment, not the title card.
+    await expect(visitor.getByTestId("intro-overlay")).toHaveCount(0);
+    await expect(visitor.getByTestId("dock-clock-time")).toHaveText("5:00 PM");
+    await visitor.close();
+  });
+
   test("keeps the stage usable on mobile", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");

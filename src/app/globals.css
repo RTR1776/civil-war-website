@@ -132,6 +132,12 @@ button {
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
 }
 
+.hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
 .hud-modes {
   display: flex;
   gap: 0.35rem;
@@ -1548,6 +1554,46 @@ button {
 .mapbox-empty p {
   color: var(--muted);
   max-width: 44ch;
+}
+
+.share-button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  min-width: 2.35rem;
+  height: 2.35rem;
+  padding: 0 0.7rem;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--panel-soft);
+  backdrop-filter: blur(10px);
+  color: var(--muted);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+}
+
+.share-button svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.share-button:hover {
+  color: var(--bone);
+  border-color: var(--hairline-strong);
+}
+
+.share-button.copied {
+  color: var(--gold-bright);
+  border-color: var(--hairline-strong);
+  background: rgba(216, 173, 98, 0.16);
+}
+
+.share-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .dock-audio {
