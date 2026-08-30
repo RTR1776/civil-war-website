@@ -11,6 +11,11 @@ import IntroOverlay from "@/features/battlefield/IntroOverlay";
 import PresentDayMapbox from "@/features/battlefield/PresentDayMapbox";
 import RecordsPanel from "@/features/battlefield/RecordsPanel";
 import StoryRail from "@/features/battlefield/StoryRail";
+import VoiceCard from "@/features/battlefield/VoiceCard";
+import VoicesPanel from "@/features/battlefield/VoicesPanel";
+import { useBattlefieldAudio } from "@/features/battlefield/useBattlefieldAudio";
+import { currentPermalinkUrl, usePermalink } from "@/features/battlefield/usePermalink";
+import { decodePermalink, type PermalinkView } from "@/lib/battle/permalink";
 import { useBattleStore } from "@/lib/battle/store";
 import { loadScenarioData } from "@/lib/battle/scenarioLoader";
 import { formatBattleClock } from "@/lib/battle/time";
@@ -89,11 +94,15 @@ export default function BattlefieldExperience() {
   const [showIntro, setShowIntro] = useState(true);
   const [showEpilogue, setShowEpilogue] = useState(false);
   const [showRecords, setShowRecords] = useState(false);
+  const [showVoices, setShowVoices] = useState(false);
   const [railOpen, setRailOpen] = useState(
     () => typeof window === "undefined" || window.innerWidth > 900,
   );
   const [satelliteView, setSatelliteView] = useState(false);
   const [view3d, setView3d] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [audioVolume, setAudioVolume] = useState(0.65);
+  const [copied, setCopied] = useState(false);
 
   const data = useBattleStore((state) => state.data);
   const sidebarMode = useBattleStore((state) => state.uiState.sidebarMode);
@@ -104,6 +113,18 @@ export default function BattlefieldExperience() {
   const setSidebarMode = useBattleStore((state) => state.setSidebarMode);
   const beginStory = useBattleStore((state) => state.beginStory);
   const acknowledgeStoryComplete = useBattleStore((state) => state.acknowledgeStoryComplete);
+
+  const storyActive = sidebarMode === "story" && guidedMode && !view3d && !satelliteView;
+  const permalinkView: PermalinkView = view3d
+    ? "3d"
+    : satelliteView
+      ? "satellite"
+      : storyActive
+        ? "story"
+        : "explore";
+
+  useBattlefieldAudio(data, audioEnabled, audioVolume);
+  usePermalink({ view: permalinkView, sound: audioEnabled, active: !showIntro && Boolean(data) });
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -147,6 +168,54 @@ export default function BattlefieldExperience() {
     };
   }, [setData]);
 
+  // A shared link lands on its moment rather than the title card.
+  useEffect(() => {
+    if (!data || typeof window === "undefined") {
+      return;
+    }
+
+    const link = decodePermalink(window.location.hash, Date.parse(data.manifest.timeStart));
+    if (Object.keys(link).length === 0) {
+      return;
+    }
+
+    const store = useBattleStore.getState();
+    setShowIntro(false);
+
+    if (link.view === "3d") {
+      setView3d(true);
+    } else if (link.view === "satellite" && MAPBOX_TOKEN) {
+      setSatelliteView(true);
+    }
+
+    if (link.view === "story") {
+      store.setSidebarMode("story");
+    } else if (link.view) {
+      store.setSidebarMode("analyze");
+    }
+
+    if (link.timeMs !== undefined) {
+      store.seek(link.timeMs);
+      store.pause();
+    }
+
+    if (link.formationId) {
+      store.selectFormation(link.formationId);
+    }
+
+    const voice = link.voiceId
+      ? data.voices.find((entry) => entry.id === link.voiceId)
+      : undefined;
+    if (voice) {
+      store.cueVoice(voice);
+    }
+
+    if (link.sound) {
+      setAudioEnabled(true);
+    }
+    // Applied once, from the address the visitor arrived on.
+  }, [data]);
+
   // Guided playback reaching the end of the timeline raises the epilogue.
   useEffect(() => {
     if (storyComplete) {
@@ -176,6 +245,8 @@ export default function BattlefieldExperience() {
           setShowEpilogue(false);
         } else if (showRecords) {
           setShowRecords(false);
+        } else if (showVoices) {
+          setShowVoices(false);
         } else if (store.uiState.selectedFormationId) {
           store.selectFormation(null);
         }
@@ -184,7 +255,7 @@ export default function BattlefieldExperience() {
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [showEpilogue, showIntro, showRecords]);
+  }, [showEpilogue, showIntro, showRecords, showVoices]);
 
   if (loading) {
     return (
@@ -207,6 +278,8 @@ export default function BattlefieldExperience() {
   const handleBeginStory = () => {
     setShowIntro(false);
     setShowEpilogue(false);
+    setShowVoices(false);
+    setShowRecords(false);
     setSatelliteView(false);
     setView3d(false);
     beginStory();
@@ -218,7 +291,16 @@ export default function BattlefieldExperience() {
     setSidebarMode("analyze");
   };
 
-  const storyActive = sidebarMode === "story" && guidedMode && !view3d;
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(currentPermalinkUrl(permalinkView, audioEnabled));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+    } catch {
+      // Clipboard access can be refused; the address bar already carries the
+      // same link, so there is nothing to recover.
+    }
+  };
 
   return (
     <div className="stage-root" data-testid="battlefield-app" data-mode={sidebarMode}>
@@ -238,6 +320,7 @@ export default function BattlefieldExperience() {
               <h1>{data.manifest.name}</h1>
             </div>
 
+            <div className="hud-actions">
             <div className="hud-modes" role="group" aria-label="View mode">
               <button
                 type="button"
@@ -292,12 +375,50 @@ export default function BattlefieldExperience() {
               ) : null}
               <button
                 type="button"
+                className={showVoices ? "active" : ""}
+                data-testid="mode-voices"
+                onClick={() => {
+                  setShowVoices((open) => !open);
+                  setShowRecords(false);
+                }}
+              >
+                Voices
+              </button>
+              <button
+                type="button"
                 className={showRecords ? "active" : ""}
                 data-testid="mode-records"
-                onClick={() => setShowRecords((open) => !open)}
+                onClick={() => {
+                  setShowRecords((open) => !open);
+                  setShowVoices(false);
+                }}
               >
                 Records
               </button>
+            </div>
+
+            <button
+              type="button"
+              className={`share-button ${copied ? "copied" : ""}`}
+              data-testid="share-link"
+              onClick={handleCopyLink}
+              aria-label="Copy a link to this moment"
+              title="Copy a link to this moment"
+            >
+              {copied ? (
+                <span className="share-label">Link copied</span>
+              ) : (
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <path
+                    d="M8.4 11.6a3.4 3.4 0 0 0 5 .3l2.2-2.2a3.4 3.4 0 0 0-4.8-4.8l-1.2 1.2M11.6 8.4a3.4 3.4 0 0 0-5-.3l-2.2 2.2a3.4 3.4 0 0 0 4.8 4.8l1.2-1.2"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              )}
+            </button>
             </div>
           </header>
 
@@ -316,9 +437,25 @@ export default function BattlefieldExperience() {
           </div>
 
           {!satelliteView && !view3d ? <BeatCaption /> : null}
+          <VoiceCard
+            bundle={data}
+            onOpenVoices={() => {
+              setShowVoices(true);
+              setShowRecords(false);
+            }}
+          />
           <HoveredEventToast />
-          <ControlDock bundle={data} />
+          <ControlDock
+            bundle={data}
+            audioEnabled={audioEnabled}
+            audioVolume={audioVolume}
+            onToggleAudio={() => setAudioEnabled((on) => !on)}
+            onChangeAudioVolume={setAudioVolume}
+          />
           {selectedFormationId ? <IntelCard bundle={data} /> : null}
+          {showVoices ? (
+            <VoicesPanel bundle={data} onClose={() => setShowVoices(false)} />
+          ) : null}
           {showRecords ? (
             <RecordsPanel
               bundle={data}

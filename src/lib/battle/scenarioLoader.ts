@@ -10,6 +10,7 @@ import type {
   ScenarioManifest,
   SourceCitation,
   TimelineEvent,
+  VoiceAccount,
 } from "@/lib/battle/types";
 
 interface LegacyDivisionsPayload {
@@ -55,6 +56,11 @@ interface EvidencePayload {
   claims: EvidenceClaim[];
 }
 
+interface VoicesPayload {
+  voices?: VoiceAccount[];
+  epilogueVoices?: VoiceAccount[];
+}
+
 interface ScenarioFileSet {
   manifest: ScenarioManifest | BattleManifest;
   divisions: LegacyDivisionsPayload;
@@ -63,6 +69,7 @@ interface ScenarioFileSet {
   chapters?: ChapterScene[];
   mapLayers?: MapLayerPack;
   evidence?: EvidencePayload;
+  voices?: VoicesPayload;
 }
 
 export async function fetchJson<T>(url: string, fetcher: typeof fetch = fetch): Promise<T> {
@@ -291,6 +298,11 @@ function buildFallbackEvidenceClaims(
   }));
 }
 
+/** Voices drive a live overlay, so they must be in clock order. */
+function sortVoices(voices: VoiceAccount[]): VoiceAccount[] {
+  return [...voices].sort((a, b) => Date.parse(a.time ?? "") - Date.parse(b.time ?? ""));
+}
+
 export function buildScenarioBundle(files: ScenarioFileSet): ScenarioDataBundle {
   const narrativeBeats = adaptNarrativeBeats(files.events);
   const timelineEvents = adaptTimelineEvents(files.events);
@@ -317,6 +329,8 @@ export function buildScenarioBundle(files: ScenarioFileSet): ScenarioDataBundle 
     mapLayerPack: files.mapLayers ?? buildFallbackMapLayers(),
     evidenceSources: files.sources,
     evidenceClaims,
+    voices: sortVoices(files.voices?.voices ?? []),
+    epilogueVoices: files.voices?.epilogueVoices ?? [],
   };
 }
 
@@ -324,7 +338,7 @@ export async function loadScenarioData(
   scenarioPath = "/data/franklin",
   fetcher: typeof fetch = fetch,
 ): Promise<ScenarioDataBundle> {
-  const [manifest, divisions, events, sources, chapters, mapLayers, evidence] = await Promise.all([
+  const [manifest, divisions, events, sources, chapters, mapLayers, evidence, voices] = await Promise.all([
     fetchJson<ScenarioManifest | BattleManifest>(`${scenarioPath}/manifest.json`, fetcher),
     fetchJson<LegacyDivisionsPayload>(`${scenarioPath}/divisions.json`, fetcher),
     fetchJson<LegacyEventsPayload>(`${scenarioPath}/events.json`, fetcher),
@@ -332,6 +346,7 @@ export async function loadScenarioData(
     fetchOptionalJson<ChapterScene[]>(`${scenarioPath}/chapters.json`, fetcher),
     fetchOptionalJson<MapLayerPack>(`${scenarioPath}/mapLayers.json`, fetcher),
     fetchOptionalJson<EvidencePayload>(`${scenarioPath}/evidence.json`, fetcher),
+    fetchOptionalJson<VoicesPayload>(`${scenarioPath}/voices.json`, fetcher),
   ]);
 
   return buildScenarioBundle({
@@ -342,5 +357,6 @@ export async function loadScenarioData(
     chapters: chapters ?? undefined,
     mapLayers: mapLayers ?? undefined,
     evidence: evidence ?? undefined,
+    voices: voices ?? undefined,
   });
 }

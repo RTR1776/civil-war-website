@@ -155,6 +155,27 @@ export interface EvidenceClaim {
   evidenceRefs: EvidenceRef[];
 }
 
+/**
+ * A verbatim first-person account, pinned to the minute and the ground it was
+ * spoken or written about. Every entry carries a citation; nothing here is
+ * paraphrase.
+ */
+export interface VoiceAccount {
+  id: string;
+  /** Absent for epilogue voices, which sit outside the battle clock. */
+  time?: string;
+  speaker: string;
+  role: string;
+  side: Side;
+  quote: string;
+  context: string;
+  place?: string;
+  lat?: number;
+  lng?: number;
+  confidence: ConfidenceLevel;
+  sourceId: string;
+}
+
 export interface TimelineEvent {
   id: string;
   time: string;
@@ -205,6 +226,10 @@ export interface ScenarioDataBundle {
   mapLayerPack: MapLayerPack;
   evidenceSources: SourceCitation[];
   evidenceClaims: EvidenceClaim[];
+  /** Accounts placed on the battle clock, in time order. */
+  voices: VoiceAccount[];
+  /** Accounts of the morning after, shown with the epilogue. */
+  epilogueVoices: VoiceAccount[];
 }
 
 export interface InterpolatedFormationPosition {

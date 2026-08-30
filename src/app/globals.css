@@ -132,6 +132,12 @@ button {
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
 }
 
+.hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
 .hud-modes {
   display: flex;
   gap: 0.35rem;
@@ -170,7 +176,7 @@ button {
 
 .rail-toggle {
   position: absolute;
-  top: 5.4rem;
+  top: 5.2rem;
   left: 0;
   z-index: 22;
   display: flex;
@@ -194,8 +200,9 @@ button {
   color: var(--gold-bright);
 }
 
+/* Lands exactly on the open rail's right edge (left offset + width). */
 .rail-toggle.open {
-  transform: translateX(min(19rem, 76vw));
+  transform: translateX(min(19.2rem, calc(74vw + 0.8rem)));
 }
 
 .rail-wrap {
@@ -885,13 +892,15 @@ button {
   position: absolute;
   top: 4.7rem;
   right: 0;
-  bottom: 0;
+  /* Clear of the control dock, which floats above at z-index 25. */
+  bottom: 7.4rem;
   z-index: 18;
   width: min(26rem, 92vw);
   overflow-y: auto;
   border-left: 1px solid var(--hairline);
   border-top: 1px solid var(--hairline);
-  border-top-left-radius: 0.9rem;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0.9rem 0 0 0.9rem;
   background: rgba(13, 10, 8, 0.96);
   backdrop-filter: blur(18px);
   padding: 1.1rem 1.2rem 2rem;
@@ -1187,6 +1196,16 @@ button {
   animation: fade-up 900ms ease 1400ms both;
 }
 
+.intro-hint-quiet {
+  max-width: 34rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0.5rem;
+  line-height: 1.5;
+  color: rgba(177, 162, 137, 0.72);
+  animation-delay: 1550ms;
+}
+
 .intro-hint kbd {
   border: 1px solid rgba(240, 231, 211, 0.3);
   border-bottom-width: 2px;
@@ -1410,7 +1429,11 @@ button {
   border-radius: 999px;
   background: var(--panel-soft);
   backdrop-filter: blur(10px);
-  max-width: min(46rem, calc(100vw - 2rem));
+  /* Centering on left:50% caps the shrink-to-fit width at half the viewport,
+     so the row wrapped on anything under a very wide screen. max-content
+     takes the width the chips actually need, still clamped and still centred. */
+  width: max-content;
+  max-width: min(56rem, calc(100vw - 2rem));
 }
 
 .vantage-chips button {
@@ -1475,10 +1498,25 @@ button {
 }
 
 @media (max-width: 900px) {
+  /* One scrollable row above the dock, rather than a tall stack of chips
+     that would swallow the middle of the screen. */
   .vantage-chips {
     top: auto;
-    bottom: 12rem;
-    max-width: calc(100vw - 1rem);
+    bottom: 11.8rem;
+    /* Starts clear of the chapter tab, which holds the same band. */
+    left: 9.6rem;
+    right: 0.5rem;
+    transform: none;
+    width: auto;
+    max-width: none;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .vantage-chips::-webkit-scrollbar {
+    display: none;
   }
 
   .figure-legend {
@@ -1523,6 +1561,458 @@ button {
   max-width: 44ch;
 }
 
+.share-button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  min-width: 2.35rem;
+  height: 2.35rem;
+  padding: 0 0.7rem;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--panel-soft);
+  backdrop-filter: blur(10px);
+  color: var(--muted);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+}
+
+.share-button svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.share-button:hover {
+  color: var(--bone);
+  border-color: var(--hairline-strong);
+}
+
+.share-button.copied {
+  color: var(--gold-bright);
+  border-color: var(--hairline-strong);
+  background: rgba(216, 173, 98, 0.16);
+}
+
+.share-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dock-audio {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.audio-button {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+
+.audio-button .phase-glyph {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.audio-button:hover {
+  color: var(--bone);
+  border-color: var(--hairline-strong);
+}
+
+.audio-button.active {
+  color: var(--gold-bright);
+  border-color: var(--hairline-strong);
+  background: rgba(216, 173, 98, 0.16);
+}
+
+.audio-volume {
+  width: 4.4rem;
+  height: 0.9rem;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------------------- voices -- */
+
+.voice-card {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 19;
+  width: min(24rem, calc(100vw - 2rem));
+  max-height: min(30rem, calc(100dvh - 16rem));
+  overflow-y: auto;
+  margin: 0;
+  padding: 1rem 1.15rem 0.85rem;
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--gold);
+  border-radius: 0.2rem 0.85rem 0.85rem 0.2rem;
+  background:
+    linear-gradient(180deg, rgba(24, 19, 14, 0.95), rgba(14, 11, 8, 0.95));
+  backdrop-filter: blur(14px);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+  animation: voice-in 620ms cubic-bezier(0.19, 0.8, 0.32, 1) both;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(216, 173, 98, 0.4) transparent;
+}
+
+.voice-card.side-union {
+  border-left-color: var(--union);
+}
+
+.voice-card.side-confederate {
+  border-left-color: var(--confed);
+}
+
+@keyframes voice-in {
+  from { opacity: 0; transform: translate(22px, -50%); }
+  to { opacity: 1; transform: translate(0, -50%); }
+}
+
+.voice-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.voice-mark {
+  flex-shrink: 0;
+  width: 1.35rem;
+  color: var(--gold);
+  opacity: 0.85;
+}
+
+.voice-mark svg {
+  width: 100%;
+  display: block;
+}
+
+.voice-who {
+  flex: 1;
+  min-width: 0;
+}
+
+.voice-who strong {
+  display: block;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.voice-who small {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.voice-time {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.voice-card blockquote {
+  margin: 0.75rem 0 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.06rem;
+  line-height: 1.5;
+  color: rgba(240, 231, 211, 0.96);
+  text-indent: -0.42em;
+}
+
+.voice-card blockquote::before { content: "\201C"; }
+.voice-card blockquote::after { content: "\201D"; }
+
+.voice-card figcaption {
+  margin-top: 0.7rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid rgba(240, 231, 211, 0.1);
+  display: grid;
+  gap: 0.3rem;
+}
+
+.voice-context {
+  margin: 0;
+  font-size: 0.79rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.voice-source {
+  margin: 0;
+  font-size: 0.7rem;
+  color: rgba(203, 176, 131, 0.9);
+}
+
+.voice-source cite {
+  font-style: italic;
+}
+
+.voice-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+}
+
+.voice-actions button {
+  border: 1px solid var(--hairline);
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  padding: 0.24rem 0.55rem;
+  cursor: pointer;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.voice-actions button:hover {
+  color: var(--gold-bright);
+  background: rgba(216, 173, 98, 0.12);
+}
+
+/* voices panel */
+
+.voices-panel {
+  position: absolute;
+  top: 4.7rem;
+  right: 0;
+  bottom: 7.4rem;
+  z-index: 18;
+  width: min(28rem, 94vw);
+  overflow-y: auto;
+  border-left: 1px solid var(--hairline);
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0.9rem 0 0 0.9rem;
+  background: rgba(13, 10, 8, 0.96);
+  backdrop-filter: blur(18px);
+  padding: 1.1rem 1.2rem 2rem;
+  animation: records-in 300ms cubic-bezier(0.22, 0.9, 0.34, 1) both;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(216, 173, 98, 0.4) transparent;
+}
+
+.voices-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0.9rem 0 0.3rem;
+}
+
+.voices-filter {
+  display: flex;
+  gap: 0.25rem;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  padding: 0.18rem;
+}
+
+.voices-filter button {
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  padding: 0.22rem 0.6rem;
+  cursor: pointer;
+}
+
+.voices-filter button.active {
+  background: rgba(216, 173, 98, 0.2);
+  color: var(--gold-bright);
+}
+
+.voices-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.voices-toggle input {
+  accent-color: var(--gold);
+}
+
+.voices-list {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+  counter-reset: none;
+}
+
+.voices-list li {
+  border-left: 2px solid rgba(240, 231, 211, 0.14);
+}
+
+.voices-list li.side-union {
+  border-left-color: rgba(74, 122, 181, 0.55);
+}
+
+.voices-list li.side-confederate {
+  border-left-color: rgba(182, 84, 63, 0.55);
+}
+
+.voices-list li.active {
+  background: rgba(216, 173, 98, 0.08);
+  border-left-color: var(--gold);
+}
+
+.voice-entry {
+  display: flex;
+  gap: 0.6rem;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0.55rem 0.6rem;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.voice-entry:hover {
+  background: rgba(216, 173, 98, 0.07);
+}
+
+.voice-entry-time {
+  flex-shrink: 0;
+  width: 4.1rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+  padding-top: 0.15rem;
+}
+
+.voice-entry-body {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.voice-entry-body strong {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 0.94rem;
+}
+
+.voice-entry-body small {
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.voice-entry-body q {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: rgba(240, 231, 211, 0.92);
+  margin-top: 0.15rem;
+}
+
+.voice-entry-place {
+  font-size: 0.68rem;
+  font-style: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(203, 176, 131, 0.75);
+}
+
+.voice-entry-source {
+  font-size: 0.66rem;
+  color: rgba(177, 162, 137, 0.75);
+}
+
+/* timeline voice pips */
+
+.timeline-voices {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.05rem;
+  height: 0.55rem;
+}
+
+.timeline-voice-pip {
+  position: absolute;
+  bottom: 0;
+  width: 3px;
+  height: 0.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: rgba(203, 176, 131, 0.55);
+  cursor: pointer;
+  transition: background-color 140ms ease, height 140ms ease;
+}
+
+.timeline-voice-pip:hover {
+  height: 0.7rem;
+  background: var(--gold-bright);
+}
+
+.timeline-voice-pip.side-union {
+  background: rgba(74, 122, 181, 0.75);
+}
+
+.timeline-voice-pip.side-confederate {
+  background: rgba(182, 84, 63, 0.8);
+}
+
+/* epilogue voices */
+
+.epilogue-voices {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1.4rem;
+  text-align: left;
+}
+
+.epilogue-voice {
+  margin: 0;
+  border-left: 2px solid var(--hairline);
+  padding: 0.2rem 0 0.2rem 0.9rem;
+}
+
+.epilogue-voice blockquote {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: rgba(240, 231, 211, 0.94);
+}
+
+.epilogue-voice figcaption {
+  margin-top: 0.4rem;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
 /* -------------------------------------------------------------- responsive -- */
 
 @media (max-width: 900px) {
@@ -1534,8 +2024,32 @@ button {
   }
 
   .hud-modes {
-    align-self: flex-start;
-    flex-wrap: wrap;
+    align-self: stretch;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* The bar itself must take taps even though the HUD strip does not. */
+    pointer-events: auto;
+  }
+
+  .hud-modes::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Fade the trailing edge so it reads as a scrollable strip. */
+  .hud-modes {
+    mask-image: linear-gradient(90deg, #000 88%, transparent);
+  }
+
+  .hud-modes button {
+    flex: 0 0 auto;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+  }
+
+  .hud-title h1 {
+    font-size: 1.15rem;
   }
 
   .rail-toggle {
@@ -1554,7 +2068,16 @@ button {
   }
 
   .beat-caption {
-    bottom: 11.6rem;
+    bottom: 14.2rem;
+    padding: 0.8rem 1rem 0.9rem;
+  }
+
+  .beat-caption h2 {
+    font-size: 1.5rem;
+  }
+
+  .caption-body {
+    font-size: 0.9rem;
   }
 
   .control-dock {
@@ -1578,6 +2101,10 @@ button {
     justify-content: space-between;
   }
 
+  .audio-volume {
+    width: 3.2rem;
+  }
+
   .dock-casualties {
     display: none;
   }
@@ -1590,6 +2117,48 @@ button {
   }
 
   .event-toast {
+    display: none;
+  }
+
+  .records-panel,
+  .voices-panel {
+    /* The HUD stacks its title over the mode bar on narrow screens. */
+    top: 7.4rem;
+    bottom: 11.4rem;
+    width: min(28rem, 100vw);
+    border-radius: 0.9rem 0 0 0.9rem;
+  }
+
+  /* A side panel owns the screen on a phone; the chapter rail would only
+     float over it. */
+  .stage-root:has(.records-panel) .rail-toggle,
+  .stage-root:has(.voices-panel) .rail-toggle,
+  .stage-root:has(.records-panel) .rail-wrap,
+  .stage-root:has(.voices-panel) .rail-wrap {
+    display: none;
+  }
+
+  .voice-card {
+    top: 7.4rem;
+    bottom: auto;
+    right: 0.6rem;
+    left: 0.6rem;
+    width: auto;
+    max-height: 42vh;
+    transform: none;
+    animation-name: voice-in-mobile;
+  }
+
+  @keyframes voice-in-mobile {
+    from { opacity: 0; transform: translateY(-18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* An account and a chapter caption both want the viewer's attention; on a
+     phone there is only room for one, and the account is the rarer thing. */
+  /* display, not opacity: .beat-caption's entry animation uses fill-mode
+     both, and an animated opacity outranks a plain declaration. */
+  .stage-root:has(.voice-card) .beat-caption {
     display: none;
   }
 }

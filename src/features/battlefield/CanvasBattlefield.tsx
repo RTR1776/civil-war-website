@@ -25,6 +25,15 @@ interface PointerRecord {
   y: number;
 }
 
+/**
+ * "Maj. Gen. Patrick R. Cleburne" -> "Cleburne". The map has room for a name,
+ * not a rank and three initials.
+ */
+function lastNameOf(speaker: string): string {
+  const parts = speaker.trim().split(/\s+/);
+  return parts[parts.length - 1] ?? speaker;
+}
+
 function resolveDisplayFont(): string {
   if (typeof window === "undefined") {
     return "Georgia, serif";
@@ -198,6 +207,18 @@ export default function CanvasBattlefield({ bundle, attract, reducedMotion }: Ca
         ? scene.projection.toWorld(beatForFocus.cameraPose.lat, beatForFocus.cameraPose.lng)
         : null;
 
+      // Pin the account on screen to the ground it describes.
+      const activeVoice = uiState.voicesEnabled && storyState.activeVoiceId
+        ? data?.voices.find((entry) => entry.id === storyState.activeVoiceId) ?? null
+        : null;
+      const voiceMark = activeVoice && activeVoice.lat !== undefined && activeVoice.lng !== undefined
+        ? {
+            world: scene.projection.toWorld(activeVoice.lat, activeVoice.lng),
+            speaker: lastNameOf(activeVoice.speaker),
+            side: activeVoice.side,
+          }
+        : null;
+
       anchorsRef.current = scene.draw(
         ctx,
         camera,
@@ -209,6 +230,7 @@ export default function CanvasBattlefield({ bundle, attract, reducedMotion }: Ca
           selectedFormationId: uiState.selectedFormationId,
           hoveredFormationId: hoveredRef.current,
           focusWorld,
+          voiceMark,
           isPlaying: simulationState.isPlaying,
           reducedMotion: reducedMotionRef.current,
           effectsBudget,

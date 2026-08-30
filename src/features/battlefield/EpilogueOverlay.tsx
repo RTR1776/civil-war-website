@@ -80,6 +80,26 @@ export default function EpilogueOverlay({ bundle, onReplay, onExplore, onClose }
           ))}
         </div>
 
+        {bundle.epilogueVoices.length > 0 ? (
+          <>
+            <h3 className="epilogue-generals-heading">The Morning After</h3>
+            <div className="epilogue-voices">
+              {bundle.epilogueVoices.map((voice) => {
+                const source = bundle.evidenceSources.find((entry) => entry.id === voice.sourceId);
+                return (
+                  <figure key={voice.id} className="epilogue-voice">
+                    <blockquote>&ldquo;{voice.quote}&rdquo;</blockquote>
+                    <figcaption>
+                      {voice.speaker}, {voice.role}
+                      {source ? ` — ${source.author}, ${source.title} (${source.year})` : null}
+                    </figcaption>
+                  </figure>
+                );
+              })}
+            </div>
+          </>
+        ) : null}
+
         {citedSources.length > 0 ? (
           <p className="epilogue-citation">
             Figures per {citedSources.map((source) => `${source.author} (${source.year})`).join("; ")}.

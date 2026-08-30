@@ -100,6 +100,115 @@ test.describe("Franklin cinematic battlefield", () => {
     await expect(page.getByTestId("battlefield-canvas")).toBeVisible();
   });
 
+  test("surfaces first-person accounts and lists them with citations", async ({ page }) => {
+    await page.goto("/");
+    await page.getByTestId("intro-explore").click();
+
+    await page.getByTestId("mode-voices").click();
+    const panel = page.getByTestId("voices-panel");
+    await expect(panel).toBeVisible();
+    await expect(panel.getByText("Maj. Gen. Patrick R. Cleburne").first()).toBeVisible();
+
+    // Choosing an account moves the clock to it and raises it over the map.
+    await page.getByTestId("voice-voice-govan-cleburne").click();
+    await expect(page.getByTestId("dock-clock-time")).toHaveText(/3:3\d PM/);
+
+    await page.getByTestId("mode-voices").click();
+    const card = page.getByTestId("voice-card");
+    await expect(card).toBeVisible();
+    await expect(card).toContainText("let us die like men");
+    await expect(card).toContainText("Cleburne and His Command");
+
+    await card.getByRole("button", { name: "Dismiss account" }).click();
+    await expect(card).toHaveCount(0);
+  });
+
+  test("turns the synthesized field audio on and off", async ({ page }) => {
+    // Probe the audio graph from the page: nothing in the app exposes it, and
+    // the point of the test is that the sound is built, not fetched.
+    await page.addInitScript(() => {
+      const Real = window.AudioContext;
+      const probe = { started: 0, context: null as AudioContext | null };
+      (window as unknown as { __audioProbe: typeof probe }).__audioProbe = probe;
+
+      window.AudioContext = class extends Real {
+        constructor(options?: AudioContextOptions) {
+          super(options);
+          probe.context = this;
+        }
+
+        createBufferSource() {
+          const source = super.createBufferSource();
+          const start = source.start.bind(source);
+          source.start = (...args: Parameters<typeof start>) => {
+            probe.started += 1;
+            return start(...args);
+          };
+          return source;
+        }
+      };
+    });
+
+    const requests: string[] = [];
+    page.on("request", (request) => requests.push(request.url()));
+
+    await page.goto("/");
+    await page.getByTestId("intro-explore").click();
+
+    const toggle = page.getByTestId("audio-toggle");
+    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+    await expect(page.getByLabel("Field volume")).toHaveCount(0);
+
+    // The height of the assault, where the fire is heaviest.
+    await page.getByTestId("chapter-chapter-breach").click();
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByLabel("Field volume")).toBeVisible();
+
+    const readProbe = () =>
+      page.evaluate(() => {
+        const probe = (window as unknown as {
+          __audioProbe: { started: number; context: AudioContext | null };
+        }).__audioProbe;
+        return { started: probe.started, state: probe.context?.state ?? null };
+      });
+
+    await expect.poll(async () => (await readProbe()).state).toBe("running");
+    // Wind and the musketry roll loop; the cracks and guns are fired on top.
+    await expect.poll(async () => (await readProbe()).started).toBeGreaterThan(12);
+
+    expect(requests.filter((url) => /\.(mp3|ogg|wav|m4a)(\?|$)/i.test(url))).toEqual([]);
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+    await expect(page.getByLabel("Field volume")).toHaveCount(0);
+  });
+
+  test("links to a moment and reopens it", async ({ page, context }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+
+    await page.goto("/");
+    await page.getByTestId("intro-explore").click();
+    await page.getByTestId("chapter-chapter-breach").click();
+
+    // The address bar tracks the clock on its own.
+    await expect.poll(() => page.url()).toContain("t=1700");
+
+    await page.getByTestId("share-link").click();
+    await expect(page.getByText("Link copied")).toBeVisible();
+
+    const shared = await page.evaluate(() => navigator.clipboard.readText());
+    expect(shared).toContain("t=1700");
+
+    const visitor = await context.newPage();
+    await visitor.goto(shared);
+
+    // A shared link opens on its moment, not the title card.
+    await expect(visitor.getByTestId("intro-overlay")).toHaveCount(0);
+    await expect(visitor.getByTestId("dock-clock-time")).toHaveText("5:00 PM");
+    await visitor.close();
+  });
+
   test("keeps the stage usable on mobile", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");

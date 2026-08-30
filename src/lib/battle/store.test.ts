@@ -3,6 +3,7 @@ import {
   chapterAtTime,
   resolveActiveTimelineEvent,
   useBattleStore,
+  voiceAtTime,
 } from "@/lib/battle/store";
 import type { ScenarioDataBundle } from "@/lib/battle/types";
 
@@ -155,6 +156,31 @@ const SAMPLE_BUNDLE: ScenarioDataBundle = {
       evidenceRefs: [{ sourceId: "source-1" }],
     },
   ],
+  voices: [
+    {
+      id: "voice-1",
+      time: "1864-11-30T13:30:00-06:00",
+      speaker: "Speaker One",
+      role: "Role",
+      side: "Confederate",
+      quote: "Quote one.",
+      context: "Context.",
+      confidence: "documented",
+      sourceId: "source-1",
+    },
+    {
+      id: "voice-2",
+      time: "1864-11-30T17:30:00-06:00",
+      speaker: "Speaker Two",
+      role: "Role",
+      side: "Union",
+      quote: "Quote two.",
+      context: "Context.",
+      confidence: "documented",
+      sourceId: "source-1",
+    },
+  ],
+  epilogueVoices: [],
 };
 
 const T = (iso: string) => Date.parse(iso);
@@ -176,11 +202,14 @@ function resetStore() {
       guidedMode: true,
       hoveredEventId: null,
       selectedFormationId: null,
+      voicesEnabled: true,
     },
     storyState: {
       activeBeatId: null,
       activeChapterId: null,
+      activeVoiceId: null,
       lockedFormationId: null,
+      voiceCue: 0,
       storyComplete: false,
     },
   });
@@ -286,6 +315,40 @@ describe("story pointer helpers", () => {
     expect(beatAtTime(SAMPLE_BUNDLE, T("1864-11-30T12:10:00-06:00"))).toBeNull();
     expect(beatAtTime(SAMPLE_BUNDLE, T("1864-11-30T14:00:00-06:00"))?.id).toBe("beat-1");
     expect(beatAtTime(SAMPLE_BUNDLE, T("1864-11-30T18:00:00-06:00"))?.id).toBe("beat-2");
+  });
+
+  it("voiceAtTime returns the most recent crossed account", () => {
+    expect(voiceAtTime(SAMPLE_BUNDLE, T("1864-11-30T13:00:00-06:00"))).toBeNull();
+    expect(voiceAtTime(SAMPLE_BUNDLE, T("1864-11-30T14:00:00-06:00"))?.id).toBe("voice-1");
+    expect(voiceAtTime(SAMPLE_BUNDLE, T("1864-11-30T20:00:00-06:00"))?.id).toBe("voice-2");
+  });
+});
+
+describe("voice cueing", () => {
+  beforeEach(() => {
+    resetStore();
+    useBattleStore.getState().setData(SAMPLE_BUNDLE);
+  });
+
+  it("seeking across an account makes it active and raises a cue", () => {
+    const before = useBattleStore.getState().storyState.voiceCue;
+    useBattleStore.getState().seek(T("1864-11-30T14:00:00-06:00"));
+
+    const { storyState } = useBattleStore.getState();
+    expect(storyState.activeVoiceId).toBe("voice-1");
+    expect(storyState.voiceCue).toBeGreaterThan(before);
+  });
+
+  it("cueing an already-active account re-raises it and moves the clock", () => {
+    useBattleStore.getState().seek(T("1864-11-30T14:00:00-06:00"));
+    const before = useBattleStore.getState().storyState.voiceCue;
+
+    useBattleStore.getState().cueVoice(SAMPLE_BUNDLE.voices[0]);
+
+    const state = useBattleStore.getState();
+    expect(state.storyState.activeVoiceId).toBe("voice-1");
+    expect(state.storyState.voiceCue).toBeGreaterThan(before);
+    expect(state.simulationState.simTimeMs).toBe(T("1864-11-30T13:30:00-06:00"));
   });
 });
 

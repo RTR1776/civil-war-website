@@ -36,6 +36,42 @@ describe("validateScenarioData", () => {
     expect(result.errors[0]).toContain("unknown formation id");
   });
 
+  it("fails when an account cites a source that does not exist", () => {
+    const voices = franklinFiles.voices?.voices ?? [];
+    const result = validateScenarioData(
+      buildScenarioBundle({
+        ...franklinFiles,
+        voices: {
+          ...franklinFiles.voices,
+          voices: [{ ...voices[0], sourceId: "source-does-not-exist" }, ...voices.slice(1)],
+        },
+      }),
+    );
+
+    expect(result.valid).toBe(false);
+    expect(
+      result.errors.some((error) => error.includes("Unknown evidence source reference in account")),
+    ).toBe(true);
+  });
+
+  it("fails when an account sits outside the battle window", () => {
+    const voices = franklinFiles.voices?.voices ?? [];
+    const result = validateScenarioData(
+      buildScenarioBundle({
+        ...franklinFiles,
+        voices: {
+          ...franklinFiles.voices,
+          voices: [{ ...voices[0], time: "1864-12-01T09:00:00-06:00" }, ...voices.slice(1)],
+        },
+      }),
+    );
+
+    expect(result.valid).toBe(false);
+    expect(
+      result.errors.some((error) => error.includes("Account timestamp outside scenario window")),
+    ).toBe(true);
+  });
+
   it("fails when a chapter has no evidence refs", () => {
     const chapters = franklinFiles.chapters ?? [];
     const tamperedChapters = [

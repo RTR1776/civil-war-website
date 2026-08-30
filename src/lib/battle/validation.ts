@@ -132,6 +132,27 @@ export function validateScenarioData(bundle: ScenarioDataBundle): ValidationResu
     }
   }
 
+  // Every account must cite a real source and land inside the battle window;
+  // an uncited quotation is exactly the thing this project promises not to do.
+  for (const voice of bundle.voices) {
+    if (!evidenceSourceIds.has(voice.sourceId)) {
+      errors.push(`Unknown evidence source reference in account: ${voice.id} -> ${voice.sourceId}`);
+    }
+
+    const spoken = Date.parse(voice.time ?? "");
+    if (Number.isNaN(spoken)) {
+      errors.push(`Account requires a valid time: ${voice.id}`);
+    } else if (spoken < start || spoken > end) {
+      errors.push(`Account timestamp outside scenario window: ${voice.id}`);
+    }
+  }
+
+  for (const voice of bundle.epilogueVoices) {
+    if (!evidenceSourceIds.has(voice.sourceId)) {
+      errors.push(`Unknown evidence source reference in account: ${voice.id} -> ${voice.sourceId}`);
+    }
+  }
+
   for (const chapterId of bundle.manifest.chapterOrder) {
     if (!chapterIds.has(chapterId)) {
       errors.push(`Manifest chapterOrder references unknown chapter: ${chapterId}`);

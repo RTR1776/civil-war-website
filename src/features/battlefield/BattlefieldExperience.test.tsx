@@ -35,11 +35,14 @@ function resetStore() {
       guidedMode: true,
       hoveredEventId: null,
       selectedFormationId: null,
+      voicesEnabled: true,
     },
     storyState: {
       activeBeatId: null,
       activeChapterId: null,
+      activeVoiceId: null,
       lockedFormationId: null,
+      voiceCue: 0,
       storyComplete: false,
     },
   });
@@ -49,6 +52,9 @@ describe("BattlefieldExperience", () => {
   beforeEach(() => {
     vi.mocked(loadScenarioData).mockResolvedValue(mockBundle);
     resetStore();
+    // Each test is a fresh visit; the permalink written by the last one would
+    // otherwise skip the title card.
+    window.history.replaceState(null, "", window.location.pathname);
   });
 
   it("opens on the cinematic intro and starts guided playback", async () => {
@@ -131,6 +137,21 @@ describe("BattlefieldExperience", () => {
     expect(await screen.findByTestId("intel-card")).toBeVisible();
     expect(screen.getByText("Cleburne's Division")).toBeVisible();
     expect(screen.getByText("Maj. Gen. Patrick R. Cleburne")).toBeVisible();
+  });
+
+  it("opens on the moment a shared link names, past the title card", async () => {
+    window.history.replaceState(null, "", "#t=1705&view=explore&unit=conf-cleburne-division");
+
+    render(<BattlefieldExperience />);
+
+    await screen.findByTestId("battlefield-app");
+    expect(screen.queryByTestId("intro-overlay")).not.toBeInTheDocument();
+
+    const state = useBattleStore.getState();
+    expect(state.simulationState.simTimeMs).toBe(Date.parse("1864-11-30T17:05:00-06:00"));
+    expect(state.simulationState.isPlaying).toBe(false);
+    expect(state.uiState.selectedFormationId).toBe("conf-cleburne-division");
+    expect(state.uiState.guidedMode).toBe(false);
   });
 
   it("enters free exploration without guided mode", async () => {

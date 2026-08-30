@@ -10,12 +10,21 @@ import type {
   ScenarioDataBundle,
 } from "@/lib/battle/types";
 
+export interface VoiceMark {
+  world: WorldPoint;
+  /** Short name shown beside the mark, e.g. "Cleburne". */
+  speaker: string;
+  side: "Union" | "Confederate";
+}
+
 export interface FrameState {
   timeMs: number;
   dtMs: number;
   selectedFormationId: string | null;
   hoveredFormationId: string | null;
   focusWorld: WorldPoint | null;
+  /** Where the account currently on screen was spoken or written. */
+  voiceMark: VoiceMark | null;
   isPlaying: boolean;
   reducedMotion: boolean;
   effectsBudget: number;
@@ -430,6 +439,9 @@ export class BattlefieldScene {
     this.paintGrain(ctx, viewport);
     this.paintLabels(ctx, camera, viewport, night, scale);
     this.paintFormationLabels(ctx, camera, viewport, frame, anchors, night);
+    if (frame.voiceMark) {
+      this.paintVoiceMark(ctx, camera, viewport, frame.voiceMark, frame.reducedMotion, night);
+    }
     this.paintCompassAndScale(ctx, camera, viewport, night);
 
     return anchors;
@@ -1201,6 +1213,55 @@ export class BattlefieldScene {
     return `rgb(${r}, ${g}, ${b})`;
   }
 
+  /**
+   * Pins the account on screen to the ground it describes: a slow pulse at the
+   * speaker's position with their name beside it, in their side's color.
+   */
+  private paintVoiceMark(
+    ctx: CanvasRenderingContext2D,
+    camera: CameraController,
+    viewport: Viewport,
+    mark: VoiceMark,
+    reducedMotion: boolean,
+    night: number,
+  ) {
+    const point = camera.worldToScreen(mark.world, viewport);
+    if (point.x < -40 || point.y < -40 || point.x > viewport.width + 40 || point.y > viewport.height + 40) {
+      return;
+    }
+
+    const pulse = reducedMotion ? 0.5 : (Math.sin(this.effectClock / 620) + 1) / 2;
+    const union = mark.side === "Union";
+    const rgb = union ? "74, 122, 181" : "182, 84, 63";
+
+    ctx.save();
+
+    for (const [index, radius] of [10, 18, 27].entries()) {
+      ctx.strokeStyle = `rgba(${rgb}, ${(0.55 - index * 0.14) * (0.45 + pulse * 0.55)})`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, radius + pulse * (3 + index * 2), 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = `rgba(${rgb}, 0.95)`;
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 3.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.font = `600 11px ${this.fontFamily}`;
+    ctx.strokeStyle = night > 0.5 ? "rgba(8, 10, 18, 0.85)" : "rgba(240, 230, 202, 0.92)";
+    ctx.lineWidth = 3.2;
+    const labelY = point.y - 34;
+    ctx.strokeText(mark.speaker, point.x, labelY);
+    ctx.fillStyle = COLORS.gold;
+    ctx.fillText(mark.speaker, point.x, labelY);
+
+    ctx.restore();
+  }
+
   private paintCompassAndScale(
     ctx: CanvasRenderingContext2D,
     camera: CameraController,
@@ -1209,9 +1270,16 @@ export class BattlefieldScene {
   ) {
     const ink = night > 0.5 ? "rgba(214, 198, 158, 0.85)" : "rgba(74, 56, 35, 0.8)";
 
-    // Compass rose, rotating with the camera bearing.
-    const cx = 54;
-    const cy = viewport.height - 60;
+    // The control dock floats over the canvas and stacks into a taller,
+    // full-width block on narrow screens; keep the rose and the scale bar
+    // clear of it. Mirrors the 900px breakpoint in globals.css.
+    const narrow = viewport.width <= 900;
+    const dockInset = narrow ? 196 : 34;
+
+    // Compass rose, rotating with the camera bearing. It moves over the scale
+    // bar on narrow screens, where the chapter tab holds the bottom left.
+    const cx = narrow ? viewport.width - 54 : 54;
+    const cy = viewport.height - dockInset - (narrow ? 46 : 26);
     ctx.save();
     ctx.translate(cx, cy);
     ctx.strokeStyle = ink;
@@ -1252,7 +1320,7 @@ export class BattlefieldScene {
     const barPx = (yards * 0.9144) * camera.current.scale;
 
     const barX = viewport.width - barPx - 26;
-    const barY = viewport.height - 34;
+    const barY = viewport.height - dockInset;
     ctx.strokeStyle = ink;
     ctx.fillStyle = ink;
     ctx.lineWidth = 1.6;

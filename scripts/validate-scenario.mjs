@@ -19,15 +19,17 @@ async function main() {
   const root = process.cwd();
   const base = path.join(root, scenarioDir);
 
-  const [manifest, divisions, events, sources, chapters, mapLayers, evidence] = await Promise.all([
-    readJson(path.join(base, "manifest.json")),
-    readJson(path.join(base, "divisions.json")),
-    readJson(path.join(base, "events.json")),
-    readJson(path.join(base, "sources.json")),
-    readJson(path.join(base, "chapters.json")),
-    readJson(path.join(base, "mapLayers.json")),
-    readJson(path.join(base, "evidence.json")),
-  ]);
+  const [manifest, divisions, events, sources, chapters, mapLayers, evidence, voices] =
+    await Promise.all([
+      readJson(path.join(base, "manifest.json")),
+      readJson(path.join(base, "divisions.json")),
+      readJson(path.join(base, "events.json")),
+      readJson(path.join(base, "sources.json")),
+      readJson(path.join(base, "chapters.json")),
+      readJson(path.join(base, "mapLayers.json")),
+      readJson(path.join(base, "evidence.json")),
+      readJson(path.join(base, "voices.json")).catch(() => ({})),
+    ]);
 
   const errors = [];
   const sourceIds = new Set(sources.map((source) => source.id));
@@ -83,6 +85,29 @@ async function main() {
         errors,
       );
     }
+  }
+
+  const windowStart = Date.parse(manifest.timeStart);
+  const windowEnd = Date.parse(manifest.timeEnd);
+
+  for (const voice of voices.voices ?? []) {
+    assert(Boolean(voice.quote?.trim()), `voice ${voice.id} has an empty quote`, errors);
+    assert(sourceIds.has(voice.sourceId), `voice ${voice.id} references unknown source ${voice.sourceId}`, errors);
+
+    const spoken = Date.parse(voice.time ?? "");
+    assert(!Number.isNaN(spoken), `voice ${voice.id} has an invalid time`, errors);
+    if (!Number.isNaN(spoken)) {
+      assert(
+        spoken >= windowStart && spoken <= windowEnd,
+        `voice ${voice.id} sits outside the scenario window`,
+        errors,
+      );
+    }
+  }
+
+  for (const voice of voices.epilogueVoices ?? []) {
+    assert(Boolean(voice.quote?.trim()), `voice ${voice.id} has an empty quote`, errors);
+    assert(sourceIds.has(voice.sourceId), `voice ${voice.id} references unknown source ${voice.sourceId}`, errors);
   }
 
   for (const slice of divisions.timeSlices ?? []) {

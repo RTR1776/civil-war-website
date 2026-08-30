@@ -8,6 +8,7 @@ import type {
   ScenarioDataBundle,
   SidebarMode,
   TimelineEvent,
+  VoiceAccount,
 } from "@/lib/battle/types";
 
 /** Sim-time multiplier for free-analysis playback (1x). */
@@ -33,12 +34,18 @@ export interface UIState {
   guidedMode: boolean;
   hoveredEventId: string | null;
   selectedFormationId: string | null;
+  /** Whether accounts surface on their own as the clock crosses them. */
+  voicesEnabled: boolean;
 }
 
 export interface StoryState {
   activeBeatId: string | null;
   activeChapterId: string | null;
+  activeVoiceId: string | null;
   lockedFormationId: string | null;
+  /** Bumped whenever a voice should be raised again, including a re-seek onto
+   * one that is already active. */
+  voiceCue: number;
   /** Set once guided playback has run the full timeline to its end. */
   storyComplete: boolean;
 }
@@ -63,6 +70,8 @@ interface BattlefieldState {
   toggleMapMode: (mode?: MapMode) => void;
   setHoveredEventId: (eventId: string | null) => void;
   selectFormation: (formationId: string | null) => void;
+  setVoicesEnabled: (value: boolean) => void;
+  cueVoice: (voice: VoiceAccount) => void;
 
   beginStory: () => void;
   acknowledgeStoryComplete: () => void;
@@ -126,6 +135,25 @@ export function beatAtTime(data: ScenarioDataBundle, timeMs: number): NarrativeB
   return candidate;
 }
 
+/** The most recent account the clock has crossed. */
+export function voiceAtTime(data: ScenarioDataBundle, timeMs: number): VoiceAccount | null {
+  let candidate: VoiceAccount | null = null;
+  let candidateTime = -Infinity;
+
+  for (const voice of data.voices) {
+    if (!voice.time) {
+      continue;
+    }
+    const voiceTime = Date.parse(voice.time);
+    if (voiceTime <= timeMs && voiceTime > candidateTime) {
+      candidate = voice;
+      candidateTime = voiceTime;
+    }
+  }
+
+  return candidate;
+}
+
 export function resolveActiveTimelineEvent(
   currentTime: number,
   timelineEvents: TimelineEvent[],
@@ -159,18 +187,24 @@ function syncStoryPointers(
 
   const chapter = chapterAtTime(data, timeMs);
   const beat = beatAtTime(data, timeMs);
+  const voice = voiceAtTime(data, timeMs);
 
   if (
     storyState.activeChapterId === (chapter?.id ?? null)
     && storyState.activeBeatId === (beat?.id ?? null)
+    && storyState.activeVoiceId === (voice?.id ?? null)
   ) {
     return storyState;
   }
+
+  const voiceChanged = storyState.activeVoiceId !== (voice?.id ?? null);
 
   return {
     ...storyState,
     activeChapterId: chapter?.id ?? null,
     activeBeatId: beat?.id ?? null,
+    activeVoiceId: voice?.id ?? null,
+    voiceCue: voiceChanged ? storyState.voiceCue + 1 : storyState.voiceCue,
   };
 }
 
@@ -190,11 +224,14 @@ export const useBattleStore = create<BattlefieldState>((set, get) => ({
     guidedMode: true,
     hoveredEventId: null,
     selectedFormationId: null,
+    voicesEnabled: true,
   },
   storyState: {
     activeBeatId: null,
     activeChapterId: null,
+    activeVoiceId: null,
     lockedFormationId: null,
+    voiceCue: 0,
     storyComplete: false,
   },
 
@@ -219,11 +256,14 @@ export const useBattleStore = create<BattlefieldState>((set, get) => ({
         guidedMode: nextData.manifest.defaultMode === "story",
         hoveredEventId: null,
         selectedFormationId: null,
+        voicesEnabled: get().uiState.voicesEnabled,
       },
       storyState: {
         activeBeatId: null,
         activeChapterId: firstChapterId,
+        activeVoiceId: null,
         lockedFormationId: null,
+        voiceCue: 0,
         storyComplete: false,
       },
     });
@@ -371,6 +411,29 @@ export const useBattleStore = create<BattlefieldState>((set, get) => ({
   selectFormation: (formationId) => {
     const { uiState } = get();
     set({ uiState: { ...uiState, selectedFormationId: formationId } });
+  },
+
+  setVoicesEnabled: (value) => {
+    const { uiState } = get();
+    set({ uiState: { ...uiState, voicesEnabled: value } });
+  },
+
+  /** Jump the clock to an account and raise it, even if it is already active. */
+  cueVoice: (voice) => {
+    if (voice.time) {
+      get().seek(Date.parse(voice.time));
+    }
+
+    // Read the story state back after the seek so the pointers it synced are
+    // preserved; only the cue is forced.
+    const storyState = get().storyState;
+    set({
+      storyState: {
+        ...storyState,
+        activeVoiceId: voice.id,
+        voiceCue: storyState.voiceCue + 1,
+      },
+    });
   },
 
   beginStory: () => {
