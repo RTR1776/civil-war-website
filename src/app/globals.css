@@ -1429,7 +1429,11 @@ button {
   border-radius: 999px;
   background: var(--panel-soft);
   backdrop-filter: blur(10px);
-  max-width: min(46rem, calc(100vw - 2rem));
+  /* Centering on left:50% caps the shrink-to-fit width at half the viewport,
+     so the row wrapped on anything under a very wide screen. max-content
+     takes the width the chips actually need, still clamped and still centred. */
+  width: max-content;
+  max-width: min(56rem, calc(100vw - 2rem));
 }
 
 .vantage-chips button {
@@ -1503,6 +1507,7 @@ button {
     left: 9.6rem;
     right: 0.5rem;
     transform: none;
+    width: auto;
     max-width: none;
     justify-content: flex-start;
     flex-wrap: nowrap;
