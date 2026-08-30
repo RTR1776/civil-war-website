@@ -1,0 +1,106 @@
+{
+  "claims": [
+    {
+      "id": "claim-forward-screen",
+      "title": "Forward Union line collapse",
+      "detail": "Wagner's exposed brigades were pushed back toward the main works before the principal assault struck.",
+      "confidence": "documented",
+      "linkedEventIds": [
+        "event-forward-screen-pressure"
+      ],
+      "linkedBeatIds": [
+        "beat-wagner-screen"
+      ],
+      "linkedChapterIds": [
+        "chapter-observation"
+      ],
+      "evidenceRefs": [
+        {
+          "sourceId": "source-jacobs-2006"
+        }
+      ]
+    },
+    {
+      "id": "claim-mass-assault",
+      "title": "Massed Confederate advance",
+      "detail": "Cheatham's corps advanced in large assault lines across open ground toward Union earthworks.",
+      "confidence": "documented",
+      "linkedEventIds": [
+        "event-grand-assault-start"
+      ],
+      "linkedBeatIds": [
+        "beat-grand-assault"
+      ],
+      "linkedChapterIds": [
+        "chapter-assault"
+      ],
+      "evidenceRefs": [
+        {
+          "sourceId": "source-opdycke-1880"
+        }
+      ]
+    },
+    {
+      "id": "claim-breach-fight",
+      "title": "Breach fighting near Columbia Pike",
+      "detail": "Confederate units penetrated portions of the center near Carter House, prompting severe close combat.",
+      "confidence": "documented",
+      "linkedEventIds": [
+        "event-breach-fight"
+      ],
+      "linkedBeatIds": [
+        "beat-columbia-pike-breach"
+      ],
+      "linkedChapterIds": [
+        "chapter-breach"
+      ],
+      "evidenceRefs": [
+        {
+          "sourceId": "source-jacobs-2006"
+        }
+      ]
+    },
+    {
+      "id": "claim-countercharge",
+      "title": "Union local countercharge",
+      "detail": "Union reserves and nearby brigades counterattacked to restore continuity in the center.",
+      "confidence": "inferred",
+      "linkedEventIds": [
+        "event-countercharge"
+      ],
+      "linkedBeatIds": [
+        "beat-countercharge"
+      ],
+      "linkedChapterIds": [
+        "chapter-countercharge"
+      ],
+      "evidenceRefs": [
+        {
+          "sourceId": "source-horn-1941"
+        }
+      ]
+    },
+    {
+      "id": "claim-nightfall",
+      "title": "Attrition into darkness",
+      "detail": "Battle intensity remained high into evening before attack momentum eroded.",
+      "confidence": "documented",
+      "linkedEventIds": [
+        "event-nightfall",
+        "event-assault-ends"
+      ],
+      "linkedBeatIds": [
+        "beat-night-grind",
+        "beat-assault-ebbs"
+      ],
+      "linkedChapterIds": [
+        "chapter-nightfall"
+      ],
+      "evidenceRefs": [
+        {
+          "sourceId": "source-cunningham-2012"
+        }
+      ]
+    }
+  ]
+}
