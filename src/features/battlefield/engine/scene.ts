@@ -1209,9 +1209,16 @@ export class BattlefieldScene {
   ) {
     const ink = night > 0.5 ? "rgba(214, 198, 158, 0.85)" : "rgba(74, 56, 35, 0.8)";
 
-    // Compass rose, rotating with the camera bearing.
-    const cx = 54;
-    const cy = viewport.height - 60;
+    // The control dock floats over the canvas and stacks into a taller,
+    // full-width block on narrow screens; keep the rose and the scale bar
+    // clear of it. Mirrors the 900px breakpoint in globals.css.
+    const narrow = viewport.width <= 900;
+    const dockInset = narrow ? 196 : 34;
+
+    // Compass rose, rotating with the camera bearing. It moves over the scale
+    // bar on narrow screens, where the chapter tab holds the bottom left.
+    const cx = narrow ? viewport.width - 54 : 54;
+    const cy = viewport.height - dockInset - (narrow ? 46 : 26);
     ctx.save();
     ctx.translate(cx, cy);
     ctx.strokeStyle = ink;
@@ -1252,7 +1259,7 @@ export class BattlefieldScene {
     const barPx = (yards * 0.9144) * camera.current.scale;
 
     const barX = viewport.width - barPx - 26;
-    const barY = viewport.height - 34;
+    const barY = viewport.height - dockInset;
     ctx.strokeStyle = ink;
     ctx.fillStyle = ink;
     ctx.lineWidth = 1.6;

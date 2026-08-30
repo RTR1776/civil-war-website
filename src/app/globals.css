@@ -170,7 +170,7 @@ button {
 
 .rail-toggle {
   position: absolute;
-  top: 5.4rem;
+  top: 5.2rem;
   left: 0;
   z-index: 22;
   display: flex;
@@ -194,8 +194,9 @@ button {
   color: var(--gold-bright);
 }
 
+/* Lands exactly on the open rail's right edge (left offset + width). */
 .rail-toggle.open {
-  transform: translateX(min(19rem, 76vw));
+  transform: translateX(min(19.2rem, calc(74vw + 0.8rem)));
 }
 
 .rail-wrap {
@@ -1487,10 +1488,24 @@ button {
 }
 
 @media (max-width: 900px) {
+  /* One scrollable row above the dock, rather than a tall stack of chips
+     that would swallow the middle of the screen. */
   .vantage-chips {
     top: auto;
-    bottom: 12rem;
-    max-width: calc(100vw - 1rem);
+    bottom: 11.8rem;
+    /* Starts clear of the chapter tab, which holds the same band. */
+    left: 9.6rem;
+    right: 0.5rem;
+    transform: none;
+    max-width: none;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .vantage-chips::-webkit-scrollbar {
+    display: none;
   }
 
   .figure-legend {
@@ -1958,8 +1973,32 @@ button {
   }
 
   .hud-modes {
-    align-self: flex-start;
-    flex-wrap: wrap;
+    align-self: stretch;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* The bar itself must take taps even though the HUD strip does not. */
+    pointer-events: auto;
+  }
+
+  .hud-modes::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Fade the trailing edge so it reads as a scrollable strip. */
+  .hud-modes {
+    mask-image: linear-gradient(90deg, #000 88%, transparent);
+  }
+
+  .hud-modes button {
+    flex: 0 0 auto;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+  }
+
+  .hud-title h1 {
+    font-size: 1.15rem;
   }
 
   .rail-toggle {
@@ -1978,7 +2017,16 @@ button {
   }
 
   .beat-caption {
-    bottom: 11.6rem;
+    bottom: 14.2rem;
+    padding: 0.8rem 1rem 0.9rem;
+  }
+
+  .beat-caption h2 {
+    font-size: 1.5rem;
+  }
+
+  .caption-body {
+    font-size: 0.9rem;
   }
 
   .control-dock {
@@ -2023,23 +2071,44 @@ button {
 
   .records-panel,
   .voices-panel {
+    /* The HUD stacks its title over the mode bar on narrow screens. */
+    top: 7.4rem;
     bottom: 11.4rem;
+    width: min(28rem, 100vw);
+    border-radius: 0.9rem 0 0 0.9rem;
+  }
+
+  /* A side panel owns the screen on a phone; the chapter rail would only
+     float over it. */
+  .stage-root:has(.records-panel) .rail-toggle,
+  .stage-root:has(.voices-panel) .rail-toggle,
+  .stage-root:has(.records-panel) .rail-wrap,
+  .stage-root:has(.voices-panel) .rail-wrap {
+    display: none;
   }
 
   .voice-card {
-    top: auto;
-    bottom: 11.8rem;
+    top: 7.4rem;
+    bottom: auto;
     right: 0.6rem;
     left: 0.6rem;
     width: auto;
-    max-height: 46vh;
+    max-height: 42vh;
     transform: none;
     animation-name: voice-in-mobile;
   }
 
   @keyframes voice-in-mobile {
-    from { opacity: 0; transform: translateY(18px); }
+    from { opacity: 0; transform: translateY(-18px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* An account and a chapter caption both want the viewer's attention; on a
+     phone there is only room for one, and the account is the rarer thing. */
+  /* display, not opacity: .beat-caption's entry animation uses fill-mode
+     both, and an animated opacity outranks a plain declaration. */
+  .stage-root:has(.voice-card) .beat-caption {
+    display: none;
   }
 }
 
