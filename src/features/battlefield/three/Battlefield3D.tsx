@@ -205,7 +205,7 @@ export default function Battlefield3D({ bundle, reducedMotion }: Battlefield3DPr
       const timeMs = useBattleStore.getState().simulationState.simTimeMs;
 
       armies.update(timeMs);
-      world.updateLighting(timeMs);
+      world.updateLighting(timeMs, dtMs, camera.position, reducedMotionRef.current);
 
       const night = nightness(timeMs);
       effects.update(

@@ -4,7 +4,7 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import type { WorldPoint } from "@/features/battlefield/engine/projection";
 import { createRng, randBetween } from "@/features/battlefield/engine/rand";
 import { TerrainModel } from "@/features/battlefield/three/heightfield";
-import { goldenness, nightness } from "@/lib/battle/time";
+import { Sky3D } from "@/features/battlefield/three/sky3d";
 import type { ScenarioDataBundle } from "@/lib/battle/types";
 
 export interface BatteryDef {
@@ -22,10 +22,7 @@ interface PaintablePath {
 const TERRAIN_SEGMENTS_X = 240;
 const TERRAIN_SEGMENTS_Y = 120;
 
-// Sky/fog keyframe colors, reused every frame.
-const SKY_DAY = new THREE.Color(0xb9c8d8);
-const SKY_DUSK = new THREE.Color(0xd98d4f);
-const SKY_NIGHT = new THREE.Color(0x070a14);
+// Fog keyframe color, reused every frame. Sky colors live in sky3d.ts.
 const FOG_HAZE = new THREE.Color(0x777264);
 
 function samplePolyline(points: WorldPoint[], stepM: number): Array<{ point: WorldPoint; heading: number }> {
@@ -60,10 +57,11 @@ export class BattlefieldWorld {
   readonly batteries: BatteryDef[] = [];
   readonly worksPaths: WorldPoint[][] = [];
 
+  readonly sky = new Sky3D();
+
   private sun: THREE.DirectionalLight;
   private hemisphere: THREE.HemisphereLight;
   private lanternLights: THREE.PointLight[] = [];
-  private skyColor = new THREE.Color();
   private disposables: Array<{ dispose(): void }> = [];
 
   constructor(private bundle: ScenarioDataBundle, private scene: THREE.Scene) {
@@ -145,6 +143,7 @@ export class BattlefieldWorld {
     }
 
     this.scene.add(this.group);
+    this.scene.add(this.sky.mesh);
     this.scene.fog = new THREE.FogExp2(0xd7cdb4, 0.00016);
   }
 
@@ -513,37 +512,35 @@ export class BattlefieldWorld {
   }
 
   /** Drive sky, fog, sun, and lanterns from the battle clock. */
-  updateLighting(timeMs: number) {
-    const night = nightness(timeMs);
-    const golden = goldenness(timeMs);
+  updateLighting(
+    timeMs: number,
+    deltaMs: number,
+    cameraPosition: THREE.Vector3,
+    reducedMotion: boolean,
+  ) {
+    this.sky.update(timeMs, deltaMs, cameraPosition, reducedMotion);
+    const { night, golden, sunDirection, horizonColor, zenithColor, sunColor } = this.sky.state;
 
-    // Sky: afternoon blue -> amber sunset -> near-black, moonless night.
-    this.skyColor.copy(SKY_DAY).lerp(SKY_DUSK, Math.min(1, golden * 1.1));
-    this.skyColor.lerp(SKY_NIGHT, night);
-    this.scene.background = this.skyColor;
+    // The dome covers the frame, but keep the clear color in step so a
+    // dropped frame or a context blip never flashes a mismatched sky.
+    this.scene.background = horizonColor;
 
     const fog = this.scene.fog as THREE.FogExp2 | null;
     if (fog) {
-      fog.color.copy(this.skyColor).lerp(FOG_HAZE, 0.35 * (1 - night));
+      fog.color.copy(horizonColor).lerp(FOG_HAZE, 0.3 * (1 - night));
       fog.density = 0.00016 + night * 0.00006;
     }
 
-    // Sun sweeps toward the WSW horizon and dies.
-    const hour = ((timeMs / 3_600_000 - 6) % 24 + 24) % 24;
-    const sunProgress = Math.min(1, Math.max(0, (hour - 12) / 4.6));
-    const elevation = THREE.MathUtils.lerp(0.9, 0.06, sunProgress);
-    const azimuth = THREE.MathUtils.lerp(Math.PI * 0.05, Math.PI * 0.42, sunProgress);
-    this.sun.position.set(
-      -Math.sin(azimuth) * 3000,
-      Math.max(120, Math.sin(elevation) * 3400),
-      Math.cos(azimuth) * -1400 + 800,
-    );
-    this.sun.intensity = Math.max(0, 1.65 * (1 - night)) * (1 - golden * 0.25);
-    this.sun.color.setHex(golden > 0.35 ? 0xffc078 : 0xfff2dc);
+    // Sunlight comes from the sky's own sun, so shadows and highlights agree
+    // with the disk the viewer can see.
+    this.sun.position.copy(sunDirection).multiplyScalar(3200);
+    this.sun.position.y = Math.max(90, this.sun.position.y);
+    this.sun.intensity = Math.max(0, 1.7 * (1 - night)) * (1 - golden * 0.2);
+    this.sun.color.copy(sunColor);
 
-    // Keep a faint starlight floor so the night field stays readable.
+    // Ambient light picks up the sky above and the ground below it.
     this.hemisphere.intensity = THREE.MathUtils.lerp(0.95, 0.34, night);
-    this.hemisphere.color.setHex(night > 0.6 ? 0x39496e : 0xcfd8e8);
+    this.hemisphere.color.copy(zenithColor).lerp(horizonColor, 0.55);
 
     for (const lantern of this.lanternLights) {
       lantern.intensity = night * 120;
@@ -555,5 +552,6 @@ export class BattlefieldWorld {
       resource.dispose();
     }
     this.disposables.length = 0;
+    this.sky.dispose();
   }
 }
